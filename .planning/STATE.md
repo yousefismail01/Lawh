@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-04-PLAN.md
-last_updated: "2026-03-04T23:00:55Z"
-last_activity: "2026-03-04 — Completed 01-04: Auth flows with email/password, Apple, Google sign-in"
+stopped_at: Completed 01-05-PLAN.md
+last_updated: "2026-03-04T23:06:52.867Z"
+last_activity: "2026-03-04 — Completed 01-05: Offline cache wiring with quranService and first-launch seed"
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 7
-  completed_plans: 3
-  percent: 43
+  completed_plans: 5
+  percent: 71
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 1 of 5 (Foundation)
-Plan: 4 of 7 in current phase
+Plan: 5 of 7 in current phase
 Status: Executing
-Last activity: 2026-03-04 — Completed 01-04: Auth flows with email/password, Apple, Google sign-in
+Last activity: 2026-03-04 — Completed 01-05: Offline cache wiring with quranService and first-launch seed
 
-Progress: [████░░░░░░] 43%
+Progress: [███████░░░] 71%
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Progress: [████░░░░░░] 43%
 | Phase 01 P02 | 6min | 2 tasks | 19 files |
 | Phase 01 P03 | 2min | 2 tasks | 8 files |
 | Phase 01 P04 | 2min | 3 tasks | 4 files |
+| Phase 01 P05 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,8 @@ Recent decisions affecting current work:
 - [Phase 01 P03]: Supabase seed script uses placeholder Quran mapping requiring manual field name inspection before execution
 - [Phase 01 P04]: Dynamic import for Apple/Google SDKs to avoid bundling platform-specific code
 - [Phase 01 P04]: Apple display_name written to profiles immediately on first sign-in (single-delivery)
+- [Phase 01 P05]: quranService is single access point for all Quran data -- downstream code never queries Supabase directly
+- [Phase 01 P05]: Seed runs in parallel with auth initialization to minimize first-launch wait time
 
 ### Pending Todos
 
@@ -89,6 +92,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-04T23:00:55Z
-Stopped at: Completed 01-04-PLAN.md
+Last session: 2026-03-04T23:06:52Z
+Stopped at: Completed 01-05-PLAN.md
 Resume file: None
