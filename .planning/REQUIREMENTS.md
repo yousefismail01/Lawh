@@ -15,7 +15,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **FNDN-04**: Arabic text renders correctly RTL with full tashkeel using KFGQPC Uthmanic Hafs or Amiri Quran font on both iOS and Android
 - [x] **FNDN-05**: Pre-computed normalized_text column stored alongside display text for comparison operations
 - [x] **FNDN-06**: Supabase schema includes all 10 tables with Row Level Security enabled and policies enforced on every user-facing table
-- [ ] **FNDN-07**: Surah/Juz navigation with Arabic names, transliteration, and juz/hizb/rub markers
+- [x] **FNDN-07**: Surah/Juz navigation with Arabic names, transliteration, and juz/hizb/rub markers
 
 ### Authentication
 
@@ -158,7 +158,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FNDN-04 | Phase 1 | Complete |
 | FNDN-05 | Phase 1 | Complete |
 | FNDN-06 | Phase 1 | Complete |
-| FNDN-07 | Phase 1 | Pending |
+| FNDN-07 | Phase 1 | Complete |
 | AUTH-01 | Phase 1 | Complete |
 | AUTH-02 | Phase 1 | Complete |
 | AUTH-03 | Phase 1 | Complete |
