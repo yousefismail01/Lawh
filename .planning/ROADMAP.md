@@ -30,16 +30,18 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User can create an account with email/password, sign in with Apple, or sign in with Google — session survives app restart
   4. Every user-facing database table enforces Row Level Security; a logged-in user cannot read or write another user's data
   5. Every database query, API endpoint, and Edge Function accepts riwayah as an explicit typed parameter; the ayahs table has a (surah_number, ayah_number, riwayah) composite primary key
-**Plans**: 7 plans
+**Plans**: 9 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — TypeScript type contracts + Supabase migrations (10 tables, RLS, auth trigger)
-- [ ] 01-02-PLAN.md — Expo project scaffold, dependencies, Supabase client, Zustand stores, 5-tab routing
+- [x] 01-01-PLAN.md — TypeScript type contracts + Supabase migrations (10 tables, RLS, auth trigger)
+- [x] 01-02-PLAN.md — Expo project scaffold, dependencies, Supabase client, Zustand stores, 5-tab routing
 - [x] 01-03-PLAN.md — Arabic normalization pipeline + Drizzle SQLite schema + Supabase seed script
-- [ ] 01-04-PLAN.md — Auth flows: email/password, Apple Sign In, Google Sign In + session persistence
-- [ ] 01-05-PLAN.md — SQLite offline cache: first-launch seed, quranService, useQuranData hook
-- [ ] 01-06-PLAN.md — Quran display components (AyahText RTL, SurahHeader, AyahCard) + surah list + navigation
-- [ ] 01-07-PLAN.md — FastAPI skeleton on EC2: /health endpoint, Riwayah enum, Docker, nginx HTTPS
+- [x] 01-04-PLAN.md — Auth flows: email/password, Apple Sign In, Google Sign In + session persistence
+- [x] 01-05-PLAN.md — SQLite offline cache: first-launch seed, quranService, useQuranData hook
+- [x] 01-06-PLAN.md — Quran display components (AyahText RTL, SurahHeader, AyahCard) + surah list + navigation
+- [x] 01-07-PLAN.md — FastAPI skeleton on EC2: /health endpoint, Riwayah enum, Docker, nginx HTTPS
+- [ ] 01-08-PLAN.md — [GAP] Fix Quran data seed: inspect quran-json, uncomment and wire ayah seeding
+- [ ] 01-09-PLAN.md — [GAP] Download Arabic fonts + restore useFonts() in _layout.tsx
 
 ### Phase 2: Audio Pipeline and Core AI
 **Goal**: A user can record a recitation and receive word-level correctness feedback from the AI inference server
@@ -92,7 +94,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 6/7 | In Progress|  |
+| 1. Foundation | 7/9 | In Progress |  |
 | 2. Audio Pipeline and Core AI | 0/TBD | Not started | - |
 | 3. Tajweed FSM and Session UI | 0/TBD | Not started | - |
 | 4. Hifz Tracker and SM-2 Engine | 0/TBD | Not started | - |
