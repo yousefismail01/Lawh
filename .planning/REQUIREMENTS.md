@@ -9,7 +9,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Foundation
 
-- [ ] **FNDN-01**: App initializes with full Quran text (6,236 ayahs) with complete tashkeel in Supabase, seeded from quran-json dataset
+- [x] **FNDN-01**: App initializes with full Quran text (6,236 ayahs) with complete tashkeel in Supabase, seeded from quran-json dataset
 - [x] **FNDN-02**: Every ayah record includes riwayah field with multi-riwayah composite unique key (surah_id, ayah_number, riwayah)
 - [x] **FNDN-03**: Quran text is pre-cached in expo-sqlite on first launch for offline access
 - [x] **FNDN-04**: Arabic text renders correctly RTL with full tashkeel using KFGQPC Uthmanic Hafs or Amiri Quran font on both iOS and Android
@@ -152,7 +152,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FNDN-01 | Phase 1 | Pending |
+| FNDN-01 | Phase 1 | Complete |
 | FNDN-02 | Phase 1 | Complete |
 | FNDN-03 | Phase 1 | Complete |
 | FNDN-04 | Phase 1 | Complete |
