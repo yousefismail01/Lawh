@@ -1,0 +1,3 @@
+# Environment files with secrets
+scripts/.env
+.DS_Store
