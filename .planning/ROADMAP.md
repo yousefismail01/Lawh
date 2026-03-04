@@ -35,7 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 - [ ] 01-01-PLAN.md — TypeScript type contracts + Supabase migrations (10 tables, RLS, auth trigger)
 - [ ] 01-02-PLAN.md — Expo project scaffold, dependencies, Supabase client, Zustand stores, 5-tab routing
-- [ ] 01-03-PLAN.md — Arabic normalization pipeline + Drizzle SQLite schema + Supabase seed script
+- [x] 01-03-PLAN.md — Arabic normalization pipeline + Drizzle SQLite schema + Supabase seed script
 - [ ] 01-04-PLAN.md — Auth flows: email/password, Apple Sign In, Google Sign In + session persistence
 - [ ] 01-05-PLAN.md — SQLite offline cache: first-launch seed, quranService, useQuranData hook
 - [ ] 01-06-PLAN.md — Quran display components (AyahText RTL, SurahHeader, AyahCard) + surah list + navigation
