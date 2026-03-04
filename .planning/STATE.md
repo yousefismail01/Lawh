@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-03-04T22:56:32Z"
-last_activity: "2026-03-04 — Completed 01-02: Expo mobile scaffold with routing, Supabase client, Zustand stores"
+stopped_at: Completed 01-04-PLAN.md
+last_updated: "2026-03-04T23:00:55Z"
+last_activity: "2026-03-04 — Completed 01-04: Auth flows with email/password, Apple, Google sign-in"
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 7
-  completed_plans: 2
-  percent: 29
+  completed_plans: 3
+  percent: 43
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 1 of 5 (Foundation)
-Plan: 2 of 7 in current phase
+Plan: 4 of 7 in current phase
 Status: Executing
-Last activity: 2026-03-04 — Completed 01-02: Expo mobile scaffold with routing, Supabase client, Zustand stores
+Last activity: 2026-03-04 — Completed 01-04: Auth flows with email/password, Apple, Google sign-in
 
-Progress: [██░░░░░░░░] 29%
+Progress: [████░░░░░░] 43%
 
 ## Performance Metrics
 
@@ -52,6 +52,8 @@ Progress: [██░░░░░░░░] 29%
 *Updated after each plan completion*
 | Phase 01 P01 | 3min | 2 tasks | 12 files |
 | Phase 01 P02 | 6min | 2 tasks | 19 files |
+| Phase 01 P03 | 2min | 2 tasks | 8 files |
+| Phase 01 P04 | 2min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -68,6 +70,11 @@ Recent decisions affecting current work:
 - [Phase 01]: Installed jest + jest-expo test framework as prerequisite for TDD task execution
 - [Phase 01 P02]: Deferred font loading (KFGQPCHafs, AmiriQuran) with placeholder until font files downloaded
 - [Phase 01 P02]: Switched entry point to expo-router/entry, removed default App.tsx
+- [Phase 01 P03]: Arabic normalization strips tashkeel first, then character variants, then NFC -- order matters for correctness
+- [Phase 01 P03]: Standalone hamza removed entirely (not mapped to alef) per Uthmanic orthography comparison needs
+- [Phase 01 P03]: Supabase seed script uses placeholder Quran mapping requiring manual field name inspection before execution
+- [Phase 01 P04]: Dynamic import for Apple/Google SDKs to avoid bundling platform-specific code
+- [Phase 01 P04]: Apple display_name written to profiles immediately on first sign-in (single-delivery)
 
 ### Pending Todos
 
@@ -82,6 +89,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-04T22:56:32Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-03-04T23:00:55Z
+Stopped at: Completed 01-04-PLAN.md
 Resume file: None

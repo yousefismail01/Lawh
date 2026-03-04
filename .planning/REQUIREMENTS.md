@@ -19,11 +19,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication
 
-- [ ] **AUTH-01**: User can sign up with email and password
-- [ ] **AUTH-02**: User can sign in with Apple Sign In
-- [ ] **AUTH-03**: User can sign in with Google Sign In
-- [ ] **AUTH-04**: User session persists across app restarts via AsyncStorage
-- [ ] **AUTH-05**: User profile created automatically on signup with default riwayah (Hafs) and daily goals
+- [x] **AUTH-01**: User can sign up with email and password
+- [x] **AUTH-02**: User can sign in with Apple Sign In
+- [x] **AUTH-03**: User can sign in with Google Sign In
+- [x] **AUTH-04**: User session persists across app restarts via AsyncStorage
+- [x] **AUTH-05**: User profile created automatically on signup with default riwayah (Hafs) and daily goals
 
 ### Audio Pipeline
 
@@ -159,11 +159,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FNDN-05 | Phase 1 | Complete |
 | FNDN-06 | Phase 1 | Complete |
 | FNDN-07 | Phase 1 | Pending |
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
-| AUTH-04 | Phase 1 | Pending |
-| AUTH-05 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
+| AUTH-03 | Phase 1 | Complete |
+| AUTH-04 | Phase 1 | Complete |
+| AUTH-05 | Phase 1 | Complete |
 | AUDP-01 | Phase 2 | Pending |
 | AUDP-02 | Phase 2 | Pending |
 | AUDP-03 | Phase 2 | Pending |
