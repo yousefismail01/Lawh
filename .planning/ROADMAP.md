@@ -12,7 +12,7 @@ Lawh ships in five phases ordered by dependency and risk. Phase 1 bakes the arch
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Schema, Quran data, auth, RTL rendering, and offline text cache
+- [x] **Phase 1: Foundation** - Schema, Quran data, auth, RTL rendering, and offline text cache
 - [ ] **Phase 2: Audio Pipeline and Core AI** - 16kHz recording, FastAPI inference, word-level mistake detection
 - [ ] **Phase 3: Tajweed FSM and Session UI** - 13+ rule classification, confidence gating, recitation session loop
 - [ ] **Phase 4: Hifz Tracker and SM-2 Engine** - Per-ayah strength scoring, review queue, session modes
@@ -41,7 +41,7 @@ Plans:
 - [x] 01-06-PLAN.md — Quran display components (AyahText RTL, SurahHeader, AyahCard) + surah list + navigation
 - [x] 01-07-PLAN.md — FastAPI skeleton on EC2: /health endpoint, Riwayah enum, Docker, nginx HTTPS
 - [ ] 01-08-PLAN.md — [GAP] Fix Quran data seed: inspect quran-json, uncomment and wire ayah seeding
-- [ ] 01-09-PLAN.md — [GAP] Download Arabic fonts + restore useFonts() in _layout.tsx
+- [x] 01-09-PLAN.md — [GAP] Download Arabic fonts + restore useFonts() in _layout.tsx
 
 ### Phase 2: Audio Pipeline and Core AI
 **Goal**: A user can record a recitation and receive word-level correctness feedback from the AI inference server
@@ -94,7 +94,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 7/9 | In Progress |  |
+| 1. Foundation | 9/9 | Complete | 2026-03-04 |
 | 2. Audio Pipeline and Core AI | 0/TBD | Not started | - |
 | 3. Tajweed FSM and Session UI | 0/TBD | Not started | - |
 | 4. Hifz Tracker and SM-2 Engine | 0/TBD | Not started | - |
