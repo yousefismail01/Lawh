@@ -10,11 +10,11 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Foundation
 
 - [ ] **FNDN-01**: App initializes with full Quran text (6,236 ayahs) with complete tashkeel in Supabase, seeded from quran-json dataset
-- [ ] **FNDN-02**: Every ayah record includes riwayah field with multi-riwayah composite unique key (surah_id, ayah_number, riwayah)
+- [x] **FNDN-02**: Every ayah record includes riwayah field with multi-riwayah composite unique key (surah_id, ayah_number, riwayah)
 - [ ] **FNDN-03**: Quran text is pre-cached in expo-sqlite on first launch for offline access
 - [ ] **FNDN-04**: Arabic text renders correctly RTL with full tashkeel using KFGQPC Uthmanic Hafs or Amiri Quran font on both iOS and Android
-- [ ] **FNDN-05**: Pre-computed normalized_text column stored alongside display text for comparison operations
-- [ ] **FNDN-06**: Supabase schema includes all 10 tables with Row Level Security enabled and policies enforced on every user-facing table
+- [x] **FNDN-05**: Pre-computed normalized_text column stored alongside display text for comparison operations
+- [x] **FNDN-06**: Supabase schema includes all 10 tables with Row Level Security enabled and policies enforced on every user-facing table
 - [ ] **FNDN-07**: Surah/Juz navigation with Arabic names, transliteration, and juz/hizb/rub markers
 
 ### Authentication
@@ -101,7 +101,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Multi-Riwayah
 
-- [ ] **RIWY-01**: Every database table, API endpoint, Edge Function, and mobile screen accepts riwayah as explicit parameter
+- [x] **RIWY-01**: Every database table, API endpoint, Edge Function, and mobile screen accepts riwayah as explicit parameter
 - [ ] **RIWY-02**: Riwayah selector in user profile settings (Hafs available, Warsh/Qalun/Ad-Duri shown as "Coming Soon")
 - [ ] **RIWY-03**: Inference server accepts riwayah parameter and returns error for unsupported riwayahs (not silent Hafs fallback)
 
@@ -153,11 +153,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | FNDN-01 | Phase 1 | Pending |
-| FNDN-02 | Phase 1 | Pending |
+| FNDN-02 | Phase 1 | Complete |
 | FNDN-03 | Phase 1 | Pending |
 | FNDN-04 | Phase 1 | Pending |
-| FNDN-05 | Phase 1 | Pending |
-| FNDN-06 | Phase 1 | Pending |
+| FNDN-05 | Phase 1 | Complete |
+| FNDN-06 | Phase 1 | Complete |
 | FNDN-07 | Phase 1 | Pending |
 | AUTH-01 | Phase 1 | Pending |
 | AUTH-02 | Phase 1 | Pending |
@@ -211,7 +211,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GAME-02 | Phase 5 | Pending |
 | GAME-03 | Phase 5 | Pending |
 | GAME-04 | Phase 5 | Pending |
-| RIWY-01 | Phase 1 | Pending |
+| RIWY-01 | Phase 1 | Complete |
 | RIWY-02 | Phase 5 | Pending |
 | RIWY-03 | Phase 2 | Pending |
 
