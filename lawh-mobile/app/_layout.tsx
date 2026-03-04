@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { View, Text } from 'react-native'
 import { Stack, useRouter, useSegments } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
+import { useFonts } from 'expo-font'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
@@ -32,14 +33,10 @@ function AuthGate() {
 }
 
 export default function RootLayout() {
-  // TODO: Download KFGQPCHafs.ttf and AmiriQuran.ttf to assets/fonts/
-  // then uncomment font loading below:
-  // const [fontsLoaded, fontError] = useFonts({
-  //   'KFGQPCHafs': require('../assets/fonts/KFGQPCHafs.ttf'),
-  //   'AmiriQuran': require('../assets/fonts/AmiriQuran.ttf'),
-  // })
-  const fontsLoaded = true
-  const fontError = null
+  const [fontsLoaded, fontError] = useFonts({
+    'KFGQPCHafs': require('../assets/fonts/KFGQPCHafs.ttf'),
+    'AmiriQuran': require('../assets/fonts/AmiriQuran.ttf'),
+  })
 
   const { loading, setSession } = useAuthStore()
   const [seedComplete, setSeedComplete] = useState(false)
