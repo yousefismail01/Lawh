@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 06-mushaf-fullscreen-mode-with-tap-toggle-ui-menu-navigation-and-surah-glossary
-current_plan: 3 of 4 in Phase 6
+current_plan: 4 of 4 in Phase 6
 status: In Progress
-stopped_at: Completed 06-02-PLAN.md
-last_updated: "2026-03-05T18:55:59.066Z"
+stopped_at: Completed 06-03-PLAN.md
+last_updated: "2026-03-05T18:57:19Z"
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 17
-  completed_plans: 15
+  completed_plans: 16
 ---
 
 # Session State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.0 milestone
 **Current phase:** 06-mushaf-fullscreen-mode-with-tap-toggle-ui-menu-navigation-and-surah-glossary
-**Current Plan:** 3 of 4 in Phase 6
+**Current Plan:** 4 of 4 in Phase 6
 **Status:** In Progress
 
 ## Session Log
@@ -45,8 +45,11 @@ See: .planning/PROJECT.md
 - Removed handleOpenSurahList from MushafScreen since PageNavigator no longer triggers it
 - [Phase 06]: Used typed route paths /(main)/hub and /(main)/contents for ChromeOverlay navigation
 - [Phase 06]: Placed tap Pressable inside MushafFrame to avoid PagerView swipe conflicts
+- [Phase 06]: Used static SURAH_START_PAGES array for synchronous Contents screen data access
+- [Phase 06]: Navigation from Contents uses settingsStore.setLastReadPage() + router.back() bridge pattern
+- [Phase 06]: Added useFocusEffect to MushafScreen for page re-sync on return from Contents
 
 ### Last Session
 
-- **Stopped at:** Completed 06-02-PLAN.md
-- **Timestamp:** 2026-03-05T18:56:00Z
+- **Stopped at:** Completed 06-03-PLAN.md
+- **Timestamp:** 2026-03-05T18:57:19Z
