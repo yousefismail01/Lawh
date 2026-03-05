@@ -111,7 +111,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 01.1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 1 → 01.1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -121,3 +121,24 @@ Phases execute in numeric order: 1 → 01.1 → 2 → 3 → 4 → 5
 | 3. Tajweed FSM and Session UI | 0/TBD | Not started | - |
 | 4. Hifz Tracker and SM-2 Engine | 0/TBD | Not started | - |
 | 5. Dashboard, Gamification, and Retention | 0/TBD | Not started | - |
+| 6. Mushaf Fullscreen Mode | 0/4 | Planning complete | - |
+
+### Phase 6: Mushaf fullscreen mode with tap-toggle UI, menu navigation, and surah glossary
+
+**Goal:** Transform the mushaf into a distraction-free fullscreen reading experience with tap-to-toggle chrome, a hamburger menu navigating to a Home hub page, and a full-page surah/juz Contents screen -- removing the tab bar and making the mushaf the primary app screen
+**Requirements**: FSCR-01, FSCR-02, FSCR-03, FSCR-04, FSCR-05, FSCR-06
+**Depends on:** Phase 01.1
+**Success Criteria** (what must be TRUE):
+  1. User sees the mushaf with no tab bar; tapping anywhere toggles chrome (overlay icons + PageNavigator) on/off with fade animation
+  2. Chrome auto-hides after 5 seconds; status bar hides along with chrome for true immersive reading
+  3. MushafPageHeader (surah name, juz, hizb) stays visible at all times; swiping pages does NOT trigger chrome
+  4. Hamburger icon navigates to a full Home hub page with cards for Hifz, Recite, Review, Profile, Settings
+  5. Glossary icon navigates to a full-page Contents screen with surahs grouped by juz, right-edge juz index, and Surahs/Quarters tabs
+  6. Tapping a surah in Contents navigates to that surah's page in the mushaf
+**Plans**: 4 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Route restructuring (tabs to Stack), useChromeToggle hook, PageNavigator controlled mode
+- [ ] 06-02-PLAN.md — Chrome overlay integration in MushafScreen (tap toggle, status bar, overlay icons)
+- [ ] 06-03-PLAN.md — Contents screen (surah glossary with juz groups) and Home Hub page
+- [ ] 06-04-PLAN.md — End-to-end visual verification checkpoint
