@@ -1,5 +1,6 @@
 import React from 'react'
 import { View, Text, StyleSheet, ActivityIndicator, Pressable } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { MushafFrame } from './MushafFrame'
 import { MushafSurahBanner } from './MushafSurahBanner'
 import { MushafBismillah } from './MushafBismillah'
@@ -7,7 +8,8 @@ import { useV4Font } from '@/hooks/useV4Font'
 import { getPageLines, chapters } from '@/lib/data/mushafData'
 import { getPageJuzHizb } from '@/lib/data/pageJuzHizb'
 
-const TOP_BUFFER = 52
+// Header overlay height: safe area top + icons row (~36) + page header (~30) + padding
+const HEADER_CONTENT_HEIGHT = 72
 const FOOTER_HEIGHT = 28
 
 interface MushafPageProps {
@@ -44,6 +46,8 @@ function getSurahForPage(page: number): { id: number; nameArabic: string; nameSi
 export { getSurahForPage, getPageJuzHizb }
 
 const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, onPress }: MushafPageProps) {
+  const insets = useSafeAreaInsets()
+  const topBuffer = insets.top + HEADER_CONTENT_HEIGHT
   const { fontName, isLoaded: v4Loaded } = useV4Font(pageNumber)
   const pageLines = getPageLines(pageNumber)
 
@@ -112,7 +116,7 @@ const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, 
   return (
     <MushafFrame>
       <Pressable style={styles.content} onPress={onPress}>
-        <View style={{ height: TOP_BUFFER }} />
+        <View style={{ height: topBuffer }} />
         <View style={styles.linesContainer}>
           {renderedLines}
         </View>

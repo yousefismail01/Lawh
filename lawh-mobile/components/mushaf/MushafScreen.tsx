@@ -123,8 +123,8 @@ export function MushafScreen() {
   // Derive surah info for current page
   const pageInfo = useMemo(() => {
     const surah = getSurahForPage(currentPage)
-    const { juz, hizb } = getPageJuzHizb(currentPage)
-    return { surahName: surah?.nameSimple ?? '', juz, hizb }
+    const { juz, hizb, quarter } = getPageJuzHizb(currentPage)
+    return { surahName: surah?.nameSimple ?? '', juz, hizb, quarter }
   }, [currentPage])
 
   const pageData = useMemo(
@@ -216,14 +216,14 @@ export function MushafScreen() {
           />
         )}
 
-        {chromeVisible && (
-          <ChromeOverlay
-            surahName={pageInfo.surahName}
-            pageNumber={currentPage}
-            juz={pageInfo.juz}
-            hizb={pageInfo.hizb}
-          />
-        )}
+        <ChromeOverlay
+          surahName={pageInfo.surahName}
+          pageNumber={currentPage}
+          juz={pageInfo.juz}
+          hizb={pageInfo.hizb}
+          quarter={pageInfo.quarter}
+          chromeVisible={chromeVisible}
+        />
 
         {chromeVisible && (
           <Animated.View
