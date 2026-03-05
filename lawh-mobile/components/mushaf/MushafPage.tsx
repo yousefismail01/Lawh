@@ -21,6 +21,8 @@ interface MushafPageProps {
   pageNumber: number
   onAyahLongPress?: (info: { surahId: number; ayahNumber: number }) => void
   onPress?: () => void
+  /** When set, overrides the V4 COLRv1 font colors with a uniform text color (tajweed off). */
+  tajweedColorOverride?: string
 }
 
 /** Find the primary surah for a page by checking surah page ranges */
@@ -50,7 +52,7 @@ function getSurahForPage(page: number): { id: number; nameArabic: string; nameSi
 
 export { getSurahForPage, getPageJuzHizb }
 
-const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, onPress }: MushafPageProps) {
+const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, onPress, tajweedColorOverride }: MushafPageProps) {
   const insets = useSafeAreaInsets()
   const { fontName, isLoaded: v4Loaded } = useV4Font(pageNumber)
   const pageLines = getPageLines(pageNumber)
@@ -103,6 +105,7 @@ const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, 
                 {
                   fontFamily: fontName,
                   textAlign: line.centered ? 'center' : 'justify',
+                  color: tajweedColorOverride ?? styles.v4Line.color,
                 },
               ]}
             >

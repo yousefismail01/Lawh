@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Dimensions,
   ViewToken,
+  useColorScheme,
 } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 import { useFocusEffect } from 'expo-router'
@@ -17,6 +18,7 @@ import { MushafPage, getSurahForPage, getPageJuzHizb } from './MushafPage'
 import { MushafFooter } from './MushafFooter'
 import { ChromeOverlay } from './ChromeOverlay'
 import { AyahActionSheet } from './AyahActionSheet'
+import { CardView } from './CardView'
 import { quranService } from '@/services/quranService'
 import { preloadPageRange } from '@/lib/fonts/qpcV4FontManager'
 
@@ -35,11 +37,25 @@ export function MushafScreen() {
   const lastReadPage = useSettingsStore((s) => s.lastReadPage)
   const hasHydrated = useSettingsStore((s) => s._hasHydrated)
   const setLastReadPage = useSettingsStore((s) => s.setLastReadPage)
+  const readingMode = useSettingsStore((s) => s.readingMode)
+  const tajweedEnabled = useSettingsStore((s) => s.tajweedEnabled)
+
+  const colorScheme = useColorScheme()
+  const isDark = colorScheme === 'dark'
 
   const [currentPage, setCurrentPage] = useState(lastReadPage)
   const [selectedAyah, setSelectedAyah] = useState<SelectedAyah | null>(null)
 
-  const { visible: chromeVisible, toggle: toggleChrome } = useChromeToggle(5000)
+  const chrome = useChromeToggle(5000)
+  const { visible: chromeVisible, toggle: toggleChrome } = chrome
+
+  // Compute tajweed color override for V4 font rendering
+  // COLRv1 CPAL palette selection is not natively supported in React Native,
+  // so we use a color override workaround: tajweed off => uniform text color
+  const tajweedColorOverride = useMemo(() => {
+    if (tajweedEnabled) return undefined // let COLRv1 colors render naturally
+    return isDark ? '#e8e0d0' : '#1c1812' // uniform color overrides COLRv1 layers
+  }, [tajweedEnabled, isDark])
 
   const pagerRef = useRef<PagerView>(null)
   const flatListRef = useRef<FlatList>(null)
@@ -162,11 +178,23 @@ export function MushafScreen() {
     )
   }
 
+  const handlePopoverOpen = useCallback(() => {
+    chrome.pause()
+  }, [chrome])
+
+  const handlePopoverClose = useCallback(() => {
+    chrome.resume()
+  }, [chrome])
+
+  const isCardMode = readingMode === 'arabic-cards' || readingMode === 'translation-cards'
+
   return (
-    <View style={[styles.root, { backgroundColor: '#fff' }]}>
+    <View style={[styles.root, { backgroundColor: isDark ? '#1c1812' : '#fff' }]}>
         <StatusBar hidden={!chromeVisible} animated />
 
-        {navigationMode === 'horizontal' ? (
+        {isCardMode ? (
+          <CardView mode={readingMode as 'arabic-cards' | 'translation-cards'} initialPage={currentPage} />
+        ) : navigationMode === 'horizontal' ? (
           <PagerView
             ref={pagerRef}
             style={styles.pager}
@@ -186,6 +214,7 @@ export function MushafScreen() {
                       pageNumber={pageNum}
                       onAyahLongPress={handleAyahLongPress}
                       onPress={handlePageTap}
+                      tajweedColorOverride={tajweedColorOverride}
                     />
                   ) : (
                     <View style={styles.placeholder} />
@@ -205,6 +234,7 @@ export function MushafScreen() {
                   pageNumber={item}
                   onAyahLongPress={handleAyahLongPress}
                   onPress={handlePageTap}
+                  tajweedColorOverride={tajweedColorOverride}
                 />
               </View>
             )}
@@ -231,6 +261,8 @@ export function MushafScreen() {
             currentPage={currentPage}
             onPageChange={handlePageChange}
             onLayoutPress={() => {}}
+            onPopoverOpen={handlePopoverOpen}
+            onPopoverClose={handlePopoverClose}
           />
         )}
 
