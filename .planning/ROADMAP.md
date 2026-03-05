@@ -13,6 +13,7 @@ Lawh ships in five phases ordered by dependency and risk. Phase 1 bakes the arch
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Schema, Quran data, auth, RTL rendering, and offline text cache
+- [ ] **Phase 01.1: Madinah Mushaf Page View** (INSERTED) - Replace ayah-card list with true 604-page Madinah Mushaf layout
 - [ ] **Phase 2: Audio Pipeline and Core AI** - 16kHz recording, FastAPI inference, word-level mistake detection
 - [ ] **Phase 3: Tajweed FSM and Session UI** - 13+ rule classification, confidence gating, recitation session loop
 - [ ] **Phase 4: Hifz Tracker and SM-2 Engine** - Per-ayah strength scoring, review queue, session modes
@@ -42,6 +43,25 @@ Plans:
 - [x] 01-07-PLAN.md — FastAPI skeleton on EC2: /health endpoint, Riwayah enum, Docker, nginx HTTPS
 - [ ] 01-08-PLAN.md — [GAP] Fix Quran data seed: inspect quran-json, uncomment and wire ayah seeding
 - [x] 01-09-PLAN.md — [GAP] Download Arabic fonts + restore useFonts() in _layout.tsx
+
+### Phase 01.1: Madinah Mushaf Page View (INSERTED)
+
+**Goal:** The Home tab displays a true 604-page Madinah Mushaf with 15-line fixed grid, ornamental frames, RTL horizontal page swiping, surah banners, and auto-resume — replacing the ayah-card list as the primary Quran reading experience
+**Requirements**: MUSH-01, MUSH-02, MUSH-03, MUSH-04, MUSH-05, MUSH-06
+**Depends on:** Phase 1
+**Success Criteria** (what must be TRUE):
+  1. User sees the Quran as a 604-page mushaf with 15 lines per page, ornamental frames, and cream/parchment background — matching the printed Madinah Mushaf layout
+  2. User can swipe horizontally (RTL) or scroll vertically to navigate pages, with a slider/scrubber bar for quick jumping
+  3. User can open a surah list modal and tap to jump to any surah's starting page
+  4. Long press on an ayah shows a bottom sheet with bookmark and translation options; single tap does nothing
+  5. App resumes on the last-read page after restart
+  6. Pages 1-2 (Al-Fatiha, Al-Baqarah start) render with special centered layout matching the printed mushaf
+**Plans**: 3 plans
+
+Plans:
+- [ ] 01.1-01-PLAN.md — Data foundation: words table, seed script, quranService extension, persisted settings
+- [ ] 01.1-02-PLAN.md — Mushaf rendering components: MushafPage, MushafLine, ornamental elements, useMushafPage hook
+- [ ] 01.1-03-PLAN.md — Mushaf screen assembly: PagerView navigation, page slider, surah list modal, long-press actions, Home tab replacement
 
 ### Phase 2: Audio Pipeline and Core AI
 **Goal**: A user can record a recitation and receive word-level correctness feedback from the AI inference server
@@ -90,11 +110,12 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 1 → 01.1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 9/9 | Complete | 2026-03-04 |
+| 01.1. Madinah Mushaf Page View | 0/3 | Not started | - |
 | 2. Audio Pipeline and Core AI | 0/TBD | Not started | - |
 | 3. Tajweed FSM and Session UI | 0/TBD | Not started | - |
 | 4. Hifz Tracker and SM-2 Engine | 0/TBD | Not started | - |
