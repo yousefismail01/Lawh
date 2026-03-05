@@ -8,10 +8,12 @@ import {
   useColorScheme,
   ViewToken,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { chapters } from '@/lib/data/mushafData'
 import { quranService } from '@/services/quranService'
 import { loadTranslations, getTranslationText } from '@/lib/data/translationData'
 import { useSettingsStore } from '@/stores/settingsStore'
+import { getPageJuzHizb } from '@/lib/data/pageJuzHizb'
 import { AyahCard } from './AyahCard'
 
 interface CardViewProps {
@@ -26,7 +28,7 @@ interface AyahItem {
   surahName: string
   translationText: string
   key: string
-  isSurahHeader?: boolean
+  page: number
 }
 
 // Static surah start pages (1-indexed by surah number)
@@ -46,9 +48,6 @@ const SURAH_START_PAGES: number[] = [
   603, 604, 604, 604,
 ]
 
-/**
- * Find the primary surah for a given page.
- */
 function getSurahForPage(page: number): number {
   for (let id = 114; id >= 1; id--) {
     if (SURAH_START_PAGES[id] <= page) return id
@@ -56,27 +55,24 @@ function getSurahForPage(page: number): number {
   return 1
 }
 
-/** Initial number of surahs to load around the starting surah */
 const INITIAL_SURAHS = 3
-/** Surahs to load when user reaches end */
 const LOAD_MORE_SURAHS = 3
 
 const CardViewInner = function CardViewInner({ mode, initialPage }: CardViewProps) {
   const colorScheme = useColorScheme()
   const isDark = colorScheme === 'dark'
+  const insets = useSafeAreaInsets()
   const setLastReadPage = useSettingsStore((s) => s.setLastReadPage)
 
   const [ayahItems, setAyahItems] = useState<AyahItem[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [currentSurahName, setCurrentSurahName] = useState('')
+  const [currentPage, setCurrentPage] = useState(initialPage)
   const flatListRef = useRef<FlatList>(null)
   const lastLoadedSurahRef = useRef(0)
   const showTranslation = mode === 'translation-cards'
 
-  /**
-   * Load ayahs for a range of surahs [fromSurah, toSurah] inclusive.
-   * Returns AyahItem[] including surah headers.
-   */
   const loadSurahRange = useCallback(
     async (fromSurah: number, toSurah: number): Promise<AyahItem[]> => {
       const items: AyahItem[] = []
@@ -86,18 +82,6 @@ const CardViewInner = function CardViewInner({ mode, initialPage }: CardViewProp
         const ch = chapters[sid]
         if (!ch) continue
 
-        // Surah header
-        items.push({
-          surahId: sid,
-          ayahNumber: 0,
-          arabicText: '',
-          surahName: ch.nameSimple,
-          translationText: '',
-          key: `header-${sid}`,
-          isSurahHeader: true,
-        })
-
-        // Load ayahs for this surah in batch
         const dbAyahs = await quranService.getAyahsBySurah(sid)
 
         for (const ayah of dbAyahs) {
@@ -112,6 +96,7 @@ const CardViewInner = function CardViewInner({ mode, initialPage }: CardViewProp
             surahName: ch.nameSimple,
             translationText,
             key: `${sid}:${ayah.ayahNumber}`,
+            page: ayah.page,
           })
         }
       }
@@ -121,7 +106,6 @@ const CardViewInner = function CardViewInner({ mode, initialPage }: CardViewProp
     [showTranslation]
   )
 
-  // Initial load
   useEffect(() => {
     let cancelled = false
 
@@ -132,6 +116,9 @@ const CardViewInner = function CardViewInner({ mode, initialPage }: CardViewProp
 
       const startSurah = getSurahForPage(initialPage)
       const endSurah = Math.min(startSurah + INITIAL_SURAHS - 1, 114)
+
+      const ch = chapters[startSurah]
+      if (ch) setCurrentSurahName(ch.nameSimple)
 
       const items = await loadSurahRange(startSurah, endSurah)
 
@@ -163,7 +150,10 @@ const CardViewInner = function CardViewInner({ mode, initialPage }: CardViewProp
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       if (viewableItems.length > 0) {
         const item = viewableItems[0].item as AyahItem
-        if (item && item.surahId && !item.isSurahHeader) {
+        if (item && item.surahId) {
+          const ch = chapters[item.surahId]
+          if (ch) setCurrentSurahName(ch.nameSimple)
+          if (item.page) setCurrentPage(item.page)
           const page = SURAH_START_PAGES[item.surahId] ?? 1
           setLastReadPage(page)
         }
@@ -173,33 +163,22 @@ const CardViewInner = function CardViewInner({ mode, initialPage }: CardViewProp
 
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current
 
-  const headerColor = isDark ? '#b0a890' : '#6b5c3e'
-  const headerBorderColor = isDark ? 'rgba(200, 168, 78, 0.2)' : 'rgba(0, 0, 0, 0.1)'
+  const headerTextColor = isDark ? '#b0a890' : '#6b5c3e'
+  const pageNumColor = isDark ? '#8e8e93' : '#999'
+
+  const { juz } = getPageJuzHizb(currentPage)
 
   const renderItem = useCallback(
-    ({ item }: { item: AyahItem }) => {
-      if (item.isSurahHeader) {
-        return (
-          <View style={[styles.surahHeader, { borderBottomColor: headerBorderColor }]}>
-            <Text style={[styles.surahHeaderText, { color: headerColor }]}>
-              {item.surahName}
-            </Text>
-          </View>
-        )
-      }
-
-      return (
-        <AyahCard
-          surahId={item.surahId}
-          ayahNumber={item.ayahNumber}
-          arabicText={item.arabicText}
-          translationText={item.translationText}
-          surahName={item.surahName}
-          showTranslation={showTranslation}
-        />
-      )
-    },
-    [showTranslation, headerColor, headerBorderColor]
+    ({ item }: { item: AyahItem }) => (
+      <AyahCard
+        surahId={item.surahId}
+        ayahNumber={item.ayahNumber}
+        arabicText={item.arabicText}
+        translationText={item.translationText}
+        showTranslation={showTranslation}
+      />
+    ),
+    [showTranslation]
   )
 
   const keyExtractor = useCallback((item: AyahItem) => item.key, [])
@@ -222,48 +201,79 @@ const CardViewInner = function CardViewInner({ mode, initialPage }: CardViewProp
   }
 
   return (
-    <FlatList
-      ref={flatListRef}
-      data={ayahItems}
-      keyExtractor={keyExtractor}
-      renderItem={renderItem}
-      windowSize={5}
-      onViewableItemsChanged={onViewableItemsChanged}
-      viewabilityConfig={viewabilityConfig}
-      onEndReached={handleEndReached}
-      onEndReachedThreshold={0.5}
-      ListFooterComponent={renderFooter}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.listContent}
-    />
+    <View style={styles.root}>
+      {/* Sticky header: surah name | page | juz */}
+      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+        <Text style={[styles.headerText, { color: headerTextColor }]}>
+          {currentSurahName}
+        </Text>
+        <Text style={[styles.headerText, { color: headerTextColor }]}>
+          {currentPage}
+        </Text>
+        <Text style={[styles.headerText, { color: headerTextColor }]}>
+          Part {juz}
+        </Text>
+      </View>
+
+      <FlatList
+        ref={flatListRef}
+        data={ayahItems}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        windowSize={5}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
+        onEndReached={handleEndReached}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={renderFooter}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.listContent, { paddingBottom: 160 }]}
+      />
+
+      {/* Bottom page number */}
+      <View style={[styles.pageNumContainer, { paddingBottom: insets.bottom + 8 }]}>
+        <Text style={[styles.pageNum, { color: pageNumColor }]}>{currentPage}</Text>
+      </View>
+    </View>
   )
 }
 
 export const CardView = React.memo(CardViewInner)
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  listContent: {
-    paddingTop: 60,
-    paddingBottom: 160,
-  },
-  surahHeader: {
-    paddingVertical: 10,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    marginTop: 8,
+    paddingBottom: 12,
   },
-  surahHeaderText: {
-    fontSize: 18,
-    fontWeight: '700',
-    textAlign: 'center',
+  headerText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  listContent: {
+    paddingTop: 8,
   },
   footerLoader: {
     paddingVertical: 20,
     alignItems: 'center',
+  },
+  pageNumContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  pageNum: {
+    fontSize: 13,
   },
 })

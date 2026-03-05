@@ -6,47 +6,36 @@ interface AyahCardProps {
   ayahNumber: number
   arabicText: string
   translationText?: string
-  surahName?: string
   showTranslation: boolean
 }
 
 const AyahCardInner = function AyahCardInner({
-  surahId,
   ayahNumber,
   arabicText,
   translationText,
-  surahName,
   showTranslation,
 }: AyahCardProps) {
   const colorScheme = useColorScheme()
   const isDark = colorScheme === 'dark'
 
-  const cardBg = isDark ? '#2a241c' : '#faf3e0'
-  const textColor = isDark ? '#e8e0d0' : '#1c1812'
-  const headerColor = isDark ? '#b0a890' : '#6b5c3e'
-  const dividerColor = isDark ? 'rgba(200, 168, 78, 0.2)' : 'rgba(0, 0, 0, 0.1)'
+  const arabicColor = isDark ? '#e8e0d0' : '#1c1812'
+  const translationBg = isDark ? '#2a241c' : '#f5efe3'
   const translationColor = isDark ? '#c0b8a0' : '#3a3520'
 
   return (
-    <View style={[styles.card, { backgroundColor: cardBg }]}>
-      {/* Header row */}
-      <Text style={[styles.header, { color: headerColor }]}>
-        {surahName ?? `Surah ${surahId}`} {surahId}:{ayahNumber}
-      </Text>
-
-      {/* Arabic text */}
-      <Text style={[styles.arabic, { color: textColor }]}>
+    <View style={styles.container}>
+      {/* Arabic text — directly on background, no card */}
+      <Text style={[styles.arabic, { color: arabicColor }]}>
         {arabicText}
       </Text>
 
-      {/* Translation */}
+      {/* Translation in a subtle card */}
       {showTranslation && translationText ? (
-        <>
-          <View style={[styles.divider, { backgroundColor: dividerColor }]} />
+        <View style={[styles.translationCard, { backgroundColor: translationBg }]}>
           <Text style={[styles.translation, { color: translationColor }]}>
-            {translationText}
+            ({ayahNumber}) {translationText}
           </Text>
-        </>
+        </View>
       ) : null}
     </View>
   )
@@ -55,38 +44,26 @@ const AyahCardInner = function AyahCardInner({
 export const AyahCard = React.memo(AyahCardInner)
 
 const styles = StyleSheet.create({
-  card: {
-    marginHorizontal: 16,
-    marginVertical: 6,
-    borderRadius: 14,
-    paddingVertical: 16,
-    paddingHorizontal: 18,
-    // Shadow
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  header: {
-    fontSize: 13,
-    fontWeight: '600',
-    marginBottom: 10,
+  container: {
+    paddingHorizontal: 20,
+    marginBottom: 16,
   },
   arabic: {
-    fontSize: 24,
-    lineHeight: 42,
-    textAlign: 'center',
+    fontSize: 26,
+    lineHeight: 48,
+    textAlign: 'right',
     writingDirection: 'rtl',
     fontFamily: 'KFGQPCHafs',
+    marginBottom: 8,
   },
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    marginVertical: 12,
+  translationCard: {
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
   },
   translation: {
     fontSize: 15,
-    lineHeight: 22,
+    lineHeight: 24,
     textAlign: 'left',
   },
 })
