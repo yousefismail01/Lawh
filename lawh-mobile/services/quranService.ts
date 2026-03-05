@@ -1,6 +1,6 @@
 import { eq, and } from 'drizzle-orm'
 import { db } from '@/lib/db/client'
-import { surahs, ayahs } from '@/lib/db/schema'
+import { surahs, ayahs, words } from '@/lib/db/schema'
 import type { Riwayah } from '@/types/riwayah'
 import { DEFAULT_RIWAYAH } from '@/types/riwayah'
 
@@ -35,6 +35,41 @@ export const quranService = {
 
   async isSeeded(): Promise<boolean> {
     const result = await db.select().from(surahs).limit(1)
+    return result.length > 0
+  },
+
+  async getWordsByPage(page: number, riwayah: Riwayah = DEFAULT_RIWAYAH) {
+    return db.select().from(words)
+      .where(and(eq(words.pageNumber, page), eq(words.riwayah, riwayah)))
+      .orderBy(words.lineNumber, words.position)
+  },
+
+  async getPageMetadata(page: number, riwayah: Riwayah = DEFAULT_RIWAYAH) {
+    // Get all words on this page to determine which surahs appear
+    const pageWords = await db.select().from(words)
+      .where(and(eq(words.pageNumber, page), eq(words.riwayah, riwayah)))
+      .orderBy(words.lineNumber, words.position)
+
+    const surahIds = [...new Set(pageWords.map(w => w.surahId))]
+    const pageSurahs = await Promise.all(
+      surahIds.map(id => db.select().from(surahs).where(eq(surahs.id, id)).limit(1))
+    )
+
+    // Get juz from the first ayah on this page
+    const firstAyah = await db.select().from(ayahs)
+      .where(and(eq(ayahs.page, page), eq(ayahs.riwayah, riwayah)))
+      .orderBy(ayahs.ayahNumber)
+      .limit(1)
+
+    return {
+      pageNumber: page,
+      surahs: pageSurahs.flat().map(s => ({ id: s.id, nameArabic: s.nameArabic })),
+      juz: firstAyah[0]?.juz ?? 1,
+    }
+  },
+
+  async isWordSeeded(): Promise<boolean> {
+    const result = await db.select().from(words).limit(1)
     return result.length > 0
   },
 }
