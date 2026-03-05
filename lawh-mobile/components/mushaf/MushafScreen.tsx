@@ -9,6 +9,7 @@ import {
   ViewToken,
 } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
+import { useFocusEffect } from 'expo-router'
 import PagerView from 'react-native-pager-view'
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 import { useSettingsStore } from '@/stores/settingsStore'
@@ -60,6 +61,22 @@ export function MushafScreen() {
       setCurrentPage(lastReadPage)
     }
   }
+
+  // Re-sync currentPage with lastReadPage when screen regains focus
+  // (e.g., after navigating back from Contents screen which sets lastReadPage)
+  useFocusEffect(
+    useCallback(() => {
+      const stored = useSettingsStore.getState().lastReadPage
+      if (stored !== currentPage) {
+        setCurrentPage(stored)
+        if (navigationMode === 'horizontal') {
+          pagerRef.current?.setPage(stored - 1)
+        } else {
+          flatListRef.current?.scrollToIndex({ index: stored - 1, animated: false })
+        }
+      }
+    }, [currentPage, navigationMode])
+  )
 
   const handlePageSelected = useCallback(
     (e: { nativeEvent: { position: number } }) => {
