@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useCallback } from 'react'
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 
 import { PageNavigator } from './PageNavigator'
 import { MicPlaceholderButton } from './MicPlaceholderButton'
+import { LayoutSelectorPopover } from './LayoutSelectorPopover'
 
 interface MushafFooterProps {
   currentPage: number
@@ -24,15 +25,24 @@ interface MushafFooterProps {
 export const MushafFooter = React.memo(function MushafFooter({
   currentPage,
   onPageChange,
-  onLayoutPress,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onPopoverOpen: _onPopoverOpen,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onPopoverClose: _onPopoverClose,
+  onLayoutPress: _onLayoutPress,
+  onPopoverOpen,
+  onPopoverClose,
 }: MushafFooterProps) {
   const colorScheme = useColorScheme()
   const isDark = colorScheme === 'dark'
   const insets = useSafeAreaInsets()
+  const [popoverVisible, setPopoverVisible] = useState(false)
+
+  const handleOpenPopover = useCallback(() => {
+    setPopoverVisible(true)
+    onPopoverOpen?.()
+  }, [onPopoverOpen])
+
+  const handleClosePopover = useCallback(() => {
+    setPopoverVisible(false)
+    onPopoverClose?.()
+  }, [onPopoverClose])
 
   const textColor = isDark ? '#e8e0d0' : '#1a1a1a'
   const layoutIconColor = isDark ? '#c8a84e' : '#6b5c3e'
@@ -52,7 +62,7 @@ export const MushafFooter = React.memo(function MushafFooter({
         {/* Top row: layout icon | page number | mic button */}
         <View style={[styles.topRow, { borderBottomColor: borderColor }]}>
           <Pressable
-            onPress={onLayoutPress}
+            onPress={handleOpenPopover}
             style={styles.layoutButton}
             accessibilityLabel="Reading layout"
             accessibilityRole="button"
@@ -74,6 +84,11 @@ export const MushafFooter = React.memo(function MushafFooter({
         {/* Bottom row: page slider */}
         <PageNavigator currentPage={currentPage} onPageChange={onPageChange} />
       </BlurView>
+
+      <LayoutSelectorPopover
+        visible={popoverVisible}
+        onClose={handleClosePopover}
+      />
     </Animated.View>
   )
 })

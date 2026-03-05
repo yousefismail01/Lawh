@@ -18,6 +18,7 @@ const DEFAULT_AUTO_HIDE_MS = 5000
 export function useChromeToggle(autoHideMs: number = DEFAULT_AUTO_HIDE_MS) {
   const [visible, setVisible] = useState(true)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pausedRef = useRef(false)
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -27,6 +28,7 @@ export function useChromeToggle(autoHideMs: number = DEFAULT_AUTO_HIDE_MS) {
   }, [])
 
   const startTimer = useCallback(() => {
+    if (pausedRef.current) return
     clearTimer()
     timerRef.current = setTimeout(() => {
       setVisible(false)
@@ -80,5 +82,17 @@ export function useChromeToggle(autoHideMs: number = DEFAULT_AUTO_HIDE_MS) {
     }, [visible, startTimer, clearTimer])
   )
 
-  return { visible, toggle, resetTimer, show, hide }
+  const pause = useCallback(() => {
+    pausedRef.current = true
+    clearTimer()
+  }, [clearTimer])
+
+  const resume = useCallback(() => {
+    pausedRef.current = false
+    if (visible) {
+      startTimer()
+    }
+  }, [visible, startTimer])
+
+  return { visible, toggle, resetTimer, show, hide, pause, resume }
 }
