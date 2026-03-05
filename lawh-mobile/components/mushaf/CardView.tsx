@@ -76,11 +76,49 @@ function getSurahForPage(page: number): number {
 const INITIAL_SURAHS = 3
 const LOAD_MORE_SURAHS = 3
 
+/* ---------- Memoized list item ---------- */
+
+interface CardListItemProps {
+  item: AyahItem
+  onPress?: () => void
+  showTranslation: boolean
+  showArabicVerse: boolean
+  arabicFontSize: number
+  translationFontSize: number
+}
+
+const CardListItem = React.memo(function CardListItem({
+  item,
+  onPress,
+  showTranslation,
+  showArabicVerse,
+  arabicFontSize,
+  translationFontSize,
+}: CardListItemProps) {
+  return (
+    <Pressable onPress={onPress}>
+      <AyahCard
+        surahId={item.surahId}
+        ayahNumber={item.ayahNumber}
+        translationText={item.translationText}
+        showTranslation={showTranslation}
+        showArabicVerse={showArabicVerse}
+        arabicFontSize={arabicFontSize}
+        translationFontSize={translationFontSize}
+      />
+    </Pressable>
+  )
+})
+
 const CardViewInner = function CardViewInner({ mode, initialPage, onPress }: CardViewProps) {
   const colorScheme = useColorScheme()
   const isDark = colorScheme === 'dark'
   const insets = useSafeAreaInsets()
   const setLastReadPage = useSettingsStore((s) => s.setLastReadPage)
+  const showArabicVerse = useSettingsStore((s) => s.showArabicVerse)
+  const settingsShowTranslation = useSettingsStore((s) => s.showTranslation)
+  const arabicFontSize = useSettingsStore((s) => s.arabicFontSize)
+  const translationFontSize = useSettingsStore((s) => s.translationFontSize)
 
   const [ayahItems, setAyahItems] = useState<AyahItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -89,7 +127,7 @@ const CardViewInner = function CardViewInner({ mode, initialPage, onPress }: Car
   const [currentPage, setCurrentPage] = useState(initialPage)
   const flatListRef = useRef<FlatList<ListItem>>(null)
   const lastLoadedSurahRef = useRef(0)
-  const showTranslation = mode === 'translation-cards'
+  const showTranslation = mode === 'translation-cards' && settingsShowTranslation
 
   const loadSurahRange = useCallback(
     async (fromSurah: number, toSurah: number): Promise<AyahItem[]> => {
@@ -257,17 +295,17 @@ const CardViewInner = function CardViewInner({ mode, initialPage, onPress }: Car
       }
 
       return (
-        <Pressable onPress={onPress}>
-          <AyahCard
-            surahId={item.surahId}
-            ayahNumber={item.ayahNumber}
-            translationText={item.translationText}
-            showTranslation={showTranslation}
-          />
-        </Pressable>
+        <CardListItem
+          item={item}
+          onPress={onPress}
+          showTranslation={showTranslation}
+          showArabicVerse={showArabicVerse}
+          arabicFontSize={arabicFontSize}
+          translationFontSize={translationFontSize}
+        />
       )
     },
-    [showTranslation, onPress, isDark, lineColor]
+    [showTranslation, showArabicVerse, arabicFontSize, translationFontSize, onPress, isDark, lineColor]
   )
 
   const keyExtractor = useCallback((item: ListItem) => item.key, [])
