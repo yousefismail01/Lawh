@@ -13,7 +13,7 @@ Lawh ships in five phases ordered by dependency and risk. Phase 1 bakes the arch
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Schema, Quran data, auth, RTL rendering, and offline text cache
-- [ ] **Phase 01.1: Madinah Mushaf Page View** (INSERTED) - Replace ayah-card list with true 604-page Madinah Mushaf layout
+- [x] **Phase 01.1: Madinah Mushaf Page View** (INSERTED) - Replace ayah-card list with true 604-page Madinah Mushaf layout (completed 2026-03-05)
 - [ ] **Phase 2: Audio Pipeline and Core AI** - 16kHz recording, FastAPI inference, word-level mistake detection
 - [ ] **Phase 3: Tajweed FSM and Session UI** - 13+ rule classification, confidence gating, recitation session loop
 - [ ] **Phase 4: Hifz Tracker and SM-2 Engine** - Per-ayah strength scoring, review queue, session modes
@@ -116,7 +116,7 @@ Phases execute in numeric order: 1 → 01.1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 9/9 | Complete | 2026-03-04 |
-| 01.1. Madinah Mushaf Page View | 3/4 | In Progress|  |
+| 01.1. Madinah Mushaf Page View | 4/4 | Complete   | 2026-03-05 |
 | 2. Audio Pipeline and Core AI | 0/TBD | Not started | - |
 | 3. Tajweed FSM and Session UI | 0/TBD | Not started | - |
 | 4. Hifz Tracker and SM-2 Engine | 0/TBD | Not started | - |
