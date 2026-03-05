@@ -13,6 +13,7 @@ import {
 import * as Haptics from 'expo-haptics'
 import { tafsirService } from '@/services/tafsirService'
 import { translationService } from '@/services/translationService'
+import { AyahAudioPlayer } from './AyahAudioPlayer'
 
 interface AyahActionSheetProps {
   visible: boolean
@@ -31,6 +32,7 @@ export const AyahActionSheet = React.memo(function AyahActionSheet({
   const [loadingTranslation, setLoadingTranslation] = useState(false)
   const [tafsirText, setTafsirText] = useState<string | null>(null)
   const [translationText, setTranslationText] = useState<string | null>(null)
+  const [audioActive, setAudioActive] = useState(false)
 
   const handleBookmark = useCallback(() => {
     Alert.alert('Bookmark', 'Bookmark saved')
@@ -81,9 +83,14 @@ export const AyahActionSheet = React.memo(function AyahActionSheet({
     []
   )
 
+  const handlePlayAudio = useCallback(() => {
+    setAudioActive((prev) => !prev)
+  }, [])
+
   const handleClose = useCallback(() => {
     setTafsirText(null)
     setTranslationText(null)
+    setAudioActive(false)
     onClose()
   }, [onClose])
 
@@ -166,7 +173,25 @@ export const AyahActionSheet = React.memo(function AyahActionSheet({
                 )}
                 <Text style={[styles.actionLabel, { color: textColor }]}>Tafsir</Text>
               </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.actionButton,
+                  { backgroundColor: buttonBg },
+                  pressed && { opacity: 0.6 },
+                ]}
+                onPress={withHaptic(handlePlayAudio)}
+              >
+                <Text style={[styles.actionIcon, { color: secondaryColor }]}>{'\u25B6'}</Text>
+                <Text style={[styles.actionLabel, { color: textColor }]}>Play Audio</Text>
+              </Pressable>
             </View>
+
+            {audioActive && ayahInfo ? (
+              <View style={[styles.expandedSection, { borderColor }]}>
+                <AyahAudioPlayer surahId={ayahInfo.surahId} ayahNumber={ayahInfo.ayahNumber} />
+              </View>
+            ) : null}
 
             {translationText ? (
               <View style={[styles.expandedSection, { borderColor }]}>
@@ -235,16 +260,17 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'center',
     gap: 12,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 12,
     borderRadius: 10,
-    gap: 8,
+    gap: 6,
   },
   actionIcon: {
     fontSize: 18,
