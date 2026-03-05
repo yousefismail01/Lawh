@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { View, Text, Pressable, StyleSheet, useColorScheme } from 'react-native'
-import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio'
+import { Audio } from 'expo-av'
 import { getAyahAudioSegment, type AyahAudioSegment } from '@/lib/data/audioData'
 
 interface AyahAudioPlayerProps {
@@ -8,46 +8,87 @@ interface AyahAudioPlayerProps {
   ayahNumber: number
 }
 
-/** Inner component — only rendered when we have a valid audio URL */
-function AyahAudioPlayerActive({ segment }: { segment: AyahAudioSegment }) {
+export const AyahAudioPlayer = React.memo(function AyahAudioPlayer({
+  surahId,
+  ayahNumber,
+}: AyahAudioPlayerProps) {
   const colorScheme = useColorScheme()
   const isDark = colorScheme === 'dark'
 
+  const [segment, setSegment] = useState<AyahAudioSegment | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
-  const hasStartedRef = useRef(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const soundRef = useRef<Audio.Sound | null>(null)
 
-  const player = useAudioPlayer(segment.audioUrl)
-  const status = useAudioPlayerStatus(player)
+  // Load segment data
+  useEffect(() => {
+    let cancelled = false
+    getAyahAudioSegment(surahId, ayahNumber).then((seg) => {
+      if (!cancelled && seg) setSegment(seg)
+    })
+    return () => { cancelled = true }
+  }, [surahId, ayahNumber])
 
-  const startSec = segment.startMs / 1000
-  const endSec = segment.endMs / 1000
+  // Create and manage sound object
+  useEffect(() => {
+    if (!segment) return
+
+    let sound: Audio.Sound | null = null
+    let cancelled = false
+
+    const load = async () => {
+      const { sound: s } = await Audio.Sound.createAsync(
+        { uri: segment.audioUrl },
+        { shouldPlay: false },
+        (status) => {
+          if (!cancelled && status.isLoaded) {
+            setCurrentTime(status.positionMillis / 1000)
+            if (status.positionMillis / 1000 >= segment.endMs / 1000) {
+              s.pauseAsync()
+              setIsPlaying(false)
+            }
+          }
+        }
+      )
+      if (cancelled) {
+        s.unloadAsync()
+        return
+      }
+      sound = s
+      soundRef.current = s
+    }
+
+    load()
+
+    return () => {
+      cancelled = true
+      if (sound) sound.unloadAsync()
+      soundRef.current = null
+    }
+  }, [segment])
+
+  const startSec = segment ? segment.startMs / 1000 : 0
+  const endSec = segment ? segment.endMs / 1000 : 0
   const segmentDuration = endSec - startSec
 
-  // Monitor playback position - stop at end of ayah segment
-  useEffect(() => {
-    if (!isPlaying) return
-    if (status.currentTime >= endSec) {
-      player.pause()
-      setIsPlaying(false)
-    }
-  }, [status.currentTime, endSec, isPlaying, player])
-
   const handlePlayPause = useCallback(async () => {
+    const sound = soundRef.current
+    if (!sound || !segment) return
+
     if (isPlaying) {
-      player.pause()
+      await sound.pauseAsync()
       setIsPlaying(false)
     } else {
-      const seekTarget = Math.max(0, startSec - 0.1)
-      if (!hasStartedRef.current || status.currentTime < startSec || status.currentTime >= endSec) {
-        await player.seekTo(seekTarget)
-        hasStartedRef.current = true
+      const seekMs = Math.max(0, segment.startMs - 100)
+      if (currentTime < startSec || currentTime >= endSec) {
+        await sound.setPositionAsync(seekMs)
       }
-      player.play()
+      await sound.playAsync()
       setIsPlaying(true)
     }
-  }, [isPlaying, player, startSec, endSec, status.currentTime])
+  }, [segment, isPlaying, currentTime, startSec, endSec])
 
-  const elapsed = Math.max(0, Math.min(status.currentTime - startSec, segmentDuration))
+  const elapsed = Math.max(0, Math.min(currentTime - startSec, segmentDuration))
   const progress = segmentDuration > 0 ? elapsed / segmentDuration : 0
 
   const formatTime = (seconds: number): string => {
@@ -60,6 +101,14 @@ function AyahAudioPlayerActive({ segment }: { segment: AyahAudioSegment }) {
   const secondaryColor = isDark ? '#a09880' : '#6b5c3a'
   const trackBg = isDark ? '#3a3225' : '#d4c8a8'
   const fillColor = isDark ? '#c8a855' : '#8b7332'
+
+  if (!segment) {
+    return (
+      <View style={styles.container}>
+        <Text style={[styles.loadingText, { color: secondaryColor }]}>Loading audio...</Text>
+      </View>
+    )
+  }
 
   return (
     <View style={styles.container}>
@@ -84,35 +133,6 @@ function AyahAudioPlayerActive({ segment }: { segment: AyahAudioSegment }) {
       </View>
     </View>
   )
-}
-
-export const AyahAudioPlayer = React.memo(function AyahAudioPlayer({
-  surahId,
-  ayahNumber,
-}: AyahAudioPlayerProps) {
-  const colorScheme = useColorScheme()
-  const isDark = colorScheme === 'dark'
-  const secondaryColor = isDark ? '#a09880' : '#6b5c3a'
-
-  const [segment, setSegment] = useState<AyahAudioSegment | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-    getAyahAudioSegment(surahId, ayahNumber).then((seg) => {
-      if (!cancelled && seg) setSegment(seg)
-    })
-    return () => { cancelled = true }
-  }, [surahId, ayahNumber])
-
-  if (!segment) {
-    return (
-      <View style={styles.container}>
-        <Text style={[styles.loadingText, { color: secondaryColor }]}>Loading audio...</Text>
-      </View>
-    )
-  }
-
-  return <AyahAudioPlayerActive segment={segment} />
 })
 
 const styles = StyleSheet.create({
