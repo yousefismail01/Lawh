@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { View, Text, Pressable, StyleSheet, useColorScheme } from 'react-native'
-import { Audio } from 'expo-av'
 import { getAyahAudioSegment, type AyahAudioSegment } from '@/lib/data/audioData'
 
 interface AyahAudioPlayerProps {
@@ -18,7 +17,9 @@ export const AyahAudioPlayer = React.memo(function AyahAudioPlayer({
   const [segment, setSegment] = useState<AyahAudioSegment | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
-  const soundRef = useRef<Audio.Sound | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const playerRef = useRef<any>(null)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Load segment data
   useEffect(() => {
@@ -29,62 +30,80 @@ export const AyahAudioPlayer = React.memo(function AyahAudioPlayer({
     return () => { cancelled = true }
   }, [surahId, ayahNumber])
 
-  // Create and manage sound object
+  // Create player when segment is ready
   useEffect(() => {
     if (!segment) return
 
-    let sound: Audio.Sound | null = null
     let cancelled = false
 
-    const load = async () => {
-      const { sound: s } = await Audio.Sound.createAsync(
-        { uri: segment.audioUrl },
-        { shouldPlay: false },
-        (status) => {
-          if (!cancelled && status.isLoaded) {
-            setCurrentTime(status.positionMillis / 1000)
-            if (status.positionMillis / 1000 >= segment.endMs / 1000) {
-              s.pauseAsync()
-              setIsPlaying(false)
-            }
-          }
-        }
-      )
-      if (cancelled) {
-        s.unloadAsync()
-        return
+    const init = async () => {
+      try {
+        const { createAudioPlayer } = await import('expo-audio')
+        const player = createAudioPlayer(segment.audioUrl)
+        if (cancelled) return
+        playerRef.current = player
+      } catch (e: any) {
+        if (!cancelled) setError('Audio not available')
       }
-      sound = s
-      soundRef.current = s
     }
 
-    load()
+    init()
 
     return () => {
       cancelled = true
-      if (sound) sound.unloadAsync()
-      soundRef.current = null
+      if (intervalRef.current) clearInterval(intervalRef.current)
+      try { playerRef.current?.remove() } catch {}
+      playerRef.current = null
     }
   }, [segment])
+
+  // Poll position while playing
+  useEffect(() => {
+    if (isPlaying && segment) {
+      intervalRef.current = setInterval(() => {
+        const player = playerRef.current
+        if (player) {
+          const time = player.currentTime ?? 0
+          setCurrentTime(time)
+          if (time >= segment.endMs / 1000) {
+            player.pause()
+            setIsPlaying(false)
+          }
+        }
+      }, 200)
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+    }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [isPlaying, segment])
 
   const startSec = segment ? segment.startMs / 1000 : 0
   const endSec = segment ? segment.endMs / 1000 : 0
   const segmentDuration = endSec - startSec
 
   const handlePlayPause = useCallback(async () => {
-    const sound = soundRef.current
-    if (!sound || !segment) return
+    const player = playerRef.current
+    if (!player || !segment) return
 
-    if (isPlaying) {
-      await sound.pauseAsync()
-      setIsPlaying(false)
-    } else {
-      const seekMs = Math.max(0, segment.startMs - 100)
-      if (currentTime < startSec || currentTime >= endSec) {
-        await sound.setPositionAsync(seekMs)
+    try {
+      if (isPlaying) {
+        player.pause()
+        setIsPlaying(false)
+      } else {
+        const seekTarget = Math.max(0, startSec - 0.1)
+        if (currentTime < startSec || currentTime >= endSec) {
+          player.seekTo(seekTarget)
+        }
+        player.play()
+        setIsPlaying(true)
       }
-      await sound.playAsync()
-      setIsPlaying(true)
+    } catch {
+      setError('Playback failed')
     }
   }, [segment, isPlaying, currentTime, startSec, endSec])
 
@@ -101,6 +120,14 @@ export const AyahAudioPlayer = React.memo(function AyahAudioPlayer({
   const secondaryColor = isDark ? '#a09880' : '#6b5c3a'
   const trackBg = isDark ? '#3a3225' : '#d4c8a8'
   const fillColor = isDark ? '#c8a855' : '#8b7332'
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={[styles.loadingText, { color: secondaryColor }]}>{error}</Text>
+      </View>
+    )
+  }
 
   if (!segment) {
     return (
