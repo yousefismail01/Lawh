@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   FlatList,
   View,
   Text,
+  Pressable,
   ActivityIndicator,
   StyleSheet,
   useColorScheme,
@@ -15,21 +16,38 @@ import { loadTranslations, getTranslationText } from '@/lib/data/translationData
 import { useSettingsStore } from '@/stores/settingsStore'
 import { getPageJuzHizb } from '@/lib/data/pageJuzHizb'
 import { AyahCard } from './AyahCard'
+import { MushafSurahBanner } from './MushafSurahBanner'
+import { MushafBismillah } from './MushafBismillah'
 
 interface CardViewProps {
   mode: 'arabic-cards' | 'translation-cards'
   initialPage: number
+  onPress?: () => void
 }
 
 interface AyahItem {
+  type: 'ayah'
   surahId: number
   ayahNumber: number
-  arabicText: string
   surahName: string
   translationText: string
   key: string
   page: number
 }
+
+interface PageBreakItem {
+  type: 'page-break'
+  page: number
+  key: string
+}
+
+interface SurahHeaderItem {
+  type: 'surah-header'
+  surahId: number
+  key: string
+}
+
+type ListItem = AyahItem | PageBreakItem | SurahHeaderItem
 
 // Static surah start pages (1-indexed by surah number)
 const SURAH_START_PAGES: number[] = [
@@ -58,7 +76,7 @@ function getSurahForPage(page: number): number {
 const INITIAL_SURAHS = 3
 const LOAD_MORE_SURAHS = 3
 
-const CardViewInner = function CardViewInner({ mode, initialPage }: CardViewProps) {
+const CardViewInner = function CardViewInner({ mode, initialPage, onPress }: CardViewProps) {
   const colorScheme = useColorScheme()
   const isDark = colorScheme === 'dark'
   const insets = useSafeAreaInsets()
@@ -69,7 +87,7 @@ const CardViewInner = function CardViewInner({ mode, initialPage }: CardViewProp
   const [loadingMore, setLoadingMore] = useState(false)
   const [currentSurahName, setCurrentSurahName] = useState('')
   const [currentPage, setCurrentPage] = useState(initialPage)
-  const flatListRef = useRef<FlatList>(null)
+  const flatListRef = useRef<FlatList<ListItem>>(null)
   const lastLoadedSurahRef = useRef(0)
   const showTranslation = mode === 'translation-cards'
 
@@ -90,9 +108,9 @@ const CardViewInner = function CardViewInner({ mode, initialPage }: CardViewProp
             : ''
 
           items.push({
+            type: 'ayah',
             surahId: sid,
             ayahNumber: ayah.ayahNumber,
-            arabicText: ayah.textUthmani,
             surahName: ch.nameSimple,
             translationText,
             key: `${sid}:${ayah.ayahNumber}`,
@@ -105,6 +123,42 @@ const CardViewInner = function CardViewInner({ mode, initialPage }: CardViewProp
     },
     [showTranslation]
   )
+
+  // Build mixed list with surah headers and page breaks
+  const mixedItems = useMemo<ListItem[]>(() => {
+    if (ayahItems.length === 0) return []
+
+    const result: ListItem[] = []
+    let lastSurahId: number | null = null
+
+    for (let i = 0; i < ayahItems.length; i++) {
+      const item = ayahItems[i]
+
+      // Insert surah header before first ayah of each surah
+      if (item.surahId !== lastSurahId) {
+        result.push({
+          type: 'surah-header',
+          surahId: item.surahId,
+          key: `surah-header-${item.surahId}`,
+        })
+        lastSurahId = item.surahId
+      }
+
+      result.push(item)
+
+      // Insert page break after this ayah if next ayah is on a different page
+      const nextItem = ayahItems[i + 1]
+      if (nextItem && item.page !== nextItem.page) {
+        result.push({
+          type: 'page-break',
+          page: nextItem.page,
+          key: `page-break-${item.page}-${nextItem.page}`,
+        })
+      }
+    }
+
+    return result
+  }, [ayahItems])
 
   useEffect(() => {
     let cancelled = false
@@ -149,13 +203,17 @@ const CardViewInner = function CardViewInner({ mode, initialPage }: CardViewProp
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       if (viewableItems.length > 0) {
-        const item = viewableItems[0].item as AyahItem
-        if (item && item.surahId) {
-          const ch = chapters[item.surahId]
-          if (ch) setCurrentSurahName(ch.nameSimple)
-          if (item.page) setCurrentPage(item.page)
-          const page = SURAH_START_PAGES[item.surahId] ?? 1
-          setLastReadPage(page)
+        // Find the first ayah item among viewable items
+        for (const vt of viewableItems) {
+          const item = vt.item as ListItem
+          if (item && item.type === 'ayah') {
+            const ch = chapters[item.surahId]
+            if (ch) setCurrentSurahName(ch.nameSimple)
+            if (item.page) setCurrentPage(item.page)
+            const page = SURAH_START_PAGES[item.surahId] ?? 1
+            setLastReadPage(page)
+            break
+          }
         }
       }
     }
@@ -163,31 +221,62 @@ const CardViewInner = function CardViewInner({ mode, initialPage }: CardViewProp
 
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current
 
-  const headerTextColor = isDark ? '#b0a890' : '#6b5c3e'
+  const headerTextColor = isDark ? '#8e8e93' : '#666'
   const pageNumColor = isDark ? '#8e8e93' : '#999'
+  const lineColor = isDark ? '#3a3a3c' : '#d1d1d6'
 
   const { juz } = getPageJuzHizb(currentPage)
 
   const renderItem = useCallback(
-    ({ item }: { item: AyahItem }) => (
-      <AyahCard
-        surahId={item.surahId}
-        ayahNumber={item.ayahNumber}
-        arabicText={item.arabicText}
-        translationText={item.translationText}
-        showTranslation={showTranslation}
-      />
-    ),
-    [showTranslation]
+    ({ item }: { item: ListItem }) => {
+      if (item.type === 'page-break') {
+        return (
+          <View style={styles.pageBreakContainer}>
+            <View style={[styles.pageBreakLine, { backgroundColor: lineColor }]} />
+            <Text style={[styles.pageBreakText, { color: isDark ? '#8e8e93' : '#999' }]}>
+              {item.page}
+            </Text>
+            <View style={[styles.pageBreakLine, { backgroundColor: lineColor }]} />
+          </View>
+        )
+      }
+
+      if (item.type === 'surah-header') {
+        const ch = chapters[item.surahId]
+        return (
+          <View style={styles.surahHeaderContainer}>
+            <MushafSurahBanner
+              surahName={ch?.nameArabic ?? ''}
+              surahId={item.surahId}
+            />
+            {ch?.bismillahPre && (
+              <MushafBismillah surahId={item.surahId} />
+            )}
+          </View>
+        )
+      }
+
+      return (
+        <Pressable onPress={onPress}>
+          <AyahCard
+            surahId={item.surahId}
+            ayahNumber={item.ayahNumber}
+            translationText={item.translationText}
+            showTranslation={showTranslation}
+          />
+        </Pressable>
+      )
+    },
+    [showTranslation, onPress, isDark, lineColor]
   )
 
-  const keyExtractor = useCallback((item: AyahItem) => item.key, [])
+  const keyExtractor = useCallback((item: ListItem) => item.key, [])
 
   const renderFooter = useCallback(() => {
     if (!loadingMore) return null
     return (
       <View style={styles.footerLoader}>
-        <ActivityIndicator size="small" color={isDark ? '#c8a84e' : '#6b5c3e'} />
+        <ActivityIndicator size="small" color={isDark ? '#8e8e93' : '#999'} />
       </View>
     )
   }, [loadingMore, isDark])
@@ -195,7 +284,7 @@ const CardViewInner = function CardViewInner({ mode, initialPage }: CardViewProp
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="small" color={isDark ? '#c8a84e' : '#6b5c3e'} />
+        <ActivityIndicator size="small" color={isDark ? '#8e8e93' : '#999'} />
       </View>
     )
   }
@@ -215,9 +304,9 @@ const CardViewInner = function CardViewInner({ mode, initialPage }: CardViewProp
         </Text>
       </View>
 
-      <FlatList
+      <FlatList<ListItem>
         ref={flatListRef}
-        data={ayahItems}
+        data={mixedItems}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         windowSize={5}
@@ -275,5 +364,24 @@ const styles = StyleSheet.create({
   },
   pageNum: {
     fontSize: 13,
+  },
+  pageBreakContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+    paddingHorizontal: 20,
+  },
+  pageBreakLine: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+  },
+  pageBreakText: {
+    fontSize: 12,
+    marginHorizontal: 12,
+  },
+  surahHeaderContainer: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
   },
 })
