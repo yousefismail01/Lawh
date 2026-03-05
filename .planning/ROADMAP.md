@@ -122,7 +122,7 @@ Phases execute in numeric order: 1 → 01.1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. Hifz Tracker and SM-2 Engine | 0/TBD | Not started | - |
 | 5. Dashboard, Gamification, and Retention | 0/TBD | Not started | - |
 | 6. Mushaf Fullscreen Mode | 1/4 | In progress | - |
-| 7. Expanded Footer | 1/4 | In Progress|  |
+| 7. Expanded Footer | 2/4 | In Progress|  |
 
 ### Phase 6: Mushaf fullscreen mode with tap-toggle UI, menu navigation, and surah glossary
 
