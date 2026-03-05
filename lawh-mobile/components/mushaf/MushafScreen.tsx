@@ -8,12 +8,14 @@ import {
   Dimensions,
   ViewToken,
 } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { StatusBar } from 'expo-status-bar'
 import PagerView from 'react-native-pager-view'
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 import { useSettingsStore } from '@/stores/settingsStore'
+import { useChromeToggle } from '@/hooks/useChromeToggle'
 import { MushafPage } from './MushafPage'
 import { PageNavigator } from './PageNavigator'
-import { SurahListModal } from './SurahListModal'
+import { ChromeOverlay } from './ChromeOverlay'
 import { AyahActionSheet } from './AyahActionSheet'
 import { quranService } from '@/services/quranService'
 import { preloadPageRange } from '@/lib/fonts/qpcV4FontManager'
@@ -31,7 +33,6 @@ interface SelectedAyah {
 export function MushafScreen() {
   const colorScheme = useColorScheme()
   const isDark = colorScheme === 'dark'
-  const insets = useSafeAreaInsets()
 
   const navigationMode = useSettingsStore((s) => s.navigationMode)
   const lastReadPage = useSettingsStore((s) => s.lastReadPage)
@@ -39,8 +40,9 @@ export function MushafScreen() {
   const setLastReadPage = useSettingsStore((s) => s.setLastReadPage)
 
   const [currentPage, setCurrentPage] = useState(lastReadPage)
-  const [surahListVisible, setSurahListVisible] = useState(false)
   const [selectedAyah, setSelectedAyah] = useState<SelectedAyah | null>(null)
+
+  const { visible: chromeVisible, toggle: toggleChrome } = useChromeToggle(5000)
 
   const pagerRef = useRef<PagerView>(null)
   const flatListRef = useRef<FlatList>(null)
@@ -81,16 +83,9 @@ export function MushafScreen() {
     [navigationMode, setLastReadPage]
   )
 
-  const handleCloseSurahList = useCallback(() => {
-    setSurahListVisible(false)
-  }, [])
-
-  const handleSelectSurah = useCallback(
-    (page: number) => {
-      handlePageChange(page)
-    },
-    [handlePageChange]
-  )
+  const handlePageTap = useCallback(() => {
+    toggleChrome()
+  }, [toggleChrome])
 
   const handleAyahLongPress = useCallback(
     async (info: { surahId: number; ayahNumber: number }) => {
@@ -152,7 +147,9 @@ export function MushafScreen() {
   }
 
   return (
-    <View style={[styles.root, { backgroundColor: '#fff', paddingTop: insets.top }]}>
+    <View style={[styles.root, { backgroundColor: '#fff' }]}>
+        <StatusBar hidden={!chromeVisible} animated />
+
         {navigationMode === 'horizontal' ? (
           <PagerView
             ref={pagerRef}
@@ -172,6 +169,7 @@ export function MushafScreen() {
                     <MushafPage
                       pageNumber={pageNum}
                       onAyahLongPress={handleAyahLongPress}
+                      onPress={handlePageTap}
                     />
                   ) : (
                     <View style={styles.placeholder} />
@@ -190,6 +188,7 @@ export function MushafScreen() {
                 <MushafPage
                   pageNumber={item}
                   onAyahLongPress={handleAyahLongPress}
+                  onPress={handlePageTap}
                 />
               </View>
             )}
@@ -202,16 +201,21 @@ export function MushafScreen() {
           />
         )}
 
-        <PageNavigator
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-        />
+        {chromeVisible && (
+          <ChromeOverlay />
+        )}
 
-        <SurahListModal
-          visible={surahListVisible}
-          onClose={handleCloseSurahList}
-          onSelectSurah={handleSelectSurah}
-        />
+        {chromeVisible && (
+          <Animated.View
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(300)}
+          >
+            <PageNavigator
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+            />
+          </Animated.View>
+        )}
 
         <AyahActionSheet
           visible={selectedAyah !== null}
@@ -230,9 +234,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  container: {
-    flex: 1,
   },
   pager: {
     flex: 1,
