@@ -16,6 +16,11 @@ interface SettingsState {
   contentsSortOrder: ContentsSortOrder
   readingMode: ReadingMode
   tajweedEnabled: boolean
+  showArabicVerse: boolean
+  showTransliteration: boolean
+  showTranslation: boolean
+  arabicFontSize: number
+  translationFontSize: number
   _hasHydrated: boolean
   setRiwayah: (riwayah: Riwayah) => void
   setGoals: (minutes: number, ayahs: number) => void
@@ -24,6 +29,11 @@ interface SettingsState {
   setContentsSortOrder: (order: ContentsSortOrder) => void
   setReadingMode: (mode: ReadingMode) => void
   setTajweedEnabled: (enabled: boolean) => void
+  setShowArabicVerse: (show: boolean) => void
+  setShowTransliteration: (show: boolean) => void
+  setShowTranslation: (show: boolean) => void
+  setArabicFontSize: (size: number) => void
+  setTranslationFontSize: (size: number) => void
   setHasHydrated: (hydrated: boolean) => void
 }
 
@@ -38,6 +48,11 @@ export const useSettingsStore = create<SettingsState>()(
       contentsSortOrder: 'ascending',
       readingMode: 'mushaf',
       tajweedEnabled: true,
+      showArabicVerse: true,
+      showTransliteration: false,
+      showTranslation: true,
+      arabicFontSize: 26,
+      translationFontSize: 15,
       _hasHydrated: false,
       setRiwayah: (riwayah) => set({ riwayah }),
       setGoals: (dailyGoalMinutes, dailyGoalAyahs) => set({ dailyGoalMinutes, dailyGoalAyahs }),
@@ -46,6 +61,11 @@ export const useSettingsStore = create<SettingsState>()(
       setContentsSortOrder: (contentsSortOrder) => set({ contentsSortOrder }),
       setReadingMode: (readingMode) => set({ readingMode }),
       setTajweedEnabled: (tajweedEnabled) => set({ tajweedEnabled }),
+      setShowArabicVerse: (showArabicVerse) => set({ showArabicVerse }),
+      setShowTransliteration: (showTransliteration) => set({ showTransliteration }),
+      setShowTranslation: (showTranslation) => set({ showTranslation }),
+      setArabicFontSize: (arabicFontSize) => set({ arabicFontSize }),
+      setTranslationFontSize: (translationFontSize) => set({ translationFontSize }),
       setHasHydrated: (_hasHydrated) => set({ _hasHydrated }),
     }),
     {
@@ -64,6 +84,11 @@ export const useSettingsStore = create<SettingsState>()(
         contentsSortOrder: state.contentsSortOrder,
         readingMode: state.readingMode,
         tajweedEnabled: state.tajweedEnabled,
+        showArabicVerse: state.showArabicVerse,
+        showTransliteration: state.showTransliteration,
+        showTranslation: state.showTranslation,
+        arabicFontSize: state.arabicFontSize,
+        translationFontSize: state.translationFontSize,
       }),
     }
   )
