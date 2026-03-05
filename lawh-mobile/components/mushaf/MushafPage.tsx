@@ -6,35 +6,28 @@ import { MushafSurahBanner } from './MushafSurahBanner'
 import { MushafBismillah } from './MushafBismillah'
 import { useV4Font } from '@/hooks/useV4Font'
 import { getPageLines, chapters } from '@/lib/data/mushafData'
+import { getPageJuzHizb } from '@/lib/data/pageJuzHizb'
 
 const HEADER_HEIGHT = 30
 const FOOTER_HEIGHT = 28
-const LINES_PADDING_TOP = 20
-const LINES_PADDING_BOTTOM = 8
 
 interface MushafPageProps {
   pageNumber: number
   onAyahLongPress?: (info: { surahId: number; ayahNumber: number }) => void
+  onPress?: () => void
 }
 
 /** Find the primary surah for a page by checking surah page ranges */
-function getSurahForPage(page: number): { id: number; nameArabic: string } | null {
-  for (let i = 114; i >= 1; i--) {
-    // chapters doesn't have pageStart, so find the first surah line on or before this page
-    // Simple heuristic: iterate backwards
-  }
-  // Check which surahs appear on this page from the layout lines
+function getSurahForPage(page: number): { id: number; nameArabic: string; nameSimple: string } | null {
   const lines = getPageLines(page)
   let lastSurahId: number | null = null
   for (const line of lines) {
     if (line.type === 'surah') lastSurahId = line.surahId
   }
-  // If no surah_name line on this page, check previous pages
   if (lastSurahId) {
     const ch = chapters[lastSurahId]
-    return ch ? { id: lastSurahId, nameArabic: ch.nameArabic } : null
+    return ch ? { id: lastSurahId, nameArabic: ch.nameArabic, nameSimple: ch.nameSimple } : null
   }
-  // Walk backwards to find the current surah
   for (let p = page - 1; p >= 1; p--) {
     const pLines = getPageLines(p)
     for (let i = pLines.length - 1; i >= 0; i--) {
@@ -42,14 +35,14 @@ function getSurahForPage(page: number): { id: number; nameArabic: string } | nul
       if (pLine.type === 'surah') {
         const sid = pLine.surahId
         const ch = chapters[sid]
-        return ch ? { id: sid, nameArabic: ch.nameArabic } : null
+        return ch ? { id: sid, nameArabic: ch.nameArabic, nameSimple: ch.nameSimple } : null
       }
     }
   }
-  return { id: 1, nameArabic: chapters[1].nameArabic }
+  return { id: 1, nameArabic: chapters[1].nameArabic, nameSimple: chapters[1].nameSimple }
 }
 
-const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress }: MushafPageProps) {
+const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, onPress }: MushafPageProps) {
   const { fontName, isLoaded: v4Loaded } = useV4Font(pageNumber)
   const pageLines = getPageLines(pageNumber)
 
@@ -64,6 +57,7 @@ const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress }
   }
 
   const primarySurah = getSurahForPage(pageNumber)
+  const { juz, hizb, quarter } = getPageJuzHizb(pageNumber)
   const renderedLines: React.ReactNode[] = []
 
   for (let i = 0; i < 15; i++) {
@@ -86,15 +80,24 @@ const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress }
         </View>
       )
     } else if (line.type === 'ayah') {
-      // Matches QUL sample: getWords(first, last).join(' ')
+      // Per the spec: retrieve words and join them to form a single string
       const lineText = [...line.text].join(' ')
       renderedLines.push(
-        <View key={`line-${i}`} style={[styles.lineSlot, line.centered && styles.lineCentered]}>
+        <View key={`line-${i}`} style={styles.lineSlot}>
           <Pressable
-            style={[styles.v4LineContainer, line.centered && styles.lineCentered]}
+            style={styles.v4LineContainer}
+            onPress={onPress}
             onLongPress={onAyahLongPress ? () => onAyahLongPress({ surahId: primarySurah?.id ?? 1, ayahNumber: 1 }) : undefined}
           >
-            <Text style={[styles.v4Line, { fontFamily: fontName }]}>
+            <Text
+              style={[
+                styles.v4Line,
+                {
+                  fontFamily: fontName,
+                  textAlign: line.centered ? 'center' : 'justify',
+                },
+              ]}
+            >
               {lineText}
             </Text>
           </Pressable>
@@ -109,12 +112,13 @@ const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress }
 
   return (
     <MushafFrame>
-      <View style={styles.content}>
+      <Pressable style={styles.content} onPress={onPress}>
         <View style={{ height: HEADER_HEIGHT }}>
           <MushafPageHeader
-            surahName={primarySurah?.nameArabic ?? ''}
-            surahId={primarySurah?.id}
-            juz={1}
+            surahNameSimple={primarySurah?.nameSimple ?? ''}
+            juz={juz}
+            hizb={hizb}
+            quarter={quarter}
             pageNumber={pageNumber}
           />
         </View>
@@ -124,7 +128,7 @@ const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress }
         <View style={[styles.footer, { height: FOOTER_HEIGHT }]}>
           <Text style={styles.footerText}>{pageNumber}</Text>
         </View>
-      </View>
+      </Pressable>
     </MushafFrame>
   )
 }
@@ -141,27 +145,23 @@ const styles = StyleSheet.create({
   },
   linesContainer: {
     flex: 1,
-    paddingTop: LINES_PADDING_TOP,
-    paddingBottom: LINES_PADDING_BOTTOM,
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
   },
   lineSlot: {
     flex: 1,
+    justifyContent: 'center',
     overflow: 'visible',
   },
-  lineCentered: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   v4LineContainer: {
-    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'stretch',
   },
   v4Line: {
     fontSize: 22,
     color: '#000',
     writingDirection: 'rtl',
-    textAlign: 'right',
     includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   footer: {
     alignItems: 'center',
