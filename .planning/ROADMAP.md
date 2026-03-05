@@ -111,7 +111,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 01.1 → 2 → 3 → 4 → 5 → 6
+Phases execute in numeric order: 1 → 01.1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -122,6 +122,7 @@ Phases execute in numeric order: 1 → 01.1 → 2 → 3 → 4 → 5 → 6
 | 4. Hifz Tracker and SM-2 Engine | 0/TBD | Not started | - |
 | 5. Dashboard, Gamification, and Retention | 0/TBD | Not started | - |
 | 6. Mushaf Fullscreen Mode | 1/4 | In progress | - |
+| 7. Expanded Footer | 0/4 | Not started | - |
 
 ### Phase 6: Mushaf fullscreen mode with tap-toggle UI, menu navigation, and surah glossary
 
@@ -142,3 +143,23 @@ Plans:
 - [ ] 06-02-PLAN.md — Chrome overlay integration in MushafScreen (tap toggle, status bar, overlay icons)
 - [ ] 06-03-PLAN.md — Contents screen (surah glossary with juz groups) and Home Hub page
 - [ ] 06-04-PLAN.md — End-to-end visual verification checkpoint
+
+### Phase 7: Expanded footer with reading layout selector, microphone placeholder, and ayah long-press action sheet with haptic feedback
+
+**Goal:** Expand the mushaf chrome footer into a two-row toolbar with frosted glass blur, a reading mode selector (mushaf/Arabic cards/translation cards + tajweed toggle), a microphone placeholder button, and enhance the ayah long-press action sheet with haptic feedback and functional Alafasy audio playback
+**Requirements**: FOOT-01, FOOT-02, FOOT-03, FOOT-04, FOOT-05, FOOT-06
+**Depends on:** Phase 6
+**Success Criteria** (what must be TRUE):
+  1. Footer shows two rows with frosted glass blur: top row has layout icon (left), page number (center), mic button (right); bottom row has page slider
+  2. Tapping the layout icon opens a selector with three reading modes (Mushaf, Arabic Cards, Translation Cards) and a tajweed toggle
+  3. Mic button with accent color shows "Recitation coming soon" toast on tap
+  4. Long-pressing an ayah triggers medium haptic, each action button triggers light haptic
+  5. Play Audio action in the sheet streams the correct ayah segment from Alafasy recitation
+  6. Card reading modes show ayah cards (Arabic-only or with Sahih International translation) starting from current page position
+**Plans**: 4 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Foundation: install packages, extend settingsStore, create data layers, build MushafFooter with BlurView and mic placeholder
+- [ ] 07-02-PLAN.md — Action sheet: haptic feedback on open/tap, Play Audio with AyahAudioPlayer and Alafasy streaming DB
+- [ ] 07-03-PLAN.md — Layout selector popover, CardView and AyahCard components, reading mode switching in MushafScreen
+- [ ] 07-04-PLAN.md — End-to-end visual verification checkpoint
