@@ -1,137 +1,129 @@
 import React from 'react'
-import { View, Text, StyleSheet, ActivityIndicator, useColorScheme } from 'react-native'
-import { useMushafPage } from '@/hooks/useMushafPage'
+import { View, Text, StyleSheet, ActivityIndicator, Pressable } from 'react-native'
 import { MushafFrame } from './MushafFrame'
 import { MushafPageHeader } from './MushafPageHeader'
-import { MushafLine } from './MushafLine'
 import { MushafSurahBanner } from './MushafSurahBanner'
 import { MushafBismillah } from './MushafBismillah'
-import type { Word } from '@/types/mushaf'
+import { useV4Font } from '@/hooks/useV4Font'
+import { getPageLines, chapters } from '@/lib/data/mushafData'
+
+const HEADER_HEIGHT = 30
+const FOOTER_HEIGHT = 28
+const LINES_PADDING_TOP = 20
+const LINES_PADDING_BOTTOM = 8
 
 interface MushafPageProps {
   pageNumber: number
   onAyahLongPress?: (info: { surahId: number; ayahNumber: number }) => void
 }
 
-/**
- * Detect surah transitions within a page's line data.
- * Returns a map of lineNumber -> surahId for lines where a new surah starts.
- */
-function detectSurahStarts(lines: Word[][]): Map<number, { surahId: number; surahName: string }> {
-  const starts = new Map<number, { surahId: number; surahName: string }>()
-  let prevSurahId: number | null = null
-
-  for (let i = 0; i < lines.length; i++) {
-    const lineWords = lines[i]
-    if (lineWords.length === 0) continue
-
-    const firstWord = lineWords[0]
-    if (firstWord.surahId !== prevSurahId) {
-      // New surah detected - check if first word is position 1 and ayah 1
-      if (firstWord.position === 1 && firstWord.ayahNumber === 1) {
-        starts.set(i, { surahId: firstWord.surahId, surahName: '' })
+/** Find the primary surah for a page by checking surah page ranges */
+function getSurahForPage(page: number): { id: number; nameArabic: string } | null {
+  for (let i = 114; i >= 1; i--) {
+    // chapters doesn't have pageStart, so find the first surah line on or before this page
+    // Simple heuristic: iterate backwards
+  }
+  // Check which surahs appear on this page from the layout lines
+  const lines = getPageLines(page)
+  let lastSurahId: number | null = null
+  for (const line of lines) {
+    if (line.type === 'surah') lastSurahId = line.surahId
+  }
+  // If no surah_name line on this page, check previous pages
+  if (lastSurahId) {
+    const ch = chapters[lastSurahId]
+    return ch ? { id: lastSurahId, nameArabic: ch.nameArabic } : null
+  }
+  // Walk backwards to find the current surah
+  for (let p = page - 1; p >= 1; p--) {
+    const pLines = getPageLines(p)
+    for (let i = pLines.length - 1; i >= 0; i--) {
+      const pLine = pLines[i]
+      if (pLine.type === 'surah') {
+        const sid = pLine.surahId
+        const ch = chapters[sid]
+        return ch ? { id: sid, nameArabic: ch.nameArabic } : null
       }
-      prevSurahId = firstWord.surahId
     }
   }
-
-  return starts
+  return { id: 1, nameArabic: chapters[1].nameArabic }
 }
 
 const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress }: MushafPageProps) {
-  const { lines, metadata, loading, error } = useMushafPage(pageNumber)
-  const colorScheme = useColorScheme()
-  const isDark = colorScheme === 'dark'
-  const isSpecialPage = pageNumber === 1 || pageNumber === 2
+  const { fontName, isLoaded: v4Loaded } = useV4Font(pageNumber)
+  const pageLines = getPageLines(pageNumber)
 
-  if (loading) {
+  if (!v4Loaded) {
     return (
-      <MushafFrame isSpecialPage={isSpecialPage}>
+      <MushafFrame>
         <View style={styles.centered}>
-          <ActivityIndicator size="small" color={isDark ? '#8a7340' : '#c9a84c'} />
+          <ActivityIndicator size="small" color="#999" />
         </View>
       </MushafFrame>
     )
   }
 
-  if (error || !metadata) {
-    return (
-      <MushafFrame isSpecialPage={isSpecialPage}>
-        <View style={styles.centered}>
-          <Text style={[styles.errorText, { color: isDark ? '#a09880' : '#8a7a60' }]}>
-            {error ?? 'Failed to load page'}
-          </Text>
-        </View>
-      </MushafFrame>
-    )
-  }
-
-  const surahStarts = detectSurahStarts(lines)
-  // Enrich surah starts with names from metadata
-  for (const [lineIdx, info] of surahStarts) {
-    const surahMeta = metadata.surahs.find(s => s.id === info.surahId)
-    if (surahMeta) {
-      info.surahName = surahMeta.nameArabic
-    }
-  }
-
-  const primarySurah = metadata.surahs[0]
-
-  // Build rendered lines: some lines become banners or bismillah
+  const primarySurah = getSurahForPage(pageNumber)
   const renderedLines: React.ReactNode[] = []
-  let lineIndex = 0
 
-  for (let i = 0; i < lines.length; i++) {
-    const surahStart = surahStarts.get(i)
+  for (let i = 0; i < 15; i++) {
+    const line = pageLines[i]
 
-    if (surahStart) {
-      // Render surah banner
+    if (line.type === 'surah') {
+      const ch = chapters[line.surahId]
       renderedLines.push(
-        <MushafSurahBanner
-          key={`banner-${surahStart.surahId}`}
-          surahName={surahStart.surahName}
-        />
+        <View key={`line-${i}`} style={styles.lineSlot}>
+          <MushafSurahBanner
+            surahName={ch?.nameArabic ?? ''}
+            surahId={line.surahId}
+          />
+        </View>
       )
-
-      // Render bismillah (if applicable) on the next conceptual slot
-      if (surahStart.surahId !== 1 && surahStart.surahId !== 9) {
-        renderedLines.push(
-          <MushafBismillah key={`bismillah-${surahStart.surahId}`} surahId={surahStart.surahId} />
-        )
-      }
-
-      // Render the actual text line
+    } else if (line.type === 'basmallah') {
       renderedLines.push(
-        <MushafLine
-          key={`line-${i}`}
-          words={lines[i]}
-          isCentered={isSpecialPage}
-          onAyahLongPress={onAyahLongPress}
-        />
+        <View key={`line-${i}`} style={styles.lineSlot}>
+          <MushafBismillah surahId={0} />
+        </View>
+      )
+    } else if (line.type === 'ayah') {
+      // Matches QUL sample: getWords(first, last).join(' ')
+      const lineText = [...line.text].join(' ')
+      renderedLines.push(
+        <View key={`line-${i}`} style={[styles.lineSlot, line.centered && styles.lineCentered]}>
+          <Pressable
+            style={[styles.v4LineContainer, line.centered && styles.lineCentered]}
+            onLongPress={onAyahLongPress ? () => onAyahLongPress({ surahId: primarySurah?.id ?? 1, ayahNumber: 1 }) : undefined}
+          >
+            <Text style={[styles.v4Line, { fontFamily: fontName }]}>
+              {lineText}
+            </Text>
+          </Pressable>
+        </View>
       )
     } else {
       renderedLines.push(
-        <MushafLine
-          key={`line-${i}`}
-          words={lines[i]}
-          isCentered={isSpecialPage}
-          onAyahLongPress={onAyahLongPress}
-        />
+        <View key={`line-${i}`} style={styles.lineSlot} />
       )
     }
-
-    lineIndex++
   }
 
   return (
-    <MushafFrame isSpecialPage={isSpecialPage}>
-      <MushafPageHeader
-        surahName={primarySurah?.nameArabic ?? ''}
-        juz={metadata.juz}
-        pageNumber={pageNumber}
-      />
-      <View style={[styles.linesContainer, isSpecialPage && styles.specialLinesContainer]}>
-        {renderedLines}
+    <MushafFrame>
+      <View style={styles.content}>
+        <View style={{ height: HEADER_HEIGHT }}>
+          <MushafPageHeader
+            surahName={primarySurah?.nameArabic ?? ''}
+            surahId={primarySurah?.id}
+            juz={1}
+            pageNumber={pageNumber}
+          />
+        </View>
+        <View style={styles.linesContainer}>
+          {renderedLines}
+        </View>
+        <View style={[styles.footer, { height: FOOTER_HEIGHT }]}>
+          <Text style={styles.footerText}>{pageNumber}</Text>
+        </View>
       </View>
     </MushafFrame>
   )
@@ -141,19 +133,43 @@ export const MushafPage = React.memo(MushafPageInner)
 
 const styles = StyleSheet.create({
   centered: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  errorText: {
-    fontSize: 14,
-    fontFamily: 'KFGQPCHafs',
+  content: {
+    flex: 1,
   },
   linesContainer: {
     flex: 1,
+    paddingTop: LINES_PADDING_TOP,
+    paddingBottom: LINES_PADDING_BOTTOM,
+    paddingHorizontal: 12,
   },
-  specialLinesContainer: {
+  lineSlot: {
+    flex: 1,
+    overflow: 'visible',
+  },
+  lineCentered: {
+    alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 20,
+  },
+  v4LineContainer: {
+    flex: 1,
+  },
+  v4Line: {
+    fontSize: 22,
+    color: '#000',
+    writingDirection: 'rtl',
+    textAlign: 'right',
+    includeFontPadding: false,
+  },
+  footer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
+  footerText: {
+    fontSize: 12,
+    color: '#999',
   },
 })
