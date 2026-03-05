@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in-progress
-stopped_at: Completed 01.1-00-PLAN.md
-last_updated: "2026-03-05T04:49:34Z"
-last_activity: "2026-03-05 - Completed 01.1-00: Wave 0 test stubs for Madinah Mushaf"
+status: executing
+stopped_at: Completed 01.1-01-PLAN.md
+last_updated: "2026-03-05T04:51:00.000Z"
+last_activity: "2026-03-05 - Completed 01.1-01: Data foundation for mushaf page rendering"
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 13
-  completed_plans: 10
-  percent: 77
+  completed_plans: 12
+  percent: 85
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 01.1 of 5 (Madinah Mushaf Page View)
-Plan: 1 of 4 in current phase
+Plan: 2 of 4 in current phase
 Status: In Progress
-Last activity: 2026-03-05 - Completed 01.1-00: Wave 0 test stubs for Madinah Mushaf
+Last activity: 2026-03-05 - Completed 01.1-01: Data foundation for mushaf page rendering
 
-Progress: [███████░░░] 77%
+Progress: [█████████░] 85%
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Progress: [███████░░░] 77%
 | Phase 01 P08 | 2min | 1 tasks | 1 files |
 | Phase 01 P09 | 3min | 2 tasks | 3 files |
 | Phase 01.1 P00 | 2min | 1 tasks | 8 files |
+| Phase 01.1 P01 | 2min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,9 @@ Recent decisions affecting current work:
 - [Phase 01]: Use Quran.com API v4 for juz/hizb/rub/page metadata since quran-json lacks per-verse positional data
 - [Phase 01 P09]: Used UthmanicHafs1Ver18 from quran.com official repo as KFGQPCHafs -- same King Fahd Complex font, verified digitally signed
 - [Phase 01.1 P00]: Installed react-native-worklets as reanimated v4 peer dependency to fix jest babel transform errors
+- [Phase 01.1 P01]: Used zustand persist partialize to exclude _hasHydrated from AsyncStorage -- runtime-only state
+- [Phase 01.1 P01]: seedWords fetches from quran.com API v4 at runtime rather than bundling JSON -- reduces app bundle size
+- [Phase 01.1 P01]: Used --legacy-peer-deps for @gorhom/bottom-sheet due to React 19 peer dep conflict
 
 ### Pending Todos
 
@@ -114,6 +118,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-05T04:49:34Z
-Stopped at: Completed 01.1-00-PLAN.md
-Resume file: .planning/phases/01.1-madinah-mushaf-page-view/01.1-01-PLAN.md
+Last session: 2026-03-05T04:51:00Z
+Stopped at: Completed 01.1-01-PLAN.md
+Resume file: .planning/phases/01.1-madinah-mushaf-page-view/01.1-02-PLAN.md
