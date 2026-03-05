@@ -65,10 +65,11 @@ See: .planning/PROJECT.md
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 3 | Add page break indicators and replace mushaf header with standard surah header | 2026-03-05 | 0614531 | [3-add-page-break-indicators-and-replace-mu](./quick/3-add-page-break-indicators-and-replace-mu/) |
+| 4 | Add configurable reading options to layout selector | 2026-03-05 | 078a750 | [4-add-configurable-reading-options-to-layo](./quick/4-add-configurable-reading-options-to-layo/) |
 
 ### Last Session
 
-- **Stopped at:** Completed 07-04-PLAN.md
-- **Timestamp:** 2026-03-05T21:06:00Z
+- **Stopped at:** Completed quick task 4
+- **Timestamp:** 2026-03-05T22:16:00Z
 
-Last activity: 2026-03-05 - Completed quick task 3: Add page break indicators and replace mushaf header with standard surah header
+Last activity: 2026-03-05 - Completed quick task 4: Add configurable reading options to layout selector
