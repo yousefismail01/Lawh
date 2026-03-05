@@ -1,0 +1,117 @@
+import React from 'react'
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  useColorScheme,
+} from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { BlurView } from 'expo-blur'
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
+
+import { PageNavigator } from './PageNavigator'
+import { MicPlaceholderButton } from './MicPlaceholderButton'
+
+interface MushafFooterProps {
+  currentPage: number
+  onPageChange: (page: number) => void
+  onLayoutPress: () => void
+  onPopoverOpen?: () => void
+  onPopoverClose?: () => void
+}
+
+export const MushafFooter = React.memo(function MushafFooter({
+  currentPage,
+  onPageChange,
+  onLayoutPress,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onPopoverOpen: _onPopoverOpen,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onPopoverClose: _onPopoverClose,
+}: MushafFooterProps) {
+  const colorScheme = useColorScheme()
+  const isDark = colorScheme === 'dark'
+  const insets = useSafeAreaInsets()
+
+  const textColor = isDark ? '#e8e0d0' : '#1a1a1a'
+  const layoutIconColor = isDark ? '#c8a84e' : '#6b5c3e'
+  const borderColor = isDark ? 'rgba(200, 168, 78, 0.15)' : 'rgba(0, 0, 0, 0.08)'
+
+  return (
+    <Animated.View
+      entering={FadeIn.duration(200)}
+      exiting={FadeOut.duration(300)}
+      style={styles.wrapper}
+    >
+      <BlurView
+        intensity={80}
+        tint={isDark ? 'dark' : 'light'}
+        style={[styles.container, { paddingBottom: insets.bottom }]}
+      >
+        {/* Top row: layout icon | page number | mic button */}
+        <View style={[styles.topRow, { borderBottomColor: borderColor }]}>
+          <Pressable
+            onPress={onLayoutPress}
+            style={styles.layoutButton}
+            accessibilityLabel="Reading layout"
+            accessibilityRole="button"
+          >
+            <Text style={[styles.layoutIcon, { color: layoutIconColor }]}>
+              {'\u2630'}
+            </Text>
+          </Pressable>
+
+          <Text style={[styles.pageNumber, { color: textColor }]}>
+            {currentPage}
+          </Text>
+
+          <View style={styles.micContainer}>
+            <MicPlaceholderButton />
+          </View>
+        </View>
+
+        {/* Bottom row: page slider */}
+        <PageNavigator currentPage={currentPage} onPageChange={onPageChange} />
+      </BlurView>
+    </Animated.View>
+  )
+})
+
+const styles = StyleSheet.create({
+  wrapper: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  container: {
+    overflow: 'hidden',
+  },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  layoutButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  layoutIcon: {
+    fontSize: 22,
+  },
+  pageNumber: {
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  micContainer: {
+    position: 'relative',
+  },
+})

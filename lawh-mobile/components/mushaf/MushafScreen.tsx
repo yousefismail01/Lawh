@@ -10,11 +10,10 @@ import {
 import { StatusBar } from 'expo-status-bar'
 import { useFocusEffect } from 'expo-router'
 import PagerView from 'react-native-pager-view'
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { useChromeToggle } from '@/hooks/useChromeToggle'
 import { MushafPage, getSurahForPage, getPageJuzHizb } from './MushafPage'
-import { PageNavigator } from './PageNavigator'
+import { MushafFooter } from './MushafFooter'
 import { ChromeOverlay } from './ChromeOverlay'
 import { AyahActionSheet } from './AyahActionSheet'
 import { quranService } from '@/services/quranService'
@@ -226,15 +225,11 @@ export function MushafScreen() {
         )}
 
         {chromeVisible && (
-          <Animated.View
-            entering={FadeIn.duration(200)}
-            exiting={FadeOut.duration(300)}
-          >
-            <PageNavigator
-              currentPage={currentPage}
-              onPageChange={handlePageChange}
-            />
-          </Animated.View>
+          <MushafFooter
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+            onLayoutPress={() => {}}
+          />
         )}
 
         <AyahActionSheet

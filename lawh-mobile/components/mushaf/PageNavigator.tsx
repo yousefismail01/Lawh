@@ -54,13 +54,12 @@ export const PageNavigator = React.memo(function PageNavigator({
     })
   ).current
 
-  const bgColor = isDark ? 'rgba(28, 24, 18, 0.92)' : 'rgba(255, 255, 255, 0.95)'
   const trackColor = isDark ? '#3a3225' : '#e0e0e0'
   const thumbColor = isDark ? '#8a7340' : '#333'
   const textColor = isDark ? '#e8e0d0' : '#1a1a1a'
 
   return (
-    <View style={[styles.container, { backgroundColor: bgColor }]}>
+    <View style={styles.container}>
       <View
         style={[styles.sliderTrack, { backgroundColor: trackColor }]}
         onLayout={handleSliderLayout}
@@ -84,17 +83,10 @@ export const PageNavigator = React.memo(function PageNavigator({
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingBottom: 40,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 14,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#e0e0e0',
+    paddingVertical: 10,
   },
   sliderTrack: {
     flex: 1,
