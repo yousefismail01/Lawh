@@ -1,5 +1,5 @@
-import React from 'react'
-import { View, Text, Pressable, StyleSheet } from 'react-native'
+import React, { useCallback, useRef } from 'react'
+import { View, Text, StyleSheet, PanResponder, LayoutChangeEvent } from 'react-native'
 
 interface JuzIndexProps {
   onSelectJuz: (juz: number) => void
@@ -8,18 +8,49 @@ interface JuzIndexProps {
 
 function JuzIndexInner({ onSelectJuz, totalJuz = 30 }: JuzIndexProps) {
   const numbers = Array.from({ length: totalJuz }, (_, i) => i + 1)
+  const containerHeight = useRef(0)
+  const lastJuz = useRef(0)
+
+  const handleLayout = useCallback((e: LayoutChangeEvent) => {
+    containerHeight.current = e.nativeEvent.layout.height
+  }, [])
+
+  const juzFromY = useCallback((y: number) => {
+    const h = containerHeight.current
+    if (h <= 0) return 1
+    const clamped = Math.max(0, Math.min(y, h))
+    return Math.min(totalJuz, Math.max(1, Math.ceil((clamped / h) * totalJuz)))
+  }, [totalJuz])
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: (evt) => {
+        const juz = juzFromY(evt.nativeEvent.locationY)
+        lastJuz.current = juz
+        onSelectJuz(juz)
+      },
+      onPanResponderMove: (evt) => {
+        const juz = juzFromY(evt.nativeEvent.locationY)
+        if (juz !== lastJuz.current) {
+          lastJuz.current = juz
+          onSelectJuz(juz)
+        }
+      },
+    })
+  ).current
 
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      onLayout={handleLayout}
+      {...panResponder.panHandlers}
+    >
       {numbers.map((juz) => (
-        <Pressable
-          key={juz}
-          style={styles.item}
-          onPress={() => onSelectJuz(juz)}
-          hitSlop={{ top: 2, bottom: 2, left: 8, right: 8 }}
-        >
+        <View key={juz} style={styles.item}>
           <Text style={styles.number}>{juz}</Text>
-        </Pressable>
+        </View>
       ))}
     </View>
   )
