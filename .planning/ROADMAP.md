@@ -121,7 +121,7 @@ Phases execute in numeric order: 1 → 01.1 → 2 → 3 → 4 → 5 → 6
 | 3. Tajweed FSM and Session UI | 0/TBD | Not started | - |
 | 4. Hifz Tracker and SM-2 Engine | 0/TBD | Not started | - |
 | 5. Dashboard, Gamification, and Retention | 0/TBD | Not started | - |
-| 6. Mushaf Fullscreen Mode | 0/4 | Planning complete | - |
+| 6. Mushaf Fullscreen Mode | 1/4 | In progress | - |
 
 ### Phase 6: Mushaf fullscreen mode with tap-toggle UI, menu navigation, and surah glossary
 
@@ -138,7 +138,7 @@ Phases execute in numeric order: 1 → 01.1 → 2 → 3 → 4 → 5 → 6
 **Plans**: 4 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Route restructuring (tabs to Stack), useChromeToggle hook, PageNavigator controlled mode
+- [x] 06-01-PLAN.md — Route restructuring (tabs to Stack), useChromeToggle hook, PageNavigator controlled mode
 - [ ] 06-02-PLAN.md — Chrome overlay integration in MushafScreen (tap toggle, status bar, overlay icons)
 - [ ] 06-03-PLAN.md — Contents screen (surah glossary with juz groups) and Home Hub page
 - [ ] 06-04-PLAN.md — End-to-end visual verification checkpoint
