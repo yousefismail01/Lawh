@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, ActivityIndicator, Pressable } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { MushafFrame } from './MushafFrame'
@@ -8,6 +8,7 @@ import { MushafBismillah } from './MushafBismillah'
 import { useV4Font } from '@/hooks/useV4Font'
 import { getPageLines, chapters } from '@/lib/data/mushafData'
 import { getPageJuzHizb } from '@/lib/data/pageJuzHizb'
+import { quranService } from '@/services/quranService'
 
 // Gap between safe area and header — sized so chrome header never covers any content.
 // Chrome header = safeArea + ~52px. MushafPageHeader = ~32px.
@@ -57,6 +58,16 @@ const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, 
   const { fontName, isLoaded: v4Loaded } = useV4Font(pageNumber)
   const pageLines = getPageLines(pageNumber)
 
+  // Map line numbers (1-indexed from DB) to ayah info for long-press
+  const [lineAyahMap, setLineAyahMap] = useState<Map<number, { surahId: number; ayahNumber: number }>>(new Map())
+  useEffect(() => {
+    let cancelled = false
+    quranService.getLineAyahMap(pageNumber).then((map) => {
+      if (!cancelled) setLineAyahMap(map)
+    })
+    return () => { cancelled = true }
+  }, [pageNumber])
+
   if (!v4Loaded) {
     return (
       <MushafFrame>
@@ -97,7 +108,13 @@ const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, 
           <Pressable
             style={styles.v4LineContainer}
             onPress={onPress}
-            onLongPress={onAyahLongPress ? () => onAyahLongPress({ surahId: primarySurah?.id ?? 1, ayahNumber: 1 }) : undefined}
+            onLongPress={onAyahLongPress ? () => {
+              const lineInfo = lineAyahMap.get(i + 1)
+              onAyahLongPress({
+                surahId: lineInfo?.surahId ?? primarySurah?.id ?? 1,
+                ayahNumber: lineInfo?.ayahNumber ?? 1,
+              })
+            } : undefined}
           >
             <Text
               style={[

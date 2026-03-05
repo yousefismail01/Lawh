@@ -8,55 +8,35 @@ interface AyahAudioPlayerProps {
   ayahNumber: number
 }
 
-export const AyahAudioPlayer = React.memo(function AyahAudioPlayer({
-  surahId,
-  ayahNumber,
-}: AyahAudioPlayerProps) {
+/** Inner component — only rendered when we have a valid audio URL */
+function AyahAudioPlayerActive({ segment }: { segment: AyahAudioSegment }) {
   const colorScheme = useColorScheme()
   const isDark = colorScheme === 'dark'
 
-  const [segment, setSegment] = useState<AyahAudioSegment | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const hasStartedRef = useRef(false)
 
-  // Load segment data on mount
-  useEffect(() => {
-    let cancelled = false
-    getAyahAudioSegment(surahId, ayahNumber).then((seg) => {
-      if (!cancelled && seg) {
-        setSegment(seg)
-      }
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [surahId, ayahNumber])
-
-  const player = useAudioPlayer(segment?.audioUrl ?? undefined)
+  const player = useAudioPlayer(segment.audioUrl)
   const status = useAudioPlayerStatus(player)
 
-  // Calculate segment boundaries in seconds
-  const startSec = segment ? segment.startMs / 1000 : 0
-  const endSec = segment ? segment.endMs / 1000 : 0
+  const startSec = segment.startMs / 1000
+  const endSec = segment.endMs / 1000
   const segmentDuration = endSec - startSec
 
   // Monitor playback position - stop at end of ayah segment
   useEffect(() => {
-    if (!segment || !isPlaying) return
+    if (!isPlaying) return
     if (status.currentTime >= endSec) {
       player.pause()
       setIsPlaying(false)
     }
-  }, [status.currentTime, endSec, isPlaying, player, segment])
+  }, [status.currentTime, endSec, isPlaying, player])
 
   const handlePlayPause = useCallback(async () => {
-    if (!segment) return
-
     if (isPlaying) {
       player.pause()
       setIsPlaying(false)
     } else {
-      // Add 100ms buffer before start per research pitfall (seek precision)
       const seekTarget = Math.max(0, startSec - 0.1)
       if (!hasStartedRef.current || status.currentTime < startSec || status.currentTime >= endSec) {
         await player.seekTo(seekTarget)
@@ -65,9 +45,8 @@ export const AyahAudioPlayer = React.memo(function AyahAudioPlayer({
       player.play()
       setIsPlaying(true)
     }
-  }, [segment, isPlaying, player, startSec, endSec, status.currentTime])
+  }, [isPlaying, player, startSec, endSec, status.currentTime])
 
-  // Calculate progress within the ayah segment
   const elapsed = Math.max(0, Math.min(status.currentTime - startSec, segmentDuration))
   const progress = segmentDuration > 0 ? elapsed / segmentDuration : 0
 
@@ -81,14 +60,6 @@ export const AyahAudioPlayer = React.memo(function AyahAudioPlayer({
   const secondaryColor = isDark ? '#a09880' : '#6b5c3a'
   const trackBg = isDark ? '#3a3225' : '#d4c8a8'
   const fillColor = isDark ? '#c8a855' : '#8b7332'
-
-  if (!segment) {
-    return (
-      <View style={styles.container}>
-        <Text style={[styles.loadingText, { color: secondaryColor }]}>Loading audio...</Text>
-      </View>
-    )
-  }
 
   return (
     <View style={styles.container}>
@@ -113,6 +84,35 @@ export const AyahAudioPlayer = React.memo(function AyahAudioPlayer({
       </View>
     </View>
   )
+}
+
+export const AyahAudioPlayer = React.memo(function AyahAudioPlayer({
+  surahId,
+  ayahNumber,
+}: AyahAudioPlayerProps) {
+  const colorScheme = useColorScheme()
+  const isDark = colorScheme === 'dark'
+  const secondaryColor = isDark ? '#a09880' : '#6b5c3a'
+
+  const [segment, setSegment] = useState<AyahAudioSegment | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    getAyahAudioSegment(surahId, ayahNumber).then((seg) => {
+      if (!cancelled && seg) setSegment(seg)
+    })
+    return () => { cancelled = true }
+  }, [surahId, ayahNumber])
+
+  if (!segment) {
+    return (
+      <View style={styles.container}>
+        <Text style={[styles.loadingText, { color: secondaryColor }]}>Loading audio...</Text>
+      </View>
+    )
+  }
+
+  return <AyahAudioPlayerActive segment={segment} />
 })
 
 const styles = StyleSheet.create({

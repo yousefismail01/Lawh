@@ -95,6 +95,25 @@ export const quranService = {
     return null
   },
 
+  /** Returns a map from 1-indexed line number to {surahId, ayahNumber} for a page */
+  async getLineAyahMap(page: number, riwayah: Riwayah = DEFAULT_RIWAYAH): Promise<Map<number, { surahId: number; ayahNumber: number }>> {
+    const pageWords = await db.select({
+      lineNumber: words.lineNumber,
+      surahId: words.surahId,
+      ayahNumber: words.ayahNumber,
+    }).from(words)
+      .where(and(eq(words.pageNumber, page), eq(words.riwayah, riwayah), eq(words.charType, 'word')))
+      .orderBy(words.lineNumber, words.position)
+
+    const map = new Map<number, { surahId: number; ayahNumber: number }>()
+    for (const w of pageWords) {
+      if (!map.has(w.lineNumber)) {
+        map.set(w.lineNumber, { surahId: w.surahId, ayahNumber: w.ayahNumber })
+      }
+    }
+    return map
+  },
+
   async getAyahText(surahId: number, ayahNumber: number, riwayah: Riwayah = DEFAULT_RIWAYAH): Promise<string> {
     const pageWords = await db.select().from(words)
       .where(and(
