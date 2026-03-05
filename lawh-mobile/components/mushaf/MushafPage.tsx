@@ -9,9 +9,11 @@ import { useV4Font } from '@/hooks/useV4Font'
 import { getPageLines, chapters } from '@/lib/data/mushafData'
 import { getPageJuzHizb } from '@/lib/data/pageJuzHizb'
 
-// Gap between safe area and header — sized so chrome header never covers verses
-// Chrome header = safeArea + ~52px. Header row = ~32px. So gap >= 20.
-const TOP_GAP = 22
+// Gap between safe area and header — sized so chrome header never covers any content.
+// Chrome header = safeArea + ~52px. MushafPageHeader = ~32px.
+// Total reserved top = safeArea + TOP_GAP + 32. Must exceed safeArea + 52.
+// Extra 10px breathing room so first line (surah banner) has clearance.
+const TOP_GAP = 32
 // Footer height — sized so chrome footer (PageNavigator ~60px) never covers verses
 const BOTTOM_BUFFER = 64
 
