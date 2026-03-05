@@ -46,9 +46,9 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#c4b48a',
-    backgroundColor: '#f5edd5',
-    paddingBottom: 0, // safe area handled by parent
+    borderTopColor: '#e0e0e0',
+    backgroundColor: '#fff',
+    paddingBottom: 0,
   },
   tab: {
     flex: 1,
@@ -59,20 +59,20 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   tabActive: {
-    borderBottomColor: '#6b5c3a',
+    borderBottomColor: '#333',
   },
   tabText: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#9a8c6e',
+    color: '#999',
   },
   tabTextActive: {
-    color: '#6b5c3a',
+    color: '#333',
     fontWeight: '700',
   },
   comingSoon: {
     fontSize: 8,
-    color: '#b8a87a',
+    color: '#ccc',
     marginTop: 1,
   },
 })

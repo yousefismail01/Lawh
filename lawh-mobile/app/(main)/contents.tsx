@@ -109,7 +109,7 @@ export default function ContentsScreen() {
             <SectionList<JuzSection['data'][0], JuzSection>
               ref={sectionListRef}
               sections={sections}
-              keyExtractor={(item) => String(item.id)}
+              keyExtractor={(item, index) => `${item.id}-${index}`}
               stickySectionHeadersEnabled={false}
               renderSectionHeader={({ section }) => (
                 <JuzSectionHeader title={section.title} />
@@ -135,7 +135,7 @@ export default function ContentsScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#faf3e0',
+    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
@@ -151,12 +151,12 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     fontSize: 18,
-    color: '#6b5c3a',
+    color: '#333',
     marginRight: 4,
   },
   backText: {
     fontSize: 16,
-    color: '#6b5c3a',
+    color: '#333',
   },
   headerTitle: {
     fontSize: 18,
@@ -175,20 +175,20 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#c4b48a',
+    borderColor: '#ddd',
     backgroundColor: 'transparent',
   },
   togglePillActive: {
-    backgroundColor: '#6b5c3a',
-    borderColor: '#6b5c3a',
+    backgroundColor: '#333',
+    borderColor: '#333',
   },
   toggleText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#6b5c3a',
+    color: '#333',
   },
   toggleTextActive: {
-    color: '#faf3e0',
+    color: '#fff',
   },
   content: {
     flex: 1,
@@ -204,11 +204,11 @@ const styles = StyleSheet.create({
   comingSoonText: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#6b5c3a',
+    color: '#333',
     marginBottom: 8,
   },
   comingSoonSub: {
     fontSize: 14,
-    color: '#9a8c6e',
+    color: '#999',
   },
 })

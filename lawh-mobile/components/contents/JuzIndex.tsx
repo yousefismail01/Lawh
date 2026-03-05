@@ -34,9 +34,9 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 28,
-    backgroundColor: 'rgba(250, 243, 224, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderLeftWidth: StyleSheet.hairlineWidth,
-    borderLeftColor: '#c4b48a',
+    borderLeftColor: '#ddd',
     alignItems: 'center',
     justifyContent: 'space-evenly',
     paddingVertical: 4,
@@ -49,6 +49,6 @@ const styles = StyleSheet.create({
   number: {
     fontSize: 10,
     fontWeight: '600',
-    color: '#6b5c3a',
+    color: '#333',
   },
 })

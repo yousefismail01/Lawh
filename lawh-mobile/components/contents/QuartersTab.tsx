@@ -75,18 +75,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 16,
-    backgroundColor: '#f5edd5',
+    backgroundColor: '#f8f8f8',
   },
   line: {
     flex: 1,
     height: StyleSheet.hairlineWidth,
-    backgroundColor: '#c4b48a',
+    backgroundColor: '#ddd',
   },
   sectionTitle: {
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 1.5,
-    color: '#6b5c3a',
+    color: '#666',
     marginHorizontal: 12,
     textTransform: 'uppercase',
   },
@@ -95,17 +95,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 16,
-    backgroundColor: '#faf3e0',
+    backgroundColor: '#fff',
   },
   rowPressed: {
-    backgroundColor: '#f0e8d0',
+    backgroundColor: '#f5f5f5',
   },
   hizbBadge: {
     width: 28,
     height: 28,
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: '#c4b48a',
+    borderColor: '#ddd',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   hizbText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#6b5c3a',
+    color: '#333',
   },
   quarterInfo: {
     flex: 1,
@@ -126,11 +126,11 @@ const styles = StyleSheet.create({
   },
   quarterPage: {
     fontSize: 12,
-    color: '#6b5c3a',
+    color: '#888',
   },
   pageNum: {
     fontSize: 12,
-    color: '#6b5c3a',
+    color: '#888',
     marginLeft: 8,
   },
 })

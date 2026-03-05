@@ -36,18 +36,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 16,
-    paddingRight: 40, // leave room for JuzIndex on right edge
-    backgroundColor: '#faf3e0',
+    paddingRight: 40,
+    backgroundColor: '#fff',
   },
   pressed: {
-    backgroundColor: '#f0e8d0',
+    backgroundColor: '#f5f5f5',
   },
   numberCircle: {
     width: 28,
     height: 28,
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: '#c4b48a',
+    borderColor: '#ddd',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   numberText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#6b5c3a',
+    color: '#333',
   },
   info: {
     flex: 1,
@@ -68,11 +68,11 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 12,
-    color: '#6b5c3a',
+    color: '#888',
   },
   page: {
     fontSize: 12,
-    color: '#6b5c3a',
+    color: '#888',
     marginLeft: 8,
   },
 })

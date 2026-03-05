@@ -54,9 +54,9 @@ export const PageNavigator = React.memo(function PageNavigator({
     })
   ).current
 
-  const bgColor = isDark ? 'rgba(28, 24, 18, 0.92)' : 'rgba(250, 243, 224, 0.92)'
-  const trackColor = isDark ? '#3a3225' : '#d4c8a8'
-  const thumbColor = isDark ? '#8a7340' : '#c9a84c'
+  const bgColor = isDark ? 'rgba(28, 24, 18, 0.92)' : 'rgba(255, 255, 255, 0.95)'
+  const trackColor = isDark ? '#3a3225' : '#e0e0e0'
+  const thumbColor = isDark ? '#8a7340' : '#333'
   const textColor = isDark ? '#e8e0d0' : '#1a1a1a'
 
   return (
@@ -93,8 +93,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingTop: 10,
-    marginHorizontal: 8,
-    borderRadius: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#e0e0e0',
   },
   sliderTrack: {
     flex: 1,

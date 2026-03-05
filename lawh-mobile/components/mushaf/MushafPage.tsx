@@ -1,14 +1,13 @@
 import React from 'react'
 import { View, Text, StyleSheet, ActivityIndicator, Pressable } from 'react-native'
 import { MushafFrame } from './MushafFrame'
-import { MushafPageHeader } from './MushafPageHeader'
 import { MushafSurahBanner } from './MushafSurahBanner'
 import { MushafBismillah } from './MushafBismillah'
 import { useV4Font } from '@/hooks/useV4Font'
 import { getPageLines, chapters } from '@/lib/data/mushafData'
 import { getPageJuzHizb } from '@/lib/data/pageJuzHizb'
 
-const HEADER_HEIGHT = 30
+const TOP_BUFFER = 52
 const FOOTER_HEIGHT = 28
 
 interface MushafPageProps {
@@ -42,6 +41,8 @@ function getSurahForPage(page: number): { id: number; nameArabic: string; nameSi
   return { id: 1, nameArabic: chapters[1].nameArabic, nameSimple: chapters[1].nameSimple }
 }
 
+export { getSurahForPage, getPageJuzHizb }
+
 const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, onPress }: MushafPageProps) {
   const { fontName, isLoaded: v4Loaded } = useV4Font(pageNumber)
   const pageLines = getPageLines(pageNumber)
@@ -57,7 +58,6 @@ const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, 
   }
 
   const primarySurah = getSurahForPage(pageNumber)
-  const { juz, hizb, quarter } = getPageJuzHizb(pageNumber)
   const renderedLines: React.ReactNode[] = []
 
   for (let i = 0; i < 15; i++) {
@@ -80,7 +80,6 @@ const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, 
         </View>
       )
     } else if (line.type === 'ayah') {
-      // Per the spec: retrieve words and join them to form a single string
       const lineText = [...line.text].join(' ')
       renderedLines.push(
         <View key={`line-${i}`} style={styles.lineSlot}>
@@ -113,15 +112,7 @@ const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, 
   return (
     <MushafFrame>
       <Pressable style={styles.content} onPress={onPress}>
-        <View style={{ height: HEADER_HEIGHT }}>
-          <MushafPageHeader
-            surahNameSimple={primarySurah?.nameSimple ?? ''}
-            juz={juz}
-            hizb={hizb}
-            quarter={quarter}
-            pageNumber={pageNumber}
-          />
-        </View>
+        <View style={{ height: TOP_BUFFER }} />
         <View style={styles.linesContainer}>
           {renderedLines}
         </View>

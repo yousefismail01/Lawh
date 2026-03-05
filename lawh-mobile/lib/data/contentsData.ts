@@ -1,7 +1,7 @@
 // Data layer for Contents screen — juz-grouped surahs and hizb/quarter sections
 
 import { chapters } from '@/lib/data/mushafData'
-import { getPageJuzHizb, HIZB_START_PAGES, RUB_START_PAGES } from '@/lib/data/pageJuzHizb'
+import { getPageJuzHizb, JUZ_START_PAGES, HIZB_START_PAGES, RUB_START_PAGES } from '@/lib/data/pageJuzHizb'
 
 // Static surah start pages (1-indexed by surah number)
 // Extracted from QPC V4 mushafData by scanning for surah banner lines
@@ -45,40 +45,41 @@ let _cachedJuzSections: JuzSection[] | null = null
 export function buildJuzSections(): JuzSection[] {
   if (_cachedJuzSections) return _cachedJuzSections
 
-  const juzMap = new Map<number, SurahInfo[]>()
-
+  // Build surah page ranges: [startPage, endPage] for each surah
+  const surahRanges: { surah: SurahInfo; startPage: number; endPage: number }[] = []
   for (let id = 1; id <= 114; id++) {
     const ch = chapters[id]
     if (!ch) continue
-
-    const pageStart = SURAH_START_PAGES[id]
-    const { juz } = getPageJuzHizb(pageStart)
-
-    const surah: SurahInfo = {
-      id,
-      nameArabic: ch.nameArabic,
-      nameSimple: ch.nameSimple,
-      versesCount: ch.versesCount,
-      revelationPlace: ch.revelationPlace,
-      pageStart,
-    }
-
-    const existing = juzMap.get(juz)
-    if (existing) {
-      existing.push(surah)
-    } else {
-      juzMap.set(juz, [surah])
-    }
+    const startPage = SURAH_START_PAGES[id]
+    const endPage = id < 114 ? SURAH_START_PAGES[id + 1] - 1 : 604
+    surahRanges.push({
+      surah: {
+        id,
+        nameArabic: ch.nameArabic,
+        nameSimple: ch.nameSimple,
+        versesCount: ch.versesCount,
+        revelationPlace: ch.revelationPlace,
+        pageStart: startPage,
+      },
+      startPage,
+      endPage,
+    })
   }
 
+  // For each juz, find all surahs that overlap its page range
   const sections: JuzSection[] = []
   for (let juz = 1; juz <= 30; juz++) {
-    const data = juzMap.get(juz) ?? []
-    sections.push({
-      title: `PART ${juz}`,
-      juz,
-      data,
-    })
+    const juzStart = JUZ_START_PAGES[juz - 1]
+    const juzEnd = juz < 30 ? JUZ_START_PAGES[juz] - 1 : 604
+
+    const data: SurahInfo[] = []
+    for (const { surah, startPage, endPage } of surahRanges) {
+      if (startPage <= juzEnd && endPage >= juzStart) {
+        data.push(surah)
+      }
+    }
+
+    sections.push({ title: `PART ${juz}`, juz, data })
   }
 
   _cachedJuzSections = sections

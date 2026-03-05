@@ -4,7 +4,6 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
-  useColorScheme,
   Dimensions,
   ViewToken,
 } from 'react-native'
@@ -14,7 +13,7 @@ import PagerView from 'react-native-pager-view'
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { useChromeToggle } from '@/hooks/useChromeToggle'
-import { MushafPage } from './MushafPage'
+import { MushafPage, getSurahForPage, getPageJuzHizb } from './MushafPage'
 import { PageNavigator } from './PageNavigator'
 import { ChromeOverlay } from './ChromeOverlay'
 import { AyahActionSheet } from './AyahActionSheet'
@@ -22,7 +21,7 @@ import { quranService } from '@/services/quranService'
 import { preloadPageRange } from '@/lib/fonts/qpcV4FontManager'
 
 const TOTAL_PAGES = 604
-const PAGE_RANGE = 2 // Render current +/- 2 pages in PagerView
+const PAGE_RANGE = 2
 const { height: SCREEN_HEIGHT } = Dimensions.get('window')
 
 interface SelectedAyah {
@@ -32,9 +31,6 @@ interface SelectedAyah {
 }
 
 export function MushafScreen() {
-  const colorScheme = useColorScheme()
-  const isDark = colorScheme === 'dark'
-
   const navigationMode = useSettingsStore((s) => s.navigationMode)
   const lastReadPage = useSettingsStore((s) => s.lastReadPage)
   const hasHydrated = useSettingsStore((s) => s._hasHydrated)
@@ -48,12 +44,10 @@ export function MushafScreen() {
   const pagerRef = useRef<PagerView>(null)
   const flatListRef = useRef<FlatList>(null)
 
-  // Preload V4 fonts for nearby pages (one beyond render buffer)
   useEffect(() => {
     preloadPageRange(currentPage, PAGE_RANGE + 1)
   }, [currentPage])
 
-  // Sync currentPage with lastReadPage after hydration
   const initialPageSet = useRef(false)
   if (hasHydrated && !initialPageSet.current) {
     initialPageSet.current = true
@@ -62,8 +56,6 @@ export function MushafScreen() {
     }
   }
 
-  // Re-sync currentPage with lastReadPage when screen regains focus
-  // (e.g., after navigating back from Contents screen which sets lastReadPage)
   useFocusEffect(
     useCallback(() => {
       const stored = useSettingsStore.getState().lastReadPage
@@ -128,7 +120,13 @@ export function MushafScreen() {
     setSelectedAyah(null)
   }, [])
 
-  // FlatList helpers for vertical mode
+  // Derive surah info for current page
+  const pageInfo = useMemo(() => {
+    const surah = getSurahForPage(currentPage)
+    const { juz, hizb } = getPageJuzHizb(currentPage)
+    return { surahName: surah?.nameSimple ?? '', juz, hizb }
+  }, [currentPage])
+
   const pageData = useMemo(
     () => Array.from({ length: TOTAL_PAGES }, (_, i) => i + 1),
     []
@@ -219,7 +217,12 @@ export function MushafScreen() {
         )}
 
         {chromeVisible && (
-          <ChromeOverlay />
+          <ChromeOverlay
+            surahName={pageInfo.surahName}
+            pageNumber={currentPage}
+            juz={pageInfo.juz}
+            hizb={pageInfo.hizb}
+          />
         )}
 
         {chromeVisible && (

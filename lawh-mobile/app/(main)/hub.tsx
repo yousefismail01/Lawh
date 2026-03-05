@@ -77,7 +77,7 @@ export default function HubScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#faf3e0',
+    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
@@ -91,12 +91,12 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     fontSize: 18,
-    color: '#6b5c3a',
+    color: '#333',
     marginRight: 4,
   },
   backText: {
     fontSize: 16,
-    color: '#6b5c3a',
+    color: '#333',
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -114,11 +114,11 @@ const styles = StyleSheet.create({
   },
   appSubtitle: {
     fontSize: 14,
-    color: '#6b5c3a',
+    color: '#888',
     marginTop: 4,
   },
   mushafCard: {
-    backgroundColor: '#6b5c3a',
+    backgroundColor: '#333',
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
@@ -127,12 +127,12 @@ const styles = StyleSheet.create({
   mushafCardTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#faf3e0',
+    color: '#fff',
     marginBottom: 4,
   },
   mushafCardSub: {
     fontSize: 13,
-    color: '#d4c8a8',
+    color: '#ccc',
   },
   grid: {
     flexDirection: 'row',
@@ -141,11 +141,11 @@ const styles = StyleSheet.create({
   },
   card: {
     width: CARD_WIDTH,
-    backgroundColor: '#f5edd5',
+    backgroundColor: '#f5f5f5',
     borderRadius: 14,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#e5d9b8',
+    borderColor: '#e8e8e8',
   },
   cardPressed: {
     opacity: 0.8,
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#6b5c3a',
+    backgroundColor: '#333',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   symbolText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#faf3e0',
+    color: '#fff',
   },
   cardTitle: {
     fontSize: 16,
@@ -172,6 +172,6 @@ const styles = StyleSheet.create({
   },
   cardSubtitle: {
     fontSize: 12,
-    color: '#6b5c3a',
+    color: '#888',
   },
 })

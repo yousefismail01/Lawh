@@ -1,48 +1,71 @@
 import React from 'react'
-import { Pressable, StyleSheet, Text, useColorScheme } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 
+interface ChromeOverlayProps {
+  surahName: string
+  pageNumber: number
+  juz: number
+  hizb: number
+}
+
 /**
- * Overlay icons for chrome-visible state in the Mushaf screen.
- * Renders hamburger (back to hub) and glossary (contents) icons,
- * positioned absolutely at top-left over the MushafPageHeader area.
- * Uses fade animation for enter/exit.
+ * Chrome header overlay: ≡ menu | surah info pill | bookmark + settings icons.
+ * Appears on tap, fades in/out with the chrome toggle.
  */
-export const ChromeOverlay = React.memo(function ChromeOverlay() {
+export const ChromeOverlay = React.memo(function ChromeOverlay({
+  surahName,
+  pageNumber,
+  juz,
+  hizb,
+}: ChromeOverlayProps) {
   const insets = useSafeAreaInsets()
   const router = useRouter()
-  const colorScheme = useColorScheme()
-  const isDark = colorScheme === 'dark'
-
-  const iconColor = isDark ? '#a09880' : '#6b5c3a'
-  const pillBg = isDark ? 'rgba(28, 24, 18, 0.75)' : 'rgba(250, 243, 224, 0.8)'
 
   return (
     <Animated.View
       entering={FadeIn.duration(200)}
       exiting={FadeOut.duration(300)}
-      style={[styles.container, { top: insets.top + 4 }]}
+      style={[styles.container, { paddingTop: insets.top + 4 }]}
       pointerEvents="box-none"
     >
-      <Animated.View style={[styles.pill, { backgroundColor: pillBg }]}>
+      <View style={styles.bar}>
+        {/* Menu icon */}
         <Pressable
           onPress={() => router.push('/(main)/hub')}
           hitSlop={12}
           style={styles.iconButton}
         >
-          <Text style={[styles.iconText, { color: iconColor }]}>{'\u2630'}</Text>
+          <Text style={styles.menuIcon}>{'\u2630'}</Text>
         </Pressable>
 
+        {/* Surah info pill */}
         <Pressable
           onPress={() => router.push('/(main)/contents')}
-          hitSlop={12}
-          style={styles.iconButton}
+          style={styles.infoPill}
         >
-          <Text style={[styles.iconText, { color: iconColor }]}>{'\u2263'}</Text>
+          <Text style={styles.surahName}>{surahName}</Text>
+          <Text style={styles.pageInfo}>
+            Page {pageNumber} | Juz {juz} | Hizb {hizb}
+          </Text>
         </Pressable>
-      </Animated.View>
+
+        {/* Right icons */}
+        <View style={styles.rightIcons}>
+          <Pressable hitSlop={12} style={styles.iconButton}>
+            <Text style={styles.icon}>{'\uD83D\uDD16'}</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => router.push('/(main)/settings')}
+            hitSlop={12}
+            style={styles.iconButton}
+          >
+            <Text style={styles.icon}>{'\u2699'}</Text>
+          </Pressable>
+        </View>
+      </View>
     </Animated.View>
   )
 })
@@ -50,23 +73,55 @@ export const ChromeOverlay = React.memo(function ChromeOverlay() {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    left: 8,
+    top: 0,
+    left: 0,
+    right: 0,
     zIndex: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#e0e0e0',
   },
-  pill: {
+  bar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    borderRadius: 16,
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingBottom: 8,
+    gap: 10,
   },
   iconButton: {
     justifyContent: 'center',
     alignItems: 'center',
+    width: 32,
+    height: 32,
   },
-  iconText: {
-    fontSize: 20,
-    lineHeight: 24,
+  menuIcon: {
+    fontSize: 22,
+    color: '#333',
+  },
+  infoPill: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+  },
+  surahName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+  pageInfo: {
+    fontSize: 11,
+    color: '#888',
+    marginTop: 1,
+  },
+  rightIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  icon: {
+    fontSize: 18,
+    color: '#333',
   },
 })
