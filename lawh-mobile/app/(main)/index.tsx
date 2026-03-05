@@ -1,5 +1,5 @@
 import { MushafScreen } from '@/components/mushaf/MushafScreen'
 
-export default function HomeTab() {
+export default function MushafHome() {
   return <MushafScreen />
 }

@@ -27,7 +27,7 @@ function AuthGate() {
     if (!session && !inAuthGroup) {
       router.replace('/auth/sign-in')
     } else if (session && inAuthGroup) {
-      router.replace('/(tabs)/')
+      router.replace('/(main)')
     }
   }, [session, loading, segments])
 
@@ -160,7 +160,7 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <AuthGate />
         <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(main)" />
           <Stack.Screen name="auth" />
           <Stack.Screen name="surah/[id]" />
         </Stack>
