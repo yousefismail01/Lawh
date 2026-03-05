@@ -59,7 +59,7 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 01.1-00-PLAN.md — Wave 0: test stub files for all 6 requirements (Nyquist compliance)
+- [x] 01.1-00-PLAN.md — Wave 0: test stub files for all 6 requirements (Nyquist compliance)
 - [ ] 01.1-01-PLAN.md — Data foundation: words table, seed script, quranService extension, persisted settings
 - [ ] 01.1-02-PLAN.md — Mushaf rendering components: MushafPage, MushafLine, ornamental elements, useMushafPage hook
 - [ ] 01.1-03-PLAN.md — Mushaf screen assembly: PagerView navigation, page slider, surah list modal, long-press actions, Home tab replacement
@@ -116,7 +116,7 @@ Phases execute in numeric order: 1 → 01.1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 9/9 | Complete | 2026-03-04 |
-| 01.1. Madinah Mushaf Page View | 0/4 | Not started | - |
+| 01.1. Madinah Mushaf Page View | 1/4 | In progress | - |
 | 2. Audio Pipeline and Core AI | 0/TBD | Not started | - |
 | 3. Tajweed FSM and Session UI | 0/TBD | Not started | - |
 | 4. Hifz Tracker and SM-2 Engine | 0/TBD | Not started | - |
