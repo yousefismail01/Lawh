@@ -1,63 +1,28 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useRef } from 'react'
 import {
   View,
   Text,
   StyleSheet,
-  Pressable,
   useColorScheme,
-  Animated,
   PanResponder,
   LayoutChangeEvent,
 } from 'react-native'
-// Use Text-based icon to avoid @expo/vector-icons resolution issues
 
 const TOTAL_PAGES = 604
-const AUTO_HIDE_DELAY = 3000
 
 interface PageNavigatorProps {
   currentPage: number
   onPageChange: (page: number) => void
-  onOpenSurahList: () => void
 }
 
 export const PageNavigator = React.memo(function PageNavigator({
   currentPage,
   onPageChange,
-  onOpenSurahList,
 }: PageNavigatorProps) {
   const colorScheme = useColorScheme()
   const isDark = colorScheme === 'dark'
 
-  const [visible, setVisible] = useState(true)
-  const opacity = useRef(new Animated.Value(1)).current
-  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const sliderWidth = useRef(0)
-
-  const resetHideTimer = useCallback(() => {
-    if (hideTimer.current) clearTimeout(hideTimer.current)
-    setVisible(true)
-    Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }).start()
-    hideTimer.current = setTimeout(() => {
-      Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
-        setVisible(false)
-      })
-    }, AUTO_HIDE_DELAY)
-  }, [opacity])
-
-  useEffect(() => {
-    resetHideTimer()
-    return () => {
-      if (hideTimer.current) clearTimeout(hideTimer.current)
-    }
-  }, [currentPage, resetHideTimer])
-
-  const handleTap = useCallback(() => {
-    if (!visible) {
-      setVisible(true)
-      Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }).start()
-    }
-    resetHideTimer()
-  }, [visible, opacity, resetHideTimer])
 
   const handleSliderLayout = useCallback((e: LayoutChangeEvent) => {
     sliderWidth.current = e.nativeEvent.layout.width
@@ -72,7 +37,6 @@ export const PageNavigator = React.memo(function PageNavigator({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (evt) => {
-        resetHideTimer()
         const x = evt.nativeEvent.locationX
         const fraction = x / (sliderWidth.current || 1)
         // RTL: left = 604, right = 1
@@ -94,56 +58,43 @@ export const PageNavigator = React.memo(function PageNavigator({
   const trackColor = isDark ? '#3a3225' : '#d4c8a8'
   const thumbColor = isDark ? '#8a7340' : '#c9a84c'
   const textColor = isDark ? '#e8e0d0' : '#1a1a1a'
-  const iconColor = isDark ? '#a09880' : '#6b5c3a'
 
   return (
-    <Pressable onPress={handleTap} style={styles.touchArea}>
-      <Animated.View style={[styles.container, { backgroundColor: bgColor, opacity }]}>
-        <Pressable onPress={onOpenSurahList} style={styles.iconButton} hitSlop={12}>
-          <Text style={{ fontSize: 16, color: iconColor, fontWeight: '700' }}>&#x2630;</Text>
-        </Pressable>
-
+    <View style={[styles.container, { backgroundColor: bgColor }]}>
+      <View
+        style={[styles.sliderTrack, { backgroundColor: trackColor }]}
+        onLayout={handleSliderLayout}
+        {...panResponder.panHandlers}
+      >
         <View
-          style={[styles.sliderTrack, { backgroundColor: trackColor }]}
-          onLayout={handleSliderLayout}
-          {...panResponder.panHandlers}
-        >
-          <View
-            style={[
-              styles.sliderThumb,
-              {
-                backgroundColor: thumbColor,
-                left: `${sliderFraction * 100}%`,
-              },
-            ]}
-          />
-        </View>
+          style={[
+            styles.sliderThumb,
+            {
+              backgroundColor: thumbColor,
+              left: `${sliderFraction * 100}%`,
+            },
+          ]}
+        />
+      </View>
 
-        <Text style={[styles.pageNumber, { color: textColor }]}>{currentPage}</Text>
-      </Animated.View>
-    </Pressable>
+      <Text style={[styles.pageNumber, { color: textColor }]}>{currentPage}</Text>
+    </View>
   )
 })
 
 const styles = StyleSheet.create({
-  touchArea: {
+  container: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     paddingBottom: 30,
-  },
-  container: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingTop: 10,
     marginHorizontal: 8,
     borderRadius: 12,
-  },
-  iconButton: {
-    padding: 4,
-    marginRight: 10,
   },
   sliderTrack: {
     flex: 1,

@@ -8,6 +8,7 @@ import {
   Dimensions,
   ViewToken,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import PagerView from 'react-native-pager-view'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { MushafPage } from './MushafPage'
@@ -30,6 +31,7 @@ interface SelectedAyah {
 export function MushafScreen() {
   const colorScheme = useColorScheme()
   const isDark = colorScheme === 'dark'
+  const insets = useSafeAreaInsets()
 
   const navigationMode = useSettingsStore((s) => s.navigationMode)
   const lastReadPage = useSettingsStore((s) => s.lastReadPage)
@@ -78,10 +80,6 @@ export function MushafScreen() {
     },
     [navigationMode, setLastReadPage]
   )
-
-  const handleOpenSurahList = useCallback(() => {
-    setSurahListVisible(true)
-  }, [])
 
   const handleCloseSurahList = useCallback(() => {
     setSurahListVisible(false)
@@ -154,7 +152,7 @@ export function MushafScreen() {
   }
 
   return (
-    <View style={[styles.root, { backgroundColor: '#fff' }]}>
+    <View style={[styles.root, { backgroundColor: '#fff', paddingTop: insets.top }]}>
         {navigationMode === 'horizontal' ? (
           <PagerView
             ref={pagerRef}
@@ -207,7 +205,6 @@ export function MushafScreen() {
         <PageNavigator
           currentPage={currentPage}
           onPageChange={handlePageChange}
-          onOpenSurahList={handleOpenSurahList}
         />
 
         <SurahListModal
