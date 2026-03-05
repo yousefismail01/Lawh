@@ -75,7 +75,9 @@ export function buildJuzSections(): JuzSection[] {
     const data: SurahInfo[] = []
     for (const { surah, startPage, endPage } of surahRanges) {
       if (startPage <= juzEnd && endPage >= juzStart) {
-        data.push(surah)
+        // If surah starts before this juz, navigate to the juz start page instead
+        const navPage = startPage < juzStart ? juzStart : startPage
+        data.push({ ...surah, pageStart: navPage })
       }
     }
 
