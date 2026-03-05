@@ -24,3 +24,15 @@ export const ayahs = sqliteTable('ayahs', {
 }, (t) => ({
   uniq: unique().on(t.surahId, t.ayahNumber, t.riwayah),
 }))
+
+export const words = sqliteTable('words', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  surahId: integer('surah_id').notNull(),
+  ayahNumber: integer('ayah_number').notNull(),
+  riwayah: text('riwayah').notNull().default('hafs'),
+  position: integer('position').notNull(),
+  pageNumber: integer('page_number').notNull(),
+  lineNumber: integer('line_number').notNull(),
+  textUthmani: text('text_uthmani').notNull(),
+  charType: text('char_type').notNull(), // 'word' | 'end'
+})
