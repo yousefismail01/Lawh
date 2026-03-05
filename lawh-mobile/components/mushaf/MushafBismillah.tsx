@@ -1,28 +1,19 @@
 import React from 'react'
-import { View, Text, StyleSheet, useColorScheme } from 'react-native'
-
-const MUSHAF_FONT_SIZE = 20
-const LINE_HEIGHT = MUSHAF_FONT_SIZE * 2
-const BISMILLAH_TEXT = '\u0628\u0650\u0633\u0652\u0645\u0650 \u0627\u0644\u0644\u0651\u064E\u0647\u0650 \u0627\u0644\u0631\u0651\u064E\u062D\u0652\u0645\u064E\u0670\u0646\u0650 \u0627\u0644\u0631\u0651\u064E\u062D\u0650\u064A\u0645\u0650'
+import { View, Text, StyleSheet } from 'react-native'
 
 interface MushafBismillahProps {
   surahId: number
 }
 
-export const MushafBismillah = React.memo(function MushafBismillah({ surahId }: MushafBismillahProps) {
-  const colorScheme = useColorScheme()
-  const isDark = colorScheme === 'dark'
-
-  // Al-Fatiha (surah 1): bismillah is part of ayah 1, not a separate element
-  // At-Tawbah (surah 9): no bismillah
-  if (surahId === 1 || surahId === 9) {
-    return null
-  }
-
+export const MushafBismillah = React.memo(function MushafBismillah(_props: MushafBismillahProps) {
   return (
     <View style={styles.container}>
-      <Text style={[styles.text, { color: isDark ? '#e8e0d0' : '#1a1a1a' }]}>
-        {BISMILLAH_TEXT}
+      <Text
+        style={styles.bismillah}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+      >
+        bismillah
       </Text>
     </View>
   )
@@ -30,15 +21,15 @@ export const MushafBismillah = React.memo(function MushafBismillah({ surahId }: 
 
 const styles = StyleSheet.create({
   container: {
-    height: LINE_HEIGHT,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 0,
   },
-  text: {
-    fontFamily: 'KFGQPCHafs',
-    fontSize: MUSHAF_FONT_SIZE - 2,
-    lineHeight: LINE_HEIGHT,
-    writingDirection: 'rtl',
+  bismillah: {
+    fontFamily: 'QuranCommon',
+    fontSize: 40,
+    color: '#000',
     textAlign: 'center',
     includeFontPadding: false,
   },

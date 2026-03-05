@@ -1,51 +1,82 @@
 import React from 'react'
-import { View, Text, StyleSheet, useColorScheme } from 'react-native'
-
-const MUSHAF_FONT_SIZE = 20
-const LINE_HEIGHT = MUSHAF_FONT_SIZE * 2
+import { View, Text, StyleSheet } from 'react-native'
 
 interface MushafSurahBannerProps {
   surahName: string
+  surahId?: number
 }
 
-export const MushafSurahBanner = React.memo(function MushafSurahBanner({ surahName }: MushafSurahBannerProps) {
-  const colorScheme = useColorScheme()
-  const isDark = colorScheme === 'dark'
+function surahNameLigature(surahId: number): string {
+  return `surah${String(surahId).padStart(3, '0')}`
+}
 
+export const MushafSurahBanner = React.memo(function MushafSurahBanner({ surahName, surahId }: MushafSurahBannerProps) {
   return (
-    <View
-      style={[
-        styles.banner,
-        {
-          backgroundColor: isDark ? '#3a2f1f' : '#f5e6c8',
-          borderColor: isDark ? '#8a7340' : '#c9a84c',
-        },
-      ]}
-    >
+    <View style={styles.container}>
+      {/* Banner ornament from quran-common font using "header" ligature */}
       <Text
-        style={[
-          styles.surahName,
-          { color: isDark ? '#e8e0d0' : '#1a1a1a' },
-        ]}
+        style={styles.bannerOrnament}
+        numberOfLines={1}
+        adjustsFontSizeToFit
       >
-        {surahName}
+        header
       </Text>
+      {/* Surah name overlaid on the banner */}
+      <View style={styles.nameOverlay}>
+        <Text style={styles.surahLabel}>سُورَةُ</Text>
+        {surahId ? (
+          <Text style={styles.surahNameV4}>
+            {surahNameLigature(surahId)}
+          </Text>
+        ) : (
+          <Text style={styles.surahNameFallback}>
+            {surahName}
+          </Text>
+        )}
+      </View>
     </View>
   )
 })
 
 const styles = StyleSheet.create({
-  banner: {
-    height: LINE_HEIGHT,
-    borderWidth: 1.5,
-    borderRadius: 8,
+  container: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 2,
+    marginHorizontal: 0,
   },
-  surahName: {
+  bannerOrnament: {
+    fontFamily: 'QuranCommon',
+    fontSize: 60,
+    color: '#000',
+    textAlign: 'center',
+    includeFontPadding: false,
+  },
+  nameOverlay: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'column',
+  },
+  surahLabel: {
     fontFamily: 'KFGQPCHafs',
-    fontSize: MUSHAF_FONT_SIZE + 2,
+    fontSize: 10,
+    color: '#2a4a2a',
+    textAlign: 'center',
+    includeFontPadding: false,
+    marginBottom: -4,
+  },
+  surahNameV4: {
+    fontFamily: 'SurahNameV4',
+    fontSize: 40,
+    color: '#000',
+    textAlign: 'center',
+    includeFontPadding: false,
+  },
+  surahNameFallback: {
+    fontFamily: 'KFGQPCHafs',
+    fontSize: 20,
+    color: '#2a4a2a',
     writingDirection: 'rtl',
     textAlign: 'center',
     includeFontPadding: false,

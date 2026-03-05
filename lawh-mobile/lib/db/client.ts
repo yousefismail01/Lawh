@@ -14,8 +14,11 @@ sqlite.execSync(`
     name_transliteration TEXT NOT NULL,
     name_english TEXT NOT NULL,
     ayah_count INTEGER NOT NULL,
-    juz_start INTEGER NOT NULL,
-    revelation_type TEXT NOT NULL
+    revelation_type TEXT NOT NULL,
+    revelation_order INTEGER NOT NULL DEFAULT 0,
+    page_start INTEGER NOT NULL DEFAULT 0,
+    page_end INTEGER NOT NULL DEFAULT 0,
+    bismillah_pre INTEGER NOT NULL DEFAULT 1
   );
 
   CREATE TABLE IF NOT EXISTS ayahs (
@@ -41,8 +44,17 @@ sqlite.execSync(`
     page_number INTEGER NOT NULL,
     line_number INTEGER NOT NULL,
     text_uthmani TEXT NOT NULL,
+    code_v4 TEXT,
     char_type TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS seed_metadata (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
   );
 `)
 
 export const db = drizzle(sqlite, { schema })
+
+/** Raw sqlite handle for DDL operations (e.g. dropping tables during migration) */
+export { sqlite }

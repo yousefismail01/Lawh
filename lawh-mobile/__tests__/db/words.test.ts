@@ -1,13 +1,12 @@
 /**
- * Test stubs for MUSH-01: Word schema and seeding
- * Wave 0 — stubs only, filled in by Plan 01 executor
+ * Test stubs for word schema — words are now seeded via seedFromQul in seed.ts
  */
 
 describe('words table schema', () => {
   it.todo(
     'words table has required columns: surahId, ayahNumber, riwayah, position, pageNumber, lineNumber, textUthmani, charType'
   )
-  it.todo('seedWords inserts word records into the database')
-  it.todo('seedWords skips seeding if words already exist')
-  it.todo('seedWords reports progress during seeding')
+  it.todo('seedFromQul inserts word records into the database')
+  it.todo('seedFromQul skips seeding if already seeded from QUL')
+  it.todo('seedFromQul reports progress during seeding')
 })

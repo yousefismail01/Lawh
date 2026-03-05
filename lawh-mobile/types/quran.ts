@@ -6,8 +6,11 @@ export interface Surah {
   nameTransliteration: string
   nameEnglish: string
   ayahCount: number
-  juzStart: number
   revelationType: 'Meccan' | 'Medinan'
+  revelationOrder: number
+  pageStart: number
+  pageEnd: number
+  bismillahPre: boolean
 }
 
 export interface Ayah {

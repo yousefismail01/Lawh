@@ -1,65 +1,62 @@
 import React from 'react'
-import { View, Text, StyleSheet, useColorScheme } from 'react-native'
+import { View, Text, StyleSheet } from 'react-native'
 
 interface MushafPageHeaderProps {
   surahName: string
+  surahId?: number
   juz: number
   pageNumber: number
 }
 
+function surahNameLigature(surahId: number): string {
+  return `surah${String(surahId).padStart(3, '0')}`
+}
+
 export const MushafPageHeader = React.memo(function MushafPageHeader({
   surahName,
+  surahId,
   juz,
   pageNumber,
 }: MushafPageHeaderProps) {
-  const colorScheme = useColorScheme()
-  const isDark = colorScheme === 'dark'
-  const textColor = isDark ? '#a09880' : '#8a7a60'
-  const separatorColor = isDark ? '#3a3020' : '#d4c5a0'
-
   return (
-    <View style={styles.container}>
-      <View style={styles.row}>
-        <Text style={[styles.text, styles.side, { color: textColor }]}>
-          {'\u0627\u0644\u062C\u0632\u0621 {juz}'.replace('{juz}', String(juz))}
+    <View style={styles.wrapper}>
+      <View style={styles.container}>
+        <Text style={styles.surahNameV4}>
+          {surahId ? surahNameLigature(surahId) : surahName}
         </Text>
-        <Text style={[styles.text, styles.center, { color: textColor }]}>
-          {pageNumber}
-        </Text>
-        <Text style={[styles.text, styles.side, { color: textColor, writingDirection: 'rtl' }]}>
-          {surahName}
+        <Text style={styles.headerText}>
+          الجزء {juz}
         </Text>
       </View>
-      <View style={[styles.separator, { backgroundColor: separatorColor }]} />
+      <View style={styles.separator} />
     </View>
   )
 })
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 8,
-    paddingTop: 6,
-    paddingBottom: 4,
+  wrapper: {
+    paddingBottom: 2,
   },
-  row: {
+  container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingBottom: 4,
+    paddingHorizontal: 8,
   },
-  text: {
+  headerText: {
     fontSize: 12,
-    fontFamily: 'KFGQPCHafs',
+    fontWeight: '400',
+    color: '#999',
+  },
+  surahNameV4: {
+    fontFamily: 'SurahNameV4',
+    fontSize: 28,
+    color: '#000',
     includeFontPadding: false,
   },
-  side: {
-    flex: 1,
-  },
-  center: {
-    textAlign: 'center',
-    flex: 1,
-  },
   separator: {
-    height: StyleSheet.hairlineWidth,
-    marginTop: 4,
+    height: 0.5,
+    backgroundColor: '#e0e0e0',
   },
 })

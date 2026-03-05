@@ -7,6 +7,7 @@ export interface Word {
   pageNumber: number      // 1-604
   lineNumber: number      // 1-15
   textUthmani: string     // Arabic word text with tashkeel
+  codeV4: string | null   // V4 glyph code for per-page tajweed font
   charType: string        // 'word' | 'end' (verse end marker)
 }
 

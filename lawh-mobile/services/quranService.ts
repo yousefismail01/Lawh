@@ -1,11 +1,11 @@
 import { eq, and } from 'drizzle-orm'
 import { db } from '@/lib/db/client'
-import { surahs, ayahs, words } from '@/lib/db/schema'
+import { surahs, ayahs, words, seedMetadata } from '@/lib/db/schema'
 import type { Riwayah } from '@/types/riwayah'
 import { DEFAULT_RIWAYAH } from '@/types/riwayah'
 
-// quranService: reads from local SQLite first, falls back to Supabase if not cached.
-// All downstream code MUST use this service — never query Supabase directly for Quran text.
+// quranService: reads from local SQLite only (seeded from QUL).
+// All downstream code MUST use this service — never query external APIs directly for Quran text.
 export const quranService = {
   async getAllSurahs() {
     return db.select().from(surahs).orderBy(surahs.id)
@@ -34,8 +34,10 @@ export const quranService = {
   },
 
   async isSeeded(): Promise<boolean> {
-    const result = await db.select().from(surahs).limit(1)
-    return result.length > 0
+    const result = await db.select().from(seedMetadata)
+      .where(eq(seedMetadata.key, 'source'))
+      .limit(1)
+    return result.length > 0 && result[0].value === 'qul-v4'
   },
 
   async getWordsByPage(page: number, riwayah: Riwayah = DEFAULT_RIWAYAH) {
@@ -68,17 +70,29 @@ export const quranService = {
     }
   },
 
-  async isWordSeeded(): Promise<boolean> {
-    const result = await db.select().from(words).limit(1)
-    return result.length > 0
+  async getSurahStartPage(surahId: number): Promise<number> {
+    const result = await db.select({ pageStart: surahs.pageStart })
+      .from(surahs)
+      .where(eq(surahs.id, surahId))
+      .limit(1)
+    return result[0]?.pageStart ?? 1
   },
 
-  async getSurahStartPage(surahId: number, riwayah: Riwayah = DEFAULT_RIWAYAH): Promise<number> {
-    const result = await db.select({ page: ayahs.page }).from(ayahs)
-      .where(and(eq(ayahs.surahId, surahId), eq(ayahs.riwayah, riwayah)))
-      .orderBy(ayahs.page)
-      .limit(1)
-    return result[0]?.page ?? 1
+  async getSurahByPage(page: number) {
+    const result = await db.select().from(surahs)
+      .where(and(
+        eq(surahs.pageStart, page),
+      ))
+    // If no surah starts exactly on this page, find the surah whose range contains it
+    if (result.length > 0) return result[0]
+
+    const all = await db.select().from(surahs).orderBy(surahs.id)
+    for (let i = all.length - 1; i >= 0; i--) {
+      if (all[i].pageStart <= page && all[i].pageEnd >= page) {
+        return all[i]
+      }
+    }
+    return null
   },
 
   async getAyahText(surahId: number, ayahNumber: number, riwayah: Riwayah = DEFAULT_RIWAYAH): Promise<string> {

@@ -49,6 +49,7 @@ function makeWord(overrides: Partial<Word> = {}): Word {
     pageNumber: 3,
     lineNumber: 1,
     textUthmani: '\u0628\u0650\u0633\u0652\u0645\u0650',
+    codeV4: null,
     charType: 'word',
     ...overrides,
   }

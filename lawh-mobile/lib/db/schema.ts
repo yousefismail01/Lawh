@@ -6,8 +6,11 @@ export const surahs = sqliteTable('surahs', {
   nameTransliteration: text('name_transliteration').notNull(),
   nameEnglish: text('name_english').notNull(),
   ayahCount: integer('ayah_count').notNull(),
-  juzStart: integer('juz_start').notNull(),
   revelationType: text('revelation_type').notNull(), // 'Meccan' | 'Medinan'
+  revelationOrder: integer('revelation_order').notNull(),
+  pageStart: integer('page_start').notNull(),
+  pageEnd: integer('page_end').notNull(),
+  bismillahPre: integer('bismillah_pre', { mode: 'boolean' }).notNull(),
 })
 
 export const ayahs = sqliteTable('ayahs', {
@@ -34,5 +37,11 @@ export const words = sqliteTable('words', {
   pageNumber: integer('page_number').notNull(),
   lineNumber: integer('line_number').notNull(),
   textUthmani: text('text_uthmani').notNull(),
+  codeV4: text('code_v4'),
   charType: text('char_type').notNull(), // 'word' | 'end'
+})
+
+export const seedMetadata = sqliteTable('seed_metadata', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
 })

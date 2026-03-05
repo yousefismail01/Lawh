@@ -8,15 +8,20 @@ describe('Quran type interfaces', () => {
       nameTransliteration: 'Al-Fatiha',
       nameEnglish: 'The Opening',
       ayahCount: 7,
-      juzStart: 1,
       revelationType: 'Meccan',
+      revelationOrder: 5,
+      pageStart: 1,
+      pageEnd: 1,
+      bismillahPre: false,
     }
     expect(surah.id).toBe(1)
     expect(surah.nameArabic).toBe('الفاتحة')
     expect(surah.nameTransliteration).toBe('Al-Fatiha')
     expect(surah.nameEnglish).toBe('The Opening')
     expect(surah.ayahCount).toBe(7)
-    expect(surah.juzStart).toBe(1)
+    expect(surah.revelationOrder).toBe(5)
+    expect(surah.pageStart).toBe(1)
+    expect(surah.pageEnd).toBe(1)
     expect(surah.revelationType).toBe('Meccan')
   })
 
@@ -43,11 +48,13 @@ describe('Quran type interfaces', () => {
   test('Surah revelationType only accepts Meccan or Medinan', () => {
     const meccan: Surah = {
       id: 1, nameArabic: 'test', nameTransliteration: 'test',
-      nameEnglish: 'test', ayahCount: 1, juzStart: 1, revelationType: 'Meccan',
+      nameEnglish: 'test', ayahCount: 1, revelationType: 'Meccan',
+      revelationOrder: 1, pageStart: 1, pageEnd: 1, bismillahPre: true,
     }
     const medinan: Surah = {
       id: 2, nameArabic: 'test', nameTransliteration: 'test',
-      nameEnglish: 'test', ayahCount: 1, juzStart: 1, revelationType: 'Medinan',
+      nameEnglish: 'test', ayahCount: 1, revelationType: 'Medinan',
+      revelationOrder: 2, pageStart: 2, pageEnd: 3, bismillahPre: true,
     }
     expect(meccan.revelationType).toBe('Meccan')
     expect(medinan.revelationType).toBe('Medinan')

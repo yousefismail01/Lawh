@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   View,
   FlatList,
@@ -15,7 +15,7 @@ import { PageNavigator } from './PageNavigator'
 import { SurahListModal } from './SurahListModal'
 import { AyahActionSheet } from './AyahActionSheet'
 import { quranService } from '@/services/quranService'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { preloadPageRange } from '@/lib/fonts/qpcV4FontManager'
 
 const TOTAL_PAGES = 604
 const PAGE_RANGE = 2 // Render current +/- 2 pages in PagerView
@@ -42,6 +42,11 @@ export function MushafScreen() {
 
   const pagerRef = useRef<PagerView>(null)
   const flatListRef = useRef<FlatList>(null)
+
+  // Preload V4 fonts for nearby pages (one beyond render buffer)
+  useEffect(() => {
+    preloadPageRange(currentPage, PAGE_RANGE + 1)
+  }, [currentPage])
 
   // Sync currentPage with lastReadPage after hydration
   const initialPageSet = useRef(false)
@@ -142,15 +147,14 @@ export function MushafScreen() {
 
   if (!hasHydrated) {
     return (
-      <View style={[styles.loading, { backgroundColor: isDark ? '#1c1812' : '#faf3e0' }]}>
-        <ActivityIndicator size="small" color={isDark ? '#8a7340' : '#c9a84c'} />
+      <View style={[styles.loading, { backgroundColor: '#fff' }]}>
+        <ActivityIndicator size="small" color="#999" />
       </View>
     )
   }
 
   return (
-    <GestureHandlerRootView style={styles.root}>
-      <View style={[styles.container, { backgroundColor: isDark ? '#1c1812' : '#faf3e0' }]}>
+    <View style={[styles.root, { backgroundColor: '#fff' }]}>
         {navigationMode === 'horizontal' ? (
           <PagerView
             ref={pagerRef}
@@ -217,8 +221,7 @@ export function MushafScreen() {
           ayahInfo={selectedAyah}
           onClose={handleCloseActionSheet}
         />
-      </View>
-    </GestureHandlerRootView>
+    </View>
   )
 }
 

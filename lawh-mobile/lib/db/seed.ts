@@ -1,68 +1,149 @@
+import { eq } from 'drizzle-orm'
 import { db } from './client'
-import { surahs, ayahs } from './schema'
-import { supabase } from '@/lib/supabase'
+import { surahs, ayahs, words, seedMetadata } from './schema'
+import { fetchChapters, fetchChapterVerses } from '@/lib/api/qul'
+import { getJuzForAyah } from '@/lib/data/juzBoundaries'
+import { normalizeArabic } from '@/lib/arabic/normalize'
 
-const BATCH_SIZE = 150  // Tune between 100-200 to avoid watchdog timeout
+const BATCH_SIZE = 200
+const SEED_SOURCE = 'qul-v4'
+const MUSHAF_ID = 19
+
+// Arabic-Indic numerals: ٠١٢٣٤٥٦٧٨٩
+const ARABIC_INDIC_NUMERAL = /^[\u0660-\u0669\s]+$/
 
 export type SeedProgress = {
-  stage: 'surahs' | 'ayahs'
+  stage: 'chapters' | 'verses'
+  current: number
+  total: number
   percent: number
 }
 
-export async function seedLocalDatabase(
-  onProgress?: (progress: SeedProgress) => void
+/**
+ * Seeds the local SQLite database from QUL (qul.tarteel.ai).
+ * Single entry point — replaces both old seedLocalDatabase and seedWords.
+ *
+ * ~115 API calls total: 1 for chapters + 114 for verses.
+ */
+export async function seedFromQul(
+  onProgress?: (progress: SeedProgress) => void,
 ): Promise<void> {
-  // Check if already seeded
-  const existing = await db.select().from(surahs).limit(1)
-  if (existing.length > 0) return
+  // Check if already seeded from QUL
+  const existing = await db
+    .select()
+    .from(seedMetadata)
+    .where(eq(seedMetadata.key, 'source'))
+    .limit(1)
+  if (existing.length > 0 && existing[0].value === SEED_SOURCE) return
 
-  // Fetch surahs from Supabase
-  const { data: surahData, error: surahError } = await supabase
-    .from('surahs')
-    .select('*')
-    .order('id')
-  if (surahError) throw surahError
+  // 1. Fetch all 114 chapters
+  onProgress?.({ stage: 'chapters', current: 0, total: 114, percent: 0 })
+  const chapters = await fetchChapters()
 
-  // Insert surahs (small enough to do in one batch)
+  // Insert surahs
   await db.insert(surahs).values(
-    surahData.map((s) => ({
-      id: s.id,
-      nameArabic: s.name_arabic,
-      nameTransliteration: s.name_transliteration,
-      nameEnglish: s.name_english,
-      ayahCount: s.ayah_count,
-      juzStart: s.juz_start,
-      revelationType: s.revelation_type,
-    }))
+    chapters.map((ch) => ({
+      id: ch.id,
+      nameArabic: ch.name_arabic,
+      nameTransliteration: ch.name_simple,
+      nameEnglish: ch.translated_name.name,
+      ayahCount: ch.verses_count,
+      revelationType: ch.revelation_place === 'madinah' ? 'Medinan' : 'Meccan',
+      revelationOrder: ch.revelation_order,
+      pageStart: ch.pages[0],
+      pageEnd: ch.pages[1],
+      bismillahPre: ch.bismillah_pre,
+    })),
   )
-  onProgress?.({ stage: 'surahs', percent: 100 })
+  onProgress?.({ stage: 'chapters', current: 114, total: 114, percent: 100 })
 
-  // Fetch ayahs from Supabase (hafs only for offline cache)
-  const { data: ayahData, error: ayahError } = await supabase
-    .from('ayahs')
-    .select('*')
-    .eq('riwayah', 'hafs')
-    .order('surah_id, ayah_number')
-  if (ayahError) throw ayahError
+  // 2. For each chapter, fetch verses with words
+  const pendingAyahs: (typeof ayahs.$inferInsert)[] = []
+  const pendingWords: (typeof words.$inferInsert)[] = []
 
-  // Chunked insert to avoid blocking JS thread
-  for (let i = 0; i < ayahData.length; i += BATCH_SIZE) {
-    const batch = ayahData.slice(i, i + BATCH_SIZE)
-    await db.insert(ayahs).values(
-      batch.map((a) => ({
-        surahId: a.surah_id,
-        ayahNumber: a.ayah_number,
-        riwayah: a.riwayah,
-        textUthmani: a.text_uthmani,
-        normalizedText: a.normalized_text,
-        juz: a.juz,
-        hizb: a.hizb,
-        rub: a.rub,
-        page: a.page,
-      }))
-    )
-    onProgress?.({ stage: 'ayahs', percent: (i + batch.length) / ayahData.length * 100 })
-    // Yield to JS event loop to prevent watchdog timeout on first launch
-    await new Promise<void>((resolve) => setTimeout(resolve, 0))
+  for (let i = 0; i < chapters.length; i++) {
+    const ch = chapters[i]
+    const verses = await fetchChapterVerses(ch.id, MUSHAF_ID)
+
+    for (const verse of verses) {
+      // QUL only provides verse_key ("surah:ayah"), not verse_number
+      const ayahNumber = parseInt(verse.verse_key.split(':')[1], 10)
+      const juz = getJuzForAyah(ch.id, ayahNumber)
+
+      // Build verse text from word-level text_uthmani (excluding end markers)
+      const verseText = verse.words
+        .filter((w) => !ARABIC_INDIC_NUMERAL.test(w.text_uthmani.trim()))
+        .map((w) => w.text_uthmani)
+        .join(' ')
+
+      pendingAyahs.push({
+        surahId: ch.id,
+        ayahNumber,
+        riwayah: 'hafs',
+        textUthmani: verseText,
+        normalizedText: normalizeArabic(verseText),
+        juz,
+        hizb: 0, // QUL doesn't provide — will be derived later if needed
+        rub: 0,
+        page: verse.page_number,
+      })
+
+      for (const word of verse.words) {
+        const isEnd = ARABIC_INDIC_NUMERAL.test(word.text_uthmani.trim())
+        pendingWords.push({
+          surahId: ch.id,
+          ayahNumber,
+          riwayah: 'hafs',
+          position: word.position,
+          pageNumber: word.page_number,
+          lineNumber: word.line_number,
+          textUthmani: word.text_uthmani,
+          codeV4: word.text ?? null,
+          charType: isEnd ? 'end' : 'word',
+        })
+      }
+    }
+
+    // Flush ayahs in batches
+    while (pendingAyahs.length >= BATCH_SIZE) {
+      const batch = pendingAyahs.splice(0, BATCH_SIZE)
+      await db.insert(ayahs).values(batch)
+      await new Promise<void>((r) => setTimeout(r, 0))
+    }
+
+    // Flush words in batches
+    while (pendingWords.length >= BATCH_SIZE) {
+      const batch = pendingWords.splice(0, BATCH_SIZE)
+      await db.insert(words).values(batch)
+      await new Promise<void>((r) => setTimeout(r, 0))
+    }
+
+    onProgress?.({
+      stage: 'verses',
+      current: i + 1,
+      total: chapters.length,
+      percent: ((i + 1) / chapters.length) * 100,
+    })
   }
+
+  // Flush remaining ayahs
+  while (pendingAyahs.length > 0) {
+    const batch = pendingAyahs.splice(0, BATCH_SIZE)
+    await db.insert(ayahs).values(batch)
+    await new Promise<void>((r) => setTimeout(r, 0))
+  }
+
+  // Flush remaining words
+  while (pendingWords.length > 0) {
+    const batch = pendingWords.splice(0, BATCH_SIZE)
+    await db.insert(words).values(batch)
+    await new Promise<void>((r) => setTimeout(r, 0))
+  }
+
+  // 3. Write seed metadata
+  await db.insert(seedMetadata).values([
+    { key: 'source', value: SEED_SOURCE },
+    { key: 'mushaf_id', value: String(MUSHAF_ID) },
+    { key: 'seeded_at', value: new Date().toISOString() },
+  ])
 }

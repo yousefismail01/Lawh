@@ -7,6 +7,6 @@ describe('quranService mushaf queries', () => {
   it.todo('getWordsByPage returns words ordered by lineNumber then position')
   it.todo('getWordsByPage filters by riwayah')
   it.todo('getPageMetadata returns surahs and juz for a given page')
-  it.todo('isWordSeeded returns false when no words exist')
+  it.todo('isSeeded returns false when no seed_metadata exists')
   it.todo('getSurahStartPage returns the first page of a surah')
 })

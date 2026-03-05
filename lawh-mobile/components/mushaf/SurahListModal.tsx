@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   View,
   Text,
@@ -8,8 +8,11 @@ import {
   StyleSheet,
   useColorScheme,
   ActivityIndicator,
+  Modal,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native'
-import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet'
 import { quranService } from '@/services/quranService'
 import type { Surah } from '@/types/quran'
 
@@ -24,7 +27,6 @@ export const SurahListModal = React.memo(function SurahListModal({
   onClose,
   onSelectSurah,
 }: SurahListModalProps) {
-  const bottomSheetRef = useRef<BottomSheet>(null)
   const colorScheme = useColorScheme()
   const isDark = colorScheme === 'dark'
 
@@ -32,19 +34,13 @@ export const SurahListModal = React.memo(function SurahListModal({
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
-  const snapPoints = useMemo(() => ['60%', '90%'], [])
-
   useEffect(() => {
-    if (visible) {
+    if (visible && surahs.length === 0) {
       loadSurahs()
-      bottomSheetRef.current?.snapToIndex(0)
-    } else {
-      bottomSheetRef.current?.close()
     }
   }, [visible])
 
   const loadSurahs = useCallback(async () => {
-    if (surahs.length > 0) return
     setLoading(true)
     try {
       const data = await quranService.getAllSurahs()
@@ -54,7 +50,7 @@ export const SurahListModal = React.memo(function SurahListModal({
     } finally {
       setLoading(false)
     }
-  }, [surahs.length])
+  }, [])
 
   const filtered = useMemo(() => {
     if (!searchQuery.trim()) return surahs
@@ -77,13 +73,6 @@ export const SurahListModal = React.memo(function SurahListModal({
     [onSelectSurah, onClose]
   )
 
-  const renderBackdrop = useCallback(
-    (props: React.ComponentProps<typeof BottomSheetBackdrop>) => (
-      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
-    ),
-    []
-  )
-
   const bgColor = isDark ? '#1c1812' : '#faf3e0'
   const textColor = isDark ? '#e8e0d0' : '#1a1a1a'
   const secondaryColor = isDark ? '#a09880' : '#6b5c3a'
@@ -91,73 +80,95 @@ export const SurahListModal = React.memo(function SurahListModal({
   const inputBg = isDark ? '#2a241c' : '#f0e8d4'
 
   return (
-    <BottomSheet
-      ref={bottomSheetRef}
-      index={visible ? 0 : -1}
-      snapPoints={snapPoints}
-      onClose={onClose}
-      enablePanDownToClose
-      backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: bgColor }}
-      handleIndicatorStyle={{ backgroundColor: secondaryColor }}
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
     >
-      <View style={[styles.header, { borderBottomColor: borderColor }]}>
-        <TextInput
-          style={[styles.searchInput, { backgroundColor: inputBg, color: textColor }]}
-          placeholder="Search surah..."
-          placeholderTextColor={secondaryColor}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          clearButtonMode="while-editing"
-        />
-      </View>
-
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color={secondaryColor} />
-        </View>
-      ) : (
-        <FlatList
-          data={filtered}
-          keyExtractor={(item) => String(item.id)}
-          renderItem={({ item }) => (
-            <Pressable
-              style={({ pressed }) => [
-                styles.surahItem,
-                { borderBottomColor: borderColor },
-                pressed && { opacity: 0.6 },
-              ]}
-              onPress={() => handleSelect(item.id)}
-            >
-              <View style={styles.surahNumber}>
-                <Text style={[styles.numberText, { color: secondaryColor }]}>{item.id}</Text>
-              </View>
-              <View style={styles.surahInfo}>
-                <Text style={[styles.transliteration, { color: textColor }]}>
-                  {item.nameTransliteration}
-                </Text>
-                <Text style={[styles.englishName, { color: secondaryColor }]}>
-                  {item.nameEnglish} - {item.ayahCount} ayahs
-                </Text>
-              </View>
-              <Text style={[styles.arabicName, { color: textColor }]}>{item.nameArabic}</Text>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: bgColor }]}>
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <View style={[styles.header, { borderBottomColor: borderColor }]}>
+            <Pressable onPress={onClose} style={styles.closeButton}>
+              <Text style={[styles.closeText, { color: secondaryColor }]}>Close</Text>
             </Pressable>
+            <TextInput
+              style={[styles.searchInput, { backgroundColor: inputBg, color: textColor }]}
+              placeholder="Search surah..."
+              placeholderTextColor={secondaryColor}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              clearButtonMode="while-editing"
+              autoCorrect={false}
+            />
+          </View>
+
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={secondaryColor} />
+            </View>
+          ) : (
+            <FlatList
+              data={filtered}
+              keyExtractor={(item) => String(item.id)}
+              renderItem={({ item }) => (
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.surahItem,
+                    { borderBottomColor: borderColor },
+                    pressed && { opacity: 0.6 },
+                  ]}
+                  onPress={() => handleSelect(item.id)}
+                >
+                  <View style={styles.surahNumber}>
+                    <Text style={[styles.numberText, { color: secondaryColor }]}>{item.id}</Text>
+                  </View>
+                  <View style={styles.surahInfo}>
+                    <Text style={[styles.transliteration, { color: textColor }]}>
+                      {item.nameTransliteration}
+                    </Text>
+                    <Text style={[styles.englishName, { color: secondaryColor }]}>
+                      {item.nameEnglish} - {item.ayahCount} ayahs
+                    </Text>
+                  </View>
+                  <Text style={[styles.arabicName, { color: textColor }]}>{item.nameArabic}</Text>
+                </Pressable>
+              )}
+              initialNumToRender={20}
+              maxToRenderPerBatch={20}
+              windowSize={10}
+              contentContainerStyle={styles.listContent}
+            />
           )}
-          initialNumToRender={20}
-          maxToRenderPerBatch={20}
-          windowSize={10}
-          contentContainerStyle={styles.listContent}
-        />
-      )}
-    </BottomSheet>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </Modal>
   )
 })
 
 const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+  },
+  safeArea: {
+    flex: 1,
+  },
   header: {
     paddingHorizontal: 16,
     paddingBottom: 10,
+    paddingTop: 8,
     borderBottomWidth: 1,
+  },
+  closeButton: {
+    alignSelf: 'flex-end',
+    paddingBottom: 8,
+  },
+  closeText: {
+    fontSize: 16,
+    fontWeight: '500',
   },
   searchInput: {
     paddingHorizontal: 12,

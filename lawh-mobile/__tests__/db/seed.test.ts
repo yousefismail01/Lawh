@@ -5,10 +5,11 @@ const mockLimit = jest.fn()
 const mockInsert = jest.fn()
 const mockValues = jest.fn()
 const mockWhere = jest.fn()
-const mockOrderBy = jest.fn()
 
 jest.mock('expo-sqlite', () => ({
-  openDatabaseSync: jest.fn(() => ({})),
+  openDatabaseSync: jest.fn(() => ({
+    execSync: jest.fn(),
+  })),
 }))
 
 jest.mock('drizzle-orm/expo-sqlite', () => ({
@@ -18,49 +19,53 @@ jest.mock('drizzle-orm/expo-sqlite', () => ({
   })),
 }))
 
-jest.mock('@/lib/supabase', () => ({
-  supabase: {
-    from: jest.fn().mockReturnValue({
-      select: jest.fn().mockReturnValue({
-        order: jest.fn().mockResolvedValue({
-          data: [
-            { id: 1, name_arabic: 'الفاتحة', name_transliteration: 'Al-Fatiha', name_english: 'The Opening', ayah_count: 7, juz_start: 1, revelation_type: 'Meccan' },
-          ],
-          error: null,
-        }),
-        eq: jest.fn().mockReturnValue({
-          order: jest.fn().mockResolvedValue({
-            data: Array.from({ length: 10 }, (_, i) => ({
-              surah_id: 1,
-              ayah_number: i + 1,
-              riwayah: 'hafs',
-              text_uthmani: `ayah ${i + 1}`,
-              normalized_text: `ayah ${i + 1}`,
-              juz: 1,
-              hizb: 1,
-              rub: 1,
-              page: 1,
-            })),
-            error: null,
-          }),
-        }),
-      }),
-    }),
-  },
+jest.mock('@/lib/api/qul', () => ({
+  fetchChapters: jest.fn().mockResolvedValue([
+    {
+      id: 1,
+      name_arabic: 'الفاتحة',
+      name_simple: 'Al-Fatiha',
+      translated_name: { name: 'The Opening' },
+      verses_count: 7,
+      revelation_place: 'makkah',
+      revelation_order: 5,
+      bismillah_pre: false,
+      pages: [1, 1],
+    },
+  ]),
+  fetchChapterVerses: jest.fn().mockResolvedValue([
+    {
+      id: 1,
+      verse_key: '1:1',
+      verse_number: 1,
+      text_uthmani: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+      page_number: 1,
+      words: [
+        { position: 1, page_number: 1, line_number: 2, text_uthmani: 'بِسْمِ' },
+        { position: 2, page_number: 1, line_number: 2, text_uthmani: 'اللَّهِ' },
+        { position: 3, page_number: 1, line_number: 2, text_uthmani: '١' },
+      ],
+    },
+  ]),
 }))
 
-// Reset module registry between tests so seed.ts re-evaluates
+jest.mock('@/lib/data/juzBoundaries', () => ({
+  getJuzForAyah: jest.fn().mockReturnValue(1),
+}))
+
+jest.mock('@/lib/arabic/normalize', () => ({
+  normalizeArabic: jest.fn((text: string) => text),
+}))
+
 beforeEach(() => {
   jest.clearAllMocks()
-  // Default: empty DB (triggers seed)
+  // Default: empty seed_metadata (triggers seed)
   mockSelect.mockReturnValue({
     from: mockFrom.mockReturnValue({
-      limit: mockLimit.mockResolvedValue([]),
       where: mockWhere.mockReturnValue({
-        limit: jest.fn().mockResolvedValue([]),
-        orderBy: mockOrderBy.mockResolvedValue([]),
+        limit: mockLimit.mockResolvedValue([]),
       }),
-      orderBy: mockOrderBy.mockResolvedValue([]),
+      limit: mockLimit.mockResolvedValue([]),
     }),
   })
   mockInsert.mockReturnValue({
@@ -68,40 +73,39 @@ beforeEach(() => {
   })
 })
 
-describe('seedLocalDatabase', () => {
+describe('seedFromQul', () => {
   it('calls onProgress with stage and percent', async () => {
-    const { seedLocalDatabase } = require('@/lib/db/seed')
+    const { seedFromQul } = require('@/lib/db/seed')
     const progressCalls: any[] = []
-    await seedLocalDatabase((p: any) => progressCalls.push(p))
+    await seedFromQul((p: any) => progressCalls.push(p))
 
-    const surahProgress = progressCalls.find((p) => p.stage === 'surahs')
-    expect(surahProgress).toBeDefined()
-    expect(surahProgress.percent).toBe(100)
+    const chapterProgress = progressCalls.find((p) => p.stage === 'chapters')
+    expect(chapterProgress).toBeDefined()
 
-    const ayahProgress = progressCalls.filter((p) => p.stage === 'ayahs')
-    expect(ayahProgress.length).toBeGreaterThan(0)
+    const verseProgress = progressCalls.filter((p) => p.stage === 'verses')
+    expect(verseProgress.length).toBeGreaterThan(0)
   })
 
-  it('is idempotent: skips if surahs already exist', async () => {
-    // Override to return existing rows
+  it('is idempotent: skips if already seeded from QUL', async () => {
     mockSelect.mockReturnValueOnce({
       from: jest.fn().mockReturnValue({
-        limit: jest.fn().mockResolvedValue([{ id: 1 }]),
+        where: jest.fn().mockReturnValue({
+          limit: jest.fn().mockResolvedValue([{ key: 'source', value: 'qul' }]),
+        }),
       }),
     })
 
-    const { seedLocalDatabase } = require('@/lib/db/seed')
+    const { seedFromQul } = require('@/lib/db/seed')
     const progressCalls: any[] = []
-    await seedLocalDatabase((p: any) => progressCalls.push(p))
-    // No progress calls because seed was skipped
+    await seedFromQul((p: any) => progressCalls.push(p))
     expect(progressCalls.length).toBe(0)
   })
 
-  it('inserts in batches of BATCH_SIZE', async () => {
-    const { seedLocalDatabase } = require('@/lib/db/seed')
-    await seedLocalDatabase()
+  it('inserts surahs, ayahs, words, and metadata', async () => {
+    const { seedFromQul } = require('@/lib/db/seed')
+    await seedFromQul()
 
-    // insert called at least once for surahs and once for ayahs
+    // insert called for surahs, ayahs, words, and seed_metadata
     expect(mockInsert).toHaveBeenCalled()
     expect(mockValues).toHaveBeenCalled()
   })
