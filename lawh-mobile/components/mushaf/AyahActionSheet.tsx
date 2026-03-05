@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native'
+import * as Haptics from 'expo-haptics'
 import { tafsirService } from '@/services/tafsirService'
 import { translationService } from '@/services/translationService'
 
@@ -70,6 +71,16 @@ export const AyahActionSheet = React.memo(function AyahActionSheet({
     }
   }, [ayahInfo, translationText])
 
+  const withHaptic = useCallback(
+    (action: () => void | Promise<void>) => {
+      return async () => {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+        action()
+      }
+    },
+    []
+  )
+
   const handleClose = useCallback(() => {
     setTafsirText(null)
     setTranslationText(null)
@@ -116,7 +127,7 @@ export const AyahActionSheet = React.memo(function AyahActionSheet({
                   { backgroundColor: buttonBg },
                   pressed && { opacity: 0.6 },
                 ]}
-                onPress={handleBookmark}
+                onPress={withHaptic(handleBookmark)}
               >
                 <Text style={[styles.actionIcon, { color: secondaryColor }]}>&#x2606;</Text>
                 <Text style={[styles.actionLabel, { color: textColor }]}>Bookmark</Text>
@@ -128,7 +139,7 @@ export const AyahActionSheet = React.memo(function AyahActionSheet({
                   { backgroundColor: buttonBg },
                   pressed && { opacity: 0.6 },
                 ]}
-                onPress={handleTranslation}
+                onPress={withHaptic(handleTranslation)}
                 disabled={loadingTranslation}
               >
                 {loadingTranslation ? (
@@ -145,7 +156,7 @@ export const AyahActionSheet = React.memo(function AyahActionSheet({
                   { backgroundColor: buttonBg },
                   pressed && { opacity: 0.6 },
                 ]}
-                onPress={handleTafsir}
+                onPress={withHaptic(handleTafsir)}
                 disabled={loadingTafsir}
               >
                 {loadingTafsir ? (

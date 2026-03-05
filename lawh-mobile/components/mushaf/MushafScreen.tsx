@@ -9,6 +9,7 @@ import {
 } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 import { useFocusEffect } from 'expo-router'
+import * as Haptics from 'expo-haptics'
 import PagerView from 'react-native-pager-view'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { useChromeToggle } from '@/hooks/useChromeToggle'
@@ -97,6 +98,7 @@ export function MushafScreen() {
 
   const handleAyahLongPress = useCallback(
     async (info: { surahId: number; ayahNumber: number }) => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
       try {
         const text = await quranService.getAyahText(info.surahId, info.ayahNumber)
         setSelectedAyah({
