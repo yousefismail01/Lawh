@@ -3,3 +3,5 @@ scripts/.env
 lawh-api/.env
 .DS_Store
 .mcp.json
+
+node_modules/
