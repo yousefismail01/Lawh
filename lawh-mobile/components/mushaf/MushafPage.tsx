@@ -8,8 +8,8 @@ import { useV4Font } from '@/hooks/useV4Font'
 import { getPageLines, chapters } from '@/lib/data/mushafData'
 import { getPageJuzHizb } from '@/lib/data/pageJuzHizb'
 
-// Header overlay height: safe area top + icons row (~36) + page header (~30) + padding
-const HEADER_CONTENT_HEIGHT = 72
+// Extra padding below safe area so text isn't flush with notch
+const TOP_PADDING = 12
 const FOOTER_HEIGHT = 28
 
 interface MushafPageProps {
@@ -47,7 +47,7 @@ export { getSurahForPage, getPageJuzHizb }
 
 const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, onPress }: MushafPageProps) {
   const insets = useSafeAreaInsets()
-  const topBuffer = insets.top + HEADER_CONTENT_HEIGHT
+  const topBuffer = insets.top + TOP_PADDING
   const { fontName, isLoaded: v4Loaded } = useV4Font(pageNumber)
   const pageLines = getPageLines(pageNumber)
 
