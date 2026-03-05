@@ -72,4 +72,26 @@ export const quranService = {
     const result = await db.select().from(words).limit(1)
     return result.length > 0
   },
+
+  async getSurahStartPage(surahId: number, riwayah: Riwayah = DEFAULT_RIWAYAH): Promise<number> {
+    const result = await db.select({ page: ayahs.page }).from(ayahs)
+      .where(and(eq(ayahs.surahId, surahId), eq(ayahs.riwayah, riwayah)))
+      .orderBy(ayahs.page)
+      .limit(1)
+    return result[0]?.page ?? 1
+  },
+
+  async getAyahText(surahId: number, ayahNumber: number, riwayah: Riwayah = DEFAULT_RIWAYAH): Promise<string> {
+    const pageWords = await db.select().from(words)
+      .where(and(
+        eq(words.surahId, surahId),
+        eq(words.ayahNumber, ayahNumber),
+        eq(words.riwayah, riwayah),
+      ))
+      .orderBy(words.position)
+    return pageWords
+      .filter(w => w.charType === 'word')
+      .map(w => w.textUthmani)
+      .join(' ')
+  },
 }
