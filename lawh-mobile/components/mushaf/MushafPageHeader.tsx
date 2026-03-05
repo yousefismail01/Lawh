@@ -2,31 +2,22 @@ import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 
 interface MushafPageHeaderProps {
-  surahName: string
-  surahId?: number
+  surahNameSimple: string
   juz: number
   pageNumber: number
 }
 
-function surahNameLigature(surahId: number): string {
-  return `surah${String(surahId).padStart(3, '0')}`
-}
-
 export const MushafPageHeader = React.memo(function MushafPageHeader({
-  surahName,
-  surahId,
+  surahNameSimple,
   juz,
   pageNumber,
 }: MushafPageHeaderProps) {
   return (
     <View style={styles.wrapper}>
       <View style={styles.container}>
-        <Text style={styles.surahNameV4}>
-          {surahId ? surahNameLigature(surahId) : surahName}
-        </Text>
-        <Text style={styles.headerText}>
-          الجزء {juz}
-        </Text>
+        <Text style={styles.text}>{surahNameSimple}</Text>
+        <Text style={styles.text}>{pageNumber}</Text>
+        <Text style={styles.text}>Part {juz}</Text>
       </View>
       <View style={styles.separator} />
     </View>
@@ -44,16 +35,10 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
     paddingHorizontal: 8,
   },
-  headerText: {
-    fontSize: 12,
-    fontWeight: '400',
-    color: '#999',
-  },
-  surahNameV4: {
-    fontFamily: 'SurahNameV4',
-    fontSize: 28,
-    color: '#000',
-    includeFontPadding: false,
+  text: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#666',
   },
   separator: {
     height: 0.5,

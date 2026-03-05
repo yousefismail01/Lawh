@@ -79,7 +79,7 @@ const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, 
   }
 
   const primarySurah = getSurahForPage(pageNumber)
-  const { juz, hizb, quarter } = getPageJuzHizb(pageNumber)
+  const { juz } = getPageJuzHizb(pageNumber)
   const renderedLines: React.ReactNode[] = []
 
   for (let i = 0; i < 15; i++) {
@@ -148,8 +148,6 @@ const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, 
         <MushafPageHeader
           surahNameSimple={primarySurah?.nameSimple ?? ''}
           juz={juz}
-          hizb={hizb}
-          quarter={quarter}
           pageNumber={pageNumber}
         />
 
