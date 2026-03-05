@@ -4,17 +4,26 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import type { Riwayah } from '@/types/riwayah'
 import { DEFAULT_RIWAYAH } from '@/types/riwayah'
 
+type ContentsSortOrder = 'ascending' | 'descending' | 'revelation'
+export type ReadingMode = 'mushaf' | 'arabic-cards' | 'translation-cards'
+
 interface SettingsState {
   riwayah: Riwayah
   dailyGoalMinutes: number
   dailyGoalAyahs: number
   navigationMode: 'horizontal' | 'vertical'
   lastReadPage: number
+  contentsSortOrder: ContentsSortOrder
+  readingMode: ReadingMode
+  tajweedEnabled: boolean
   _hasHydrated: boolean
   setRiwayah: (riwayah: Riwayah) => void
   setGoals: (minutes: number, ayahs: number) => void
   setNavigationMode: (mode: 'horizontal' | 'vertical') => void
   setLastReadPage: (page: number) => void
+  setContentsSortOrder: (order: ContentsSortOrder) => void
+  setReadingMode: (mode: ReadingMode) => void
+  setTajweedEnabled: (enabled: boolean) => void
   setHasHydrated: (hydrated: boolean) => void
 }
 
@@ -26,11 +35,17 @@ export const useSettingsStore = create<SettingsState>()(
       dailyGoalAyahs: 5,
       navigationMode: 'horizontal',
       lastReadPage: 1,
+      contentsSortOrder: 'ascending',
+      readingMode: 'mushaf',
+      tajweedEnabled: true,
       _hasHydrated: false,
       setRiwayah: (riwayah) => set({ riwayah }),
       setGoals: (dailyGoalMinutes, dailyGoalAyahs) => set({ dailyGoalMinutes, dailyGoalAyahs }),
       setNavigationMode: (navigationMode) => set({ navigationMode }),
       setLastReadPage: (lastReadPage) => set({ lastReadPage }),
+      setContentsSortOrder: (contentsSortOrder) => set({ contentsSortOrder }),
+      setReadingMode: (readingMode) => set({ readingMode }),
+      setTajweedEnabled: (tajweedEnabled) => set({ tajweedEnabled }),
       setHasHydrated: (_hasHydrated) => set({ _hasHydrated }),
     }),
     {
@@ -46,6 +61,9 @@ export const useSettingsStore = create<SettingsState>()(
         dailyGoalAyahs: state.dailyGoalAyahs,
         navigationMode: state.navigationMode,
         lastReadPage: state.lastReadPage,
+        contentsSortOrder: state.contentsSortOrder,
+        readingMode: state.readingMode,
+        tajweedEnabled: state.tajweedEnabled,
       }),
     }
   )
