@@ -3,7 +3,8 @@ import { View, Text, Pressable, SectionList, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useSettingsStore } from '@/stores/settingsStore'
-import { buildJuzSections, type JuzSection, type SurahInfo } from '@/lib/data/contentsData'
+import { buildJuzSections, getSurahStartPage, type JuzSection, type SurahInfo } from '@/lib/data/contentsData'
+import { getPageJuzHizb } from '@/lib/data/pageJuzHizb'
 import { SurahRow } from '@/components/contents/SurahRow'
 import { JuzSectionHeader } from '@/components/contents/JuzSectionHeader'
 import { JuzIndex } from '@/components/contents/JuzIndex'
@@ -22,6 +23,17 @@ export default function ContentsScreen() {
   const sectionListRef = useRef<SectionList<SurahInfo, JuzSection>>(null)
 
   const sections = useMemo(() => buildJuzSections(), [])
+
+  // Determine which surah the user is currently reading
+  const lastReadPage = useSettingsStore.getState().lastReadPage
+  const currentSurahId = useMemo(() => {
+    // Find the surah whose start page is <= lastReadPage and next surah starts after
+    for (let id = 114; id >= 1; id--) {
+      if (getSurahStartPage(id) <= lastReadPage) return id
+    }
+    return 1
+  }, [lastReadPage])
+  const currentJuz = useMemo(() => getPageJuzHizb(lastReadPage).juz, [lastReadPage])
 
   const handleSelectSurah = useCallback(
     (pageStart: number) => {
@@ -114,8 +126,12 @@ export default function ContentsScreen() {
               renderSectionHeader={({ section }) => (
                 <JuzSectionHeader title={section.title} />
               )}
-              renderItem={({ item }) => (
-                <SurahRow surah={item} onSelect={handleSelectSurah} />
+              renderItem={({ item, section }) => (
+                <SurahRow
+                  surah={item}
+                  isCurrent={item.id === currentSurahId && section.juz === currentJuz}
+                  onSelect={handleSelectSurah}
+                />
               )}
               contentContainerStyle={styles.list}
             />
