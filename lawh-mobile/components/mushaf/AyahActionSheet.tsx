@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   View,
   Text,
@@ -9,15 +9,20 @@ import {
   Modal,
   ActivityIndicator,
   ScrollView,
+  Share,
+  Clipboard,
 } from 'react-native'
 import * as Haptics from 'expo-haptics'
+import { Ionicons } from '@expo/vector-icons'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { tafsirService } from '@/services/tafsirService'
 import { translationService } from '@/services/translationService'
+import { chapters } from '@/lib/data/mushafData'
 import { AyahAudioPlayer } from './AyahAudioPlayer'
 
 interface AyahActionSheetProps {
   visible: boolean
-  ayahInfo: { surahId: number; ayahNumber: number; textUthmani: string } | null
+  ayahInfo: { surahId: number; ayahNumber: number } | null
   onClose: () => void
 }
 
@@ -28,19 +33,45 @@ export const AyahActionSheet = React.memo(function AyahActionSheet({
 }: AyahActionSheetProps) {
   const colorScheme = useColorScheme()
   const isDark = colorScheme === 'dark'
+  const insets = useSafeAreaInsets()
+
   const [loadingTafsir, setLoadingTafsir] = useState(false)
   const [loadingTranslation, setLoadingTranslation] = useState(false)
   const [tafsirText, setTafsirText] = useState<string | null>(null)
   const [translationText, setTranslationText] = useState<string | null>(null)
   const [audioActive, setAudioActive] = useState(false)
 
-  const handleBookmark = useCallback(() => {
-    Alert.alert('Bookmark', 'Bookmark saved')
+  // Auto-load translation when sheet opens
+  useEffect(() => {
+    if (!visible || !ayahInfo) return
+    setLoadingTranslation(true)
+    translationService
+      .getTranslation(ayahInfo.surahId, ayahInfo.ayahNumber)
+      .then((entry) => setTranslationText(entry.text))
+      .catch(() => setTranslationText(null))
+      .finally(() => setLoadingTranslation(false))
+  }, [visible, ayahInfo])
+
+  const handleClose = useCallback(() => {
+    setTafsirText(null)
+    setTranslationText(null)
+    setAudioActive(false)
     onClose()
   }, [onClose])
 
+  const handleBookmark = useCallback(async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    Alert.alert('Bookmark', 'Bookmark saved')
+  }, [])
+
+  const handlePlayAudio = useCallback(async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    setAudioActive((prev) => !prev)
+  }, [])
+
   const handleTafsir = useCallback(async () => {
     if (!ayahInfo) return
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
     if (tafsirText) {
       setTafsirText(null)
       return
@@ -56,49 +87,47 @@ export const AyahActionSheet = React.memo(function AyahActionSheet({
     }
   }, [ayahInfo, tafsirText])
 
-  const handleTranslation = useCallback(async () => {
-    if (!ayahInfo) return
-    if (translationText) {
-      setTranslationText(null)
-      return
+  const handleCopy = useCallback(async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    const text = translationText ?? ''
+    if (text) {
+      Clipboard.setString(text)
+      Alert.alert('Copied', 'Translation copied to clipboard')
     }
-    setLoadingTranslation(true)
+  }, [translationText])
+
+  const handleShare = useCallback(async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    if (!ayahInfo) return
+    const surahName = chapters[ayahInfo.surahId]?.nameSimple ?? `Surah ${ayahInfo.surahId}`
+    const reference = `${surahName} ${ayahInfo.surahId}:${ayahInfo.ayahNumber}`
+    const message = translationText
+      ? `"${translationText}"\n\n— ${reference}`
+      : reference
     try {
-      const entry = await translationService.getTranslation(ayahInfo.surahId, ayahInfo.ayahNumber)
-      setTranslationText(entry.text)
+      await Share.share({ message })
     } catch {
-      Alert.alert('Error', 'Failed to load translation')
-    } finally {
-      setLoadingTranslation(false)
+      // User cancelled or error — silent
     }
   }, [ayahInfo, translationText])
 
-  const withHaptic = useCallback(
-    (action: () => void | Promise<void>) => {
-      return async () => {
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-        action()
-      }
-    },
-    []
-  )
-
-  const handlePlayAudio = useCallback(() => {
-    setAudioActive((prev) => !prev)
+  const handleDownload = useCallback(async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    Alert.alert('Download', 'Download feature coming soon')
   }, [])
 
-  const handleClose = useCallback(() => {
-    setTafsirText(null)
-    setTranslationText(null)
-    setAudioActive(false)
-    onClose()
-  }, [onClose])
+  // Derived display values
+  const surahName = ayahInfo ? (chapters[ayahInfo.surahId]?.nameSimple ?? `Surah ${ayahInfo.surahId}`) : ''
+  const headerTitle = ayahInfo ? `${surahName}: ${ayahInfo.ayahNumber}` : ''
 
-  const bgColor = isDark ? '#1c1812' : '#faf3e0'
-  const textColor = isDark ? '#e8e0d0' : '#1a1a1a'
-  const secondaryColor = isDark ? '#a09880' : '#6b5c3a'
-  const borderColor = isDark ? '#3a3225' : '#d4c8a8'
-  const buttonBg = isDark ? '#2a241c' : '#f0e8d4'
+  // Colors
+  const bgColor = isDark ? '#1c1c1e' : '#ffffff'
+  const textColor = isDark ? '#ffffff' : '#000000'
+  const secondaryColor = isDark ? '#8e8e93' : '#666666'
+  const borderColor = isDark ? '#38383a' : '#e5e5ea'
+  const buttonBg = isDark ? '#2c2c2e' : '#f2f2f7'
+  const sectionTitleColor = isDark ? '#8e8e93' : '#6b6b6b'
+  const cardBg = isDark ? '#2c2c2e' : '#f7f7f7'
 
   return (
     <Modal
@@ -107,108 +136,181 @@ export const AyahActionSheet = React.memo(function AyahActionSheet({
       transparent
       onRequestClose={handleClose}
     >
-      <Pressable style={styles.overlay} onPress={handleClose}>
-        <Pressable style={[styles.sheet, { backgroundColor: bgColor }]} onPress={() => {}}>
+      <View style={styles.overlay}>
+        <Pressable style={styles.dismissArea} onPress={handleClose} />
+        <View
+          style={[
+            styles.sheet,
+            {
+              backgroundColor: bgColor,
+              marginTop: insets.top + 10,
+              paddingBottom: insets.bottom + 16,
+            },
+          ]}
+        >
+          {/* Handle bar */}
           <View style={[styles.handle, { backgroundColor: secondaryColor }]} />
 
-          <ScrollView style={styles.scrollContent} contentContainerStyle={styles.content}>
-            {ayahInfo?.textUthmani ? (
-              <Text
-                style={[styles.ayahText, { color: textColor }]}
-                numberOfLines={3}
-              >
-                {ayahInfo.textUthmani}
-              </Text>
-            ) : null}
-
-            <Text style={[styles.reference, { color: secondaryColor }]}>
-              {ayahInfo ? `${ayahInfo.surahId}:${ayahInfo.ayahNumber}` : ''}
+          {/* Header row */}
+          <View style={[styles.headerRow, { borderBottomColor: borderColor }]}>
+            <View style={styles.headerSpacer} />
+            <Text style={[styles.headerTitle, { color: textColor }]} numberOfLines={1}>
+              {headerTitle}
             </Text>
+            <Pressable
+              style={({ pressed }) => [styles.closeButton, pressed && { opacity: 0.6 }]}
+              onPress={handleClose}
+            >
+              <Ionicons name="close" size={22} color={secondaryColor} />
+            </Pressable>
+          </View>
 
-            <View style={[styles.divider, { backgroundColor: borderColor }]} />
-
-            <View style={styles.actions}>
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Bookmark row */}
+            <View style={styles.buttonRow}>
               <Pressable
                 style={({ pressed }) => [
-                  styles.actionButton,
+                  styles.halfButton,
                   { backgroundColor: buttonBg },
                   pressed && { opacity: 0.6 },
                 ]}
-                onPress={withHaptic(handleBookmark)}
+                onPress={handleBookmark}
               >
-                <Text style={[styles.actionIcon, { color: secondaryColor }]}>&#x2606;</Text>
-                <Text style={[styles.actionLabel, { color: textColor }]}>Bookmark</Text>
+                <Ionicons name="bookmark-outline" size={20} color={textColor} />
+                <Text style={[styles.halfButtonLabel, { color: textColor }]}>Bookmark</Text>
               </Pressable>
-
               <Pressable
                 style={({ pressed }) => [
-                  styles.actionButton,
+                  styles.halfButton,
                   { backgroundColor: buttonBg },
                   pressed && { opacity: 0.6 },
                 ]}
-                onPress={withHaptic(handleTranslation)}
-                disabled={loadingTranslation}
+                onPress={handleBookmark}
               >
-                {loadingTranslation ? (
-                  <ActivityIndicator size="small" color={secondaryColor} />
-                ) : (
-                  <Text style={[styles.actionIcon, { color: secondaryColor }]}>&#x29C9;</Text>
-                )}
-                <Text style={[styles.actionLabel, { color: textColor }]}>Translation</Text>
+                <Text style={[styles.halfButtonLabel, { color: textColor }]}>All Bookmarks</Text>
+                <Ionicons name="chevron-forward" size={16} color={secondaryColor} />
               </Pressable>
+            </View>
 
+            {/* Recitation section */}
+            <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>Recitation</Text>
+            <View style={styles.buttonRow}>
               <Pressable
                 style={({ pressed }) => [
-                  styles.actionButton,
+                  styles.halfButton,
                   { backgroundColor: buttonBg },
                   pressed && { opacity: 0.6 },
                 ]}
-                onPress={withHaptic(handleTafsir)}
-                disabled={loadingTafsir}
+                onPress={handlePlayAudio}
               >
-                {loadingTafsir ? (
-                  <ActivityIndicator size="small" color={secondaryColor} />
-                ) : (
-                  <Text style={[styles.actionIcon, { color: secondaryColor }]}>&#x1F4D6;</Text>
-                )}
-                <Text style={[styles.actionLabel, { color: textColor }]}>Tafsir</Text>
+                <Ionicons name="play" size={20} color={textColor} />
+                <Text style={[styles.halfButtonLabel, { color: textColor }]}>Play</Text>
               </Pressable>
-
               <Pressable
                 style={({ pressed }) => [
-                  styles.actionButton,
+                  styles.halfButton,
                   { backgroundColor: buttonBg },
                   pressed && { opacity: 0.6 },
                 ]}
-                onPress={withHaptic(handlePlayAudio)}
+                onPress={handlePlayAudio}
               >
-                <Text style={[styles.actionIcon, { color: secondaryColor }]}>{'\u25B6'}</Text>
-                <Text style={[styles.actionLabel, { color: textColor }]}>Play Audio</Text>
+                <Ionicons name="play" size={18} color={textColor} />
+                <Text style={[styles.halfButtonLabel, { color: textColor }]}>Play To</Text>
+                <Ionicons name="chevron-forward" size={16} color={secondaryColor} />
               </Pressable>
             </View>
 
             {audioActive && ayahInfo ? (
-              <View style={[styles.expandedSection, { borderColor }]}>
+              <View style={[styles.audioCard, { backgroundColor: cardBg, borderColor }]}>
                 <AyahAudioPlayer surahId={ayahInfo.surahId} ayahNumber={ayahInfo.ayahNumber} />
               </View>
             ) : null}
 
-            {translationText ? (
-              <View style={[styles.expandedSection, { borderColor }]}>
-                <Text style={[styles.expandedLabel, { color: secondaryColor }]}>Translation</Text>
-                <Text style={[styles.expandedText, { color: textColor }]}>{translationText}</Text>
+            {/* Translation section */}
+            <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>Translation</Text>
+            <View style={[styles.translationCard, { backgroundColor: cardBg, borderColor }]}>
+              {loadingTranslation ? (
+                <ActivityIndicator size="small" color={secondaryColor} style={styles.cardLoader} />
+              ) : translationText ? (
+                <Text style={[styles.translationText, { color: textColor }]}>{translationText}</Text>
+              ) : (
+                <Text style={[styles.translationText, { color: secondaryColor }]}>
+                  Translation not available
+                </Text>
+              )}
+              <Text style={[styles.translationSource, { color: secondaryColor }]}>
+                Saheeh International
+              </Text>
+            </View>
+            <Pressable
+              style={({ pressed }) => [
+                styles.fullButton,
+                { backgroundColor: buttonBg },
+                pressed && { opacity: 0.6 },
+              ]}
+              onPress={handleTafsir}
+              disabled={loadingTafsir}
+            >
+              {loadingTafsir ? (
+                <ActivityIndicator size="small" color={secondaryColor} />
+              ) : (
+                <Ionicons name="book-outline" size={18} color={textColor} />
+              )}
+              <Text style={[styles.fullButtonLabel, { color: textColor }]}>Tafsir</Text>
+              <Ionicons name="chevron-forward" size={16} color={secondaryColor} />
+            </Pressable>
+
+            {tafsirText ? (
+              <View style={[styles.tafsirCard, { backgroundColor: cardBg, borderColor }]}>
+                <Text style={[styles.tafsirLabel, { color: secondaryColor }]}>Ibn Kathir</Text>
+                <Text style={[styles.tafsirText, { color: textColor }]}>{tafsirText}</Text>
               </View>
             ) : null}
 
-            {tafsirText ? (
-              <View style={[styles.expandedSection, { borderColor }]}>
-                <Text style={[styles.expandedLabel, { color: secondaryColor }]}>Tafsir</Text>
-                <Text style={[styles.expandedText, { color: textColor }]}>{tafsirText}</Text>
-              </View>
-            ) : null}
+            {/* Sharing section */}
+            <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>Sharing</Text>
+            <View style={styles.threeButtonRow}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.thirdButton,
+                  { backgroundColor: buttonBg },
+                  pressed && { opacity: 0.6 },
+                ]}
+                onPress={handleCopy}
+              >
+                <Ionicons name="copy-outline" size={22} color={textColor} />
+                <Text style={[styles.thirdButtonLabel, { color: textColor }]}>Copy</Text>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.thirdButton,
+                  { backgroundColor: buttonBg },
+                  pressed && { opacity: 0.6 },
+                ]}
+                onPress={handleDownload}
+              >
+                <Ionicons name="download-outline" size={22} color={textColor} />
+                <Text style={[styles.thirdButtonLabel, { color: textColor }]}>Download</Text>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.thirdButton,
+                  { backgroundColor: buttonBg },
+                  pressed && { opacity: 0.6 },
+                ]}
+                onPress={handleShare}
+              >
+                <Ionicons name="share-social-outline" size={22} color={textColor} />
+                <Text style={[styles.thirdButtonLabel, { color: textColor }]}>Share</Text>
+              </Pressable>
+            </View>
           </ScrollView>
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   )
 })
@@ -216,81 +318,151 @@ export const AyahActionSheet = React.memo(function AyahActionSheet({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
   },
+  dismissArea: {
+    flex: 1,
+  },
   sheet: {
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    paddingBottom: 34, // safe area
-    maxHeight: '70%',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    overflow: 'hidden',
   },
   handle: {
     width: 36,
     height: 4,
     borderRadius: 2,
     alignSelf: 'center',
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  scrollContent: {
-    flexGrow: 0,
-  },
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 4,
-    paddingBottom: 20,
-  },
-  ayahText: {
-    fontFamily: 'KFGQPCHafs',
-    fontSize: 22,
-    lineHeight: 40,
-    textAlign: 'center',
-    writingDirection: 'rtl',
+    marginTop: 10,
     marginBottom: 4,
   },
-  reference: {
-    textAlign: 'center',
-    fontSize: 13,
-    marginBottom: 12,
-  },
-  divider: {
-    height: 1,
-    marginBottom: 16,
-  },
-  actions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  actionButton: {
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  headerSpacer: {
+    width: 36,
+  },
+  headerTitle: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  closeButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+    gap: 8,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
+    marginTop: 8,
+    marginBottom: 2,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  halfButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 12,
     gap: 6,
   },
-  actionIcon: {
-    fontSize: 18,
-  },
-  actionLabel: {
+  halfButtonLabel: {
     fontSize: 15,
     fontWeight: '500',
   },
-  expandedSection: {
-    marginTop: 16,
-    paddingTop: 12,
-    borderTopWidth: 1,
+  fullButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    gap: 8,
   },
-  expandedLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    marginBottom: 8,
+  fullButtonLabel: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '500',
   },
-  expandedText: {
+  threeButtonRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  thirdButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 12,
+    gap: 6,
+  },
+  thirdButtonLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  audioCard: {
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  translationCard: {
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    gap: 8,
+  },
+  translationText: {
     fontSize: 15,
     lineHeight: 24,
+  },
+  translationSource: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  cardLoader: {
+    paddingVertical: 8,
+  },
+  tafsirCard: {
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+    gap: 8,
+  },
+  tafsirLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  tafsirText: {
+    fontSize: 14,
+    lineHeight: 22,
   },
 })
