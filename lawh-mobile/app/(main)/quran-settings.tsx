@@ -157,7 +157,7 @@ export default function QuranSettingsScreen() {
         </View>
 
         {/* Section 4: Theme */}
-        <Text style={styles.sectionTitle}>THEME</Text>
+        <Text style={styles.sectionTitle}>BANNER STYLE</Text>
         <View style={styles.card}>
           {THEME_OPTIONS.map((option, index) => (
             <View key={option.key}>
@@ -204,7 +204,7 @@ export default function QuranSettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F0E8',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 56,
     paddingBottom: 12,
-    backgroundColor: '#F5F0E8',
+    backgroundColor: '#FFFFFF',
   },
   backButton: {
     flexDirection: 'row',

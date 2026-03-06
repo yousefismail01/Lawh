@@ -4,22 +4,23 @@ import { View, Text, StyleSheet } from 'react-native'
 interface MushafPageHeaderProps {
   surahNameSimple: string
   juz: number
-  pageNumber: number
+  textColor?: string
+  separatorColor?: string
 }
 
 export const MushafPageHeader = React.memo(function MushafPageHeader({
   surahNameSimple,
   juz,
-  pageNumber,
+  textColor,
+  separatorColor,
 }: MushafPageHeaderProps) {
   return (
     <View style={styles.wrapper}>
       <View style={styles.container}>
-        <Text style={styles.text}>{surahNameSimple}</Text>
-        <Text style={styles.text}>{pageNumber}</Text>
-        <Text style={styles.text}>Part {juz}</Text>
+        <Text style={[styles.text, textColor ? { color: textColor } : undefined]}>{surahNameSimple}</Text>
+        <Text style={[styles.text, textColor ? { color: textColor } : undefined]}>Part {juz}</Text>
       </View>
-      <View style={styles.separator} />
+      <View style={[styles.separator, separatorColor ? { backgroundColor: separatorColor } : undefined]} />
     </View>
   )
 })
@@ -36,8 +37,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   text: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 11,
+    fontWeight: '400',
     color: '#666',
   },
   separator: {

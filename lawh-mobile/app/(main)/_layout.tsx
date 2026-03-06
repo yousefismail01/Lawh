@@ -11,6 +11,8 @@ export default function MainLayout() {
       <Stack.Screen name="review" />
       <Stack.Screen name="profile" />
       <Stack.Screen name="settings" />
+      <Stack.Screen name="quran-settings" />
+      <Stack.Screen name="theme-settings" />
     </Stack>
   )
 }

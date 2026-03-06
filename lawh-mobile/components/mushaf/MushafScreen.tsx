@@ -6,7 +6,6 @@ import {
   ActivityIndicator,
   Dimensions,
   ViewToken,
-  useColorScheme,
 } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 import { useFocusEffect } from 'expo-router'
@@ -19,8 +18,8 @@ import { MushafFooter } from './MushafFooter'
 import { ChromeOverlay } from './ChromeOverlay'
 import { AyahActionSheet } from './AyahActionSheet'
 import { CardView } from './CardView'
-import { quranService } from '@/services/quranService'
 import { preloadPageRange } from '@/lib/fonts/qpcV4FontManager'
+import { useResolvedTheme } from '@/hooks/useResolvedTheme'
 
 const TOTAL_PAGES = 604
 const PAGE_RANGE = 2
@@ -29,7 +28,6 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window')
 interface SelectedAyah {
   surahId: number
   ayahNumber: number
-  textUthmani: string
 }
 
 export function MushafScreen() {
@@ -40,8 +38,7 @@ export function MushafScreen() {
   const readingMode = useSettingsStore((s) => s.readingMode)
   const tajweedEnabled = useSettingsStore((s) => s.tajweedEnabled)
 
-  const colorScheme = useColorScheme()
-  const isDark = colorScheme === 'dark'
+  const theme = useResolvedTheme()
 
   const [currentPage, setCurrentPage] = useState(lastReadPage)
   const [selectedAyah, setSelectedAyah] = useState<SelectedAyah | null>(null)
@@ -49,20 +46,12 @@ export function MushafScreen() {
   const chrome = useChromeToggle(5000)
   const { visible: chromeVisible, toggle: toggleChrome } = chrome
 
-  // Compute tajweed color override for V4 font rendering
-  // COLRv1 CPAL palette selection is not natively supported in React Native,
-  // so we use a color override workaround: tajweed off => uniform text color
-  const tajweedColorOverride = useMemo(() => {
-    if (tajweedEnabled) return undefined // let COLRv1 colors render naturally
-    return isDark ? '#e8e0d0' : '#1c1812' // uniform color overrides COLRv1 layers
-  }, [tajweedEnabled, isDark])
-
   const pagerRef = useRef<PagerView>(null)
   const flatListRef = useRef<FlatList>(null)
 
   useEffect(() => {
-    preloadPageRange(currentPage, PAGE_RANGE + 1)
-  }, [currentPage])
+    preloadPageRange(currentPage, PAGE_RANGE + 1, tajweedEnabled)
+  }, [currentPage, tajweedEnabled])
 
   const initialPageSet = useRef(false)
   if (hasHydrated && !initialPageSet.current) {
@@ -115,20 +104,10 @@ export function MushafScreen() {
   const handleAyahLongPress = useCallback(
     async (info: { surahId: number; ayahNumber: number }) => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-      try {
-        const text = await quranService.getAyahText(info.surahId, info.ayahNumber)
-        setSelectedAyah({
-          surahId: info.surahId,
-          ayahNumber: info.ayahNumber,
-          textUthmani: text,
-        })
-      } catch {
-        setSelectedAyah({
-          surahId: info.surahId,
-          ayahNumber: info.ayahNumber,
-          textUthmani: '',
-        })
-      }
+      setSelectedAyah({
+        surahId: info.surahId,
+        ayahNumber: info.ayahNumber,
+      })
     },
     []
   )
@@ -172,8 +151,8 @@ export function MushafScreen() {
 
   if (!hasHydrated) {
     return (
-      <View style={[styles.loading, { backgroundColor: '#fff' }]}>
-        <ActivityIndicator size="small" color="#999" />
+      <View style={[styles.loading, { backgroundColor: theme.backgroundColor }]}>
+        <ActivityIndicator size="small" color={theme.secondaryTextColor} />
       </View>
     )
   }
@@ -189,11 +168,11 @@ export function MushafScreen() {
   const isCardMode = readingMode === 'arabic-cards' || readingMode === 'translation-cards'
 
   return (
-    <View style={[styles.root, { backgroundColor: isDark ? '#1c1812' : '#fff' }]}>
-        <StatusBar hidden={!chromeVisible} animated />
+    <View style={[styles.root, { backgroundColor: theme.backgroundColor }]}>
+        <StatusBar hidden={!chromeVisible} animated style={theme.isDark ? 'light' : 'dark'} />
 
         {isCardMode ? (
-          <CardView mode={readingMode as 'arabic-cards' | 'translation-cards'} initialPage={currentPage} />
+          <CardView mode={readingMode as 'arabic-cards' | 'translation-cards'} initialPage={currentPage} onPress={handlePageTap} />
         ) : navigationMode === 'horizontal' ? (
           <PagerView
             ref={pagerRef}
@@ -214,7 +193,7 @@ export function MushafScreen() {
                       pageNumber={pageNum}
                       onAyahLongPress={handleAyahLongPress}
                       onPress={handlePageTap}
-                      tajweedColorOverride={tajweedColorOverride}
+                      tajweedEnabled={tajweedEnabled}
                     />
                   ) : (
                     <View style={styles.placeholder} />
@@ -234,7 +213,7 @@ export function MushafScreen() {
                   pageNumber={item}
                   onAyahLongPress={handleAyahLongPress}
                   onPress={handlePageTap}
-                  tajweedColorOverride={tajweedColorOverride}
+                  tajweedEnabled={tajweedEnabled}
                 />
               </View>
             )}

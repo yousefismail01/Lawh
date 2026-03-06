@@ -5,11 +5,12 @@ import type { ReactNode } from 'react'
 interface MushafFrameProps {
   children: ReactNode
   isSpecialPage?: boolean
+  backgroundColor?: string
 }
 
-export const MushafFrame = React.memo(function MushafFrame({ children, isSpecialPage = false }: MushafFrameProps) {
+export const MushafFrame = React.memo(function MushafFrame({ children, isSpecialPage = false, backgroundColor }: MushafFrameProps) {
   return (
-    <View style={styles.frame}>
+    <View style={[styles.frame, backgroundColor ? { backgroundColor } : undefined]}>
       {children}
     </View>
   )
