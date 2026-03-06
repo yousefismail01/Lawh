@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { useSettingsStore } from '@/stores/settingsStore'
+import { useResolvedTheme } from '@/hooks/useResolvedTheme'
 
 const THEME_MODE_LABELS: Record<string, string> = {
   auto: 'Auto',
@@ -11,6 +12,7 @@ const THEME_MODE_LABELS: Record<string, string> = {
 
 export default function SettingsScreen() {
   const router = useRouter()
+  const { backgroundColor, textColor, secondaryTextColor, cardColor, separatorColor, iconColor } = useResolvedTheme()
   const appThemeMode = useSettingsStore((s) => s.appThemeMode)
   const readingMode = useSettingsStore((s) => s.readingMode)
 
@@ -22,44 +24,44 @@ export default function SettingsScreen() {
         : 'Translation Cards'
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor }]}>
+      <View style={[styles.header, { backgroundColor, borderBottomColor: separatorColor }]}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color={iconColor} />
         </Pressable>
-        <Text style={styles.headerTitle}>Settings</Text>
+        <Text style={[styles.headerTitle, { color: textColor }]}>Settings</Text>
         <View style={{ width: 24 }} />
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <Text style={styles.sectionTitle}>Appearance</Text>
-        <View style={styles.card}>
+        <Text style={[styles.sectionTitle, { color: secondaryTextColor }]}>Appearance</Text>
+        <View style={[styles.card, { backgroundColor: cardColor }]}>
           {/* Quran row */}
           <Pressable
             style={styles.row}
             onPress={() => router.push('/(main)/quran-settings')}
           >
-            <Ionicons name="book-outline" size={20} color="#333" style={styles.rowIcon} />
+            <Ionicons name="book-outline" size={20} color={iconColor} style={styles.rowIcon} />
             <View style={styles.rowTextContainer}>
-              <Text style={styles.rowLabel}>Quran</Text>
-              <Text style={styles.rowSubtitle}>{readingModeLabel}</Text>
+              <Text style={[styles.rowLabel, { color: textColor }]}>Quran</Text>
+              <Text style={[styles.rowSubtitle, { color: secondaryTextColor }]}>{readingModeLabel}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color="#999" />
+            <Ionicons name="chevron-forward" size={18} color={secondaryTextColor} />
           </Pressable>
 
-          <View style={styles.separator} />
+          <View style={[styles.separator, { backgroundColor: separatorColor }]} />
 
           {/* Theme row */}
           <Pressable
             style={styles.row}
             onPress={() => router.push('/(main)/theme-settings')}
           >
-            <Ionicons name="color-palette-outline" size={20} color="#333" style={styles.rowIcon} />
+            <Ionicons name="color-palette-outline" size={20} color={iconColor} style={styles.rowIcon} />
             <View style={styles.rowTextContainer}>
-              <Text style={styles.rowLabel}>Theme</Text>
-              <Text style={styles.rowSubtitle}>{THEME_MODE_LABELS[appThemeMode] ?? appThemeMode}</Text>
+              <Text style={[styles.rowLabel, { color: textColor }]}>Theme</Text>
+              <Text style={[styles.rowSubtitle, { color: secondaryTextColor }]}>{THEME_MODE_LABELS[appThemeMode] ?? appThemeMode}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color="#999" />
+            <Ionicons name="chevron-forward" size={18} color={secondaryTextColor} />
           </Pressable>
         </View>
       </ScrollView>
@@ -70,7 +72,6 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
@@ -79,14 +80,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 56,
     paddingBottom: 12,
-    backgroundColor: '#fff',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e0e0e0',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
   },
   content: {
     flex: 1,
@@ -97,13 +95,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#888',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 8,
   },
   card: {
-    backgroundColor: '#f8f8f8',
     borderRadius: 12,
     marginBottom: 24,
     overflow: 'hidden',
@@ -122,16 +118,13 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     fontSize: 16,
-    color: '#000',
   },
   rowSubtitle: {
     fontSize: 13,
-    color: '#888',
     marginTop: 1,
   },
   separator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: '#e0e0e0',
     marginLeft: 48,
   },
 })

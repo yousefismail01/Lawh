@@ -3,9 +3,18 @@ import { View, Text, Pressable, StyleSheet } from 'react-native'
 
 type ContentsTab = 'contents' | 'khatmah' | 'bookmarks' | 'highlights'
 
+interface ContentsTabBarColors {
+  bg: string
+  border: string
+  text: string
+  activeText: string
+  muted: string
+}
+
 interface ContentsTabBarProps {
   activeTab: ContentsTab
   onTabChange: (tab: ContentsTab) => void
+  colors?: ContentsTabBarColors
 }
 
 const TABS: { key: ContentsTab; label: string; enabled: boolean }[] = [
@@ -15,22 +24,28 @@ const TABS: { key: ContentsTab; label: string; enabled: boolean }[] = [
   { key: 'highlights', label: 'Highlights', enabled: false },
 ]
 
-function ContentsTabBarInner({ activeTab, onTabChange }: ContentsTabBarProps) {
+function ContentsTabBarInner({ activeTab, onTabChange, colors }: ContentsTabBarProps) {
+  const bg = colors?.bg ?? '#fff'
+  const border = colors?.border ?? '#e0e0e0'
+  const text = colors?.text ?? '#999'
+  const activeText = colors?.activeText ?? '#333'
+  const muted = colors?.muted ?? '#ccc'
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: bg, borderTopColor: border }]}>
       {TABS.map((tab) => {
         const isActive = tab.key === activeTab
         return (
           <Pressable
             key={tab.key}
-            style={[styles.tab, isActive && styles.tabActive]}
+            style={[styles.tab, isActive && { borderBottomColor: activeText }]}
             onPress={() => onTabChange(tab.key)}
           >
-            <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
+            <Text style={[styles.tabText, { color: isActive ? activeText : text }]}>
               {tab.label}
             </Text>
             {!tab.enabled && (
-              <Text style={styles.comingSoon}>Soon</Text>
+              <Text style={[styles.comingSoon, { color: muted }]}>Soon</Text>
             )}
           </Pressable>
         )
@@ -46,8 +61,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#e0e0e0',
-    backgroundColor: '#fff',
     paddingBottom: 0,
   },
   tab: {
@@ -58,21 +71,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
   },
-  tabActive: {
-    borderBottomColor: '#333',
-  },
   tabText: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#999',
-  },
-  tabTextActive: {
-    color: '#333',
-    fontWeight: '700',
   },
   comingSoon: {
     fontSize: 8,
-    color: '#ccc',
     marginTop: 1,
   },
 })

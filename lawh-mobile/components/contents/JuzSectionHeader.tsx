@@ -1,16 +1,27 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 
-interface JuzSectionHeaderProps {
-  title: string
+interface JuzSectionHeaderColors {
+  bg: string
+  text: string
+  line: string
 }
 
-function JuzSectionHeaderInner({ title }: JuzSectionHeaderProps) {
+interface JuzSectionHeaderProps {
+  title: string
+  colors?: JuzSectionHeaderColors
+}
+
+function JuzSectionHeaderInner({ title, colors }: JuzSectionHeaderProps) {
+  const bg = colors?.bg ?? '#f8f8f8'
+  const text = colors?.text ?? '#666'
+  const line = colors?.line ?? '#ddd'
+
   return (
-    <View style={styles.container}>
-      <View style={styles.line} />
-      <Text style={styles.text}>{title}</Text>
-      <View style={styles.line} />
+    <View style={[styles.container, { backgroundColor: bg }]}>
+      <View style={[styles.line, { backgroundColor: line }]} />
+      <Text style={[styles.text, { color: text }]}>{title}</Text>
+      <View style={[styles.line, { backgroundColor: line }]} />
     </View>
   )
 }
@@ -21,20 +32,17 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
+    height: 31,
     paddingHorizontal: 16,
-    backgroundColor: '#f8f8f8',
   },
   line: {
     flex: 1,
     height: StyleSheet.hairlineWidth,
-    backgroundColor: '#ddd',
   },
   text: {
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 1.5,
-    color: '#666',
     marginHorizontal: 12,
     textTransform: 'uppercase',
   },

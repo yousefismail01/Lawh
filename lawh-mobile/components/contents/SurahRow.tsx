@@ -2,30 +2,59 @@ import React from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import type { SurahInfo } from '@/lib/data/contentsData'
 
+function surahNameLigature(surahId: number): string {
+  return `surah${String(surahId).padStart(3, '0')}`
+}
+
+interface SurahRowColors {
+  bg: string
+  currentBg: string
+  text: string
+  muted: string
+  calligraphy: string
+  border: string
+}
+
 interface SurahRowProps {
   surah: SurahInfo
   isCurrent?: boolean
   onSelect: (pageStart: number) => void
+  colors?: SurahRowColors
 }
 
-function SurahRowInner({ surah, isCurrent, onSelect }: SurahRowProps) {
+function SurahRowInner({ surah, isCurrent, onSelect, colors }: SurahRowProps) {
+  const bg = colors?.bg ?? '#fff'
+  const currentBg = colors?.currentBg ?? '#f0f0f0'
+  const text = colors?.text ?? '#1a1a1a'
+  const muted = colors?.muted ?? '#888'
+  const calligraphy = colors?.calligraphy ?? '#333'
+  const border = colors?.border ?? '#ddd'
+
   return (
     <Pressable
-      style={({ pressed }) => [styles.container, isCurrent && styles.current, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.container,
+        { backgroundColor: isCurrent ? currentBg : bg },
+        pressed && { opacity: 0.7 },
+      ]}
       onPress={() => onSelect(surah.pageStart)}
     >
-      <View style={[styles.numberCircle, isCurrent && styles.numberCircleCurrent]}>
-        <Text style={[styles.numberText, isCurrent && styles.numberTextCurrent]}>{surah.id}</Text>
+      <View style={[
+        styles.numberCircle,
+        { borderColor: isCurrent ? text : border },
+        isCurrent && { backgroundColor: text },
+      ]}>
+        <Text style={[styles.numberText, { color: isCurrent ? bg : text }]}>{surah.id}</Text>
       </View>
       <View style={styles.info}>
-        <Text style={[styles.name, isCurrent && styles.nameCurrent]}>{surah.nameSimple}</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.name, { color: text }, isCurrent && styles.nameCurrent]}>{surah.nameSimple}</Text>
+        <Text style={[styles.subtitle, { color: muted }]}>
           {surah.versesCount} Verses{' \u2022 '}
           {surah.revelationPlace === 'makkah' ? 'Meccan' : 'Medinan'}
+          {' \u2022 '}Page {surah.pageStart}
         </Text>
       </View>
-      {isCurrent && <Text style={styles.currentLabel}>Reading</Text>}
-      <Text style={styles.page}>p. {surah.pageStart}</Text>
+      <Text style={[styles.surahCalligraphy, { color: calligraphy }]}>{surahNameLigature(surah.id)}</Text>
     </Pressable>
   )
 }
@@ -36,38 +65,22 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    height: 58,
     paddingHorizontal: 16,
     paddingRight: 40,
-    backgroundColor: '#fff',
-  },
-  current: {
-    backgroundColor: '#f0f0f0',
-  },
-  pressed: {
-    backgroundColor: '#f5f5f5',
   },
   numberCircle: {
     width: 28,
     height: 28,
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: '#ddd',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
-  numberCircleCurrent: {
-    borderColor: '#333',
-    backgroundColor: '#333',
-  },
   numberText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#333',
-  },
-  numberTextCurrent: {
-    color: '#fff',
   },
   info: {
     flex: 1,
@@ -75,7 +88,6 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1a1a1a',
     marginBottom: 2,
   },
   nameCurrent: {
@@ -83,17 +95,11 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 12,
-    color: '#888',
   },
-  currentLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#888',
-    marginRight: 6,
-  },
-  page: {
-    fontSize: 12,
-    color: '#888',
+  surahCalligraphy: {
+    fontFamily: 'SurahNameV4',
+    fontSize: 30,
     marginLeft: 8,
+    includeFontPadding: false,
   },
 })
