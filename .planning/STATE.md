@@ -65,6 +65,9 @@ See: .planning/PROJECT.md
 - [Quick 8]: Used individual zustand selectors per setting to minimize re-renders in quran-settings
 - [Quick 8]: Cropped left-half SVG preview (80x48 container, 160px SVG, overflow hidden) for theme previews
 - [Quick 8]: Classic theme preview uses QuranCommon font header ligature on dark green background
+- [Quick 9]: Used inline theme resolution in MushafPage (zustand selectors + useColorScheme) instead of prop drilling isDark
+- [Quick 9]: Created separate theme-settings.tsx page instead of embedding in quran-settings
+- [Quick 9]: Used 'parchment' naming for light warm variant (user-facing label matches store value)
 
 ### Quick Tasks Completed
 
@@ -76,10 +79,11 @@ See: .planning/PROJECT.md
 | 6 | Home page with bottom tabs (Dashboard/Goals/Hifz/Activity) and full profile screen | 2026-03-06 | 64da0aa | [6-home-page-with-bottom-tabs-hifz-goals-da](./quick/6-home-page-with-bottom-tabs-hifz-goals-da/) |
 | 7 | Redesign AyahActionSheet as full-height swipe-up sheet with structured sections | 2026-03-06 | 5f54ced | [7-redesign-ayahactionsheet-as-full-height-](./quick/7-redesign-ayahactionsheet-as-full-height-/) |
 | 8 | Redesign Quran settings page with 5-section card layout | 2026-03-06 | f7c057f | [8-redesign-quran-settings-page-with-scroll](./quick/8-redesign-quran-settings-page-with-scroll/) |
+| 9 | App theme settings with Auto/Light/Dark mode and mushaf wiring | 2026-03-06 | 699ae64 | [9-add-app-theme-settings-with-auto-light-d](./quick/9-add-app-theme-settings-with-auto-light-d/) |
 
 ### Last Session
 
-- **Stopped at:** Completed quick task 8
-- **Timestamp:** 2026-03-06T09:47:00Z
+- **Stopped at:** Completed quick task 9
+- **Timestamp:** 2026-03-06T06:17:09Z
 
-Last activity: 2026-03-06 - Completed quick task 8: Redesign Quran settings page with 5-section card layout, cropped SVG theme previews, and new settings persistence
+Last activity: 2026-03-06 - Completed quick task 9: Theme settings with Auto/Light/Dark mode, Parchment/Navy sub-variants, and full mushaf component color wiring
