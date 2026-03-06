@@ -11,7 +11,7 @@ export type PageDesign = 'fullscreen' | 'book'
 export type LandscapeLayout = 'single' | 'double'
 export type AppThemeMode = 'auto' | 'light' | 'dark'
 export type LightVariant = 'white' | 'parchment'
-export type DarkVariant = 'black' | 'navy'
+export type DarkVariant = 'black' | 'gray'
 
 interface SettingsState {
   riwayah: Riwayah

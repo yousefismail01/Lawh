@@ -7,6 +7,11 @@ export interface ResolvedTheme {
   textColor: string
   secondaryTextColor: string
   separatorColor: string
+  cardColor: string
+  surfaceColor: string
+  borderColor: string
+  iconColor: string
+  accentColor: string
 }
 
 export function useResolvedTheme(): ResolvedTheme {
@@ -21,7 +26,7 @@ export function useResolvedTheme(): ResolvedTheme {
   const backgroundColor = isDark
     ? darkVariant === 'black'
       ? '#000000'
-      : '#0A1628'
+      : '#1C1C1E'
     : lightVariant === 'white'
       ? '#FFFFFF'
       : '#FAF6F0'
@@ -29,6 +34,22 @@ export function useResolvedTheme(): ResolvedTheme {
   const textColor = isDark ? '#FFFFFF' : '#000000'
   const secondaryTextColor = isDark ? '#999999' : '#666666'
   const separatorColor = isDark ? '#333333' : '#e0e0e0'
+  const cardColor = isDark ? '#1e1e1e' : '#f8f8f8'
+  const surfaceColor = isDark ? '#2a2a2a' : '#f5f5f5'
+  const borderColor = isDark ? '#333333' : '#e8e8e8'
+  const iconColor = isDark ? '#cccccc' : '#333333'
+  const accentColor = '#007AFF'
 
-  return { isDark, backgroundColor, textColor, secondaryTextColor, separatorColor }
+  return {
+    isDark,
+    backgroundColor,
+    textColor,
+    secondaryTextColor,
+    separatorColor,
+    cardColor,
+    surfaceColor,
+    borderColor,
+    iconColor,
+    accentColor,
+  }
 }

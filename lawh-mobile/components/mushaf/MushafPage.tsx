@@ -95,7 +95,7 @@ const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, 
   const darkVariant = useSettingsStore((s) => s.darkVariant)
   const systemScheme = useColorScheme()
   const isDark = appThemeMode === 'auto' ? systemScheme === 'dark' : appThemeMode === 'dark'
-  const bgColor = isDark ? (darkVariant === 'black' ? '#000000' : '#0A1628') : (lightVariant === 'white' ? '#FFFFFF' : '#FAF6F0')
+  const bgColor = isDark ? (darkVariant === 'black' ? '#000000' : '#1C1C1E') : (lightVariant === 'white' ? '#FFFFFF' : '#FAF6F0')
   const txtColor = isDark ? '#FFFFFF' : '#000000'
   const secColor = isDark ? '#999999' : '#666666'
   const sepColor = isDark ? '#333333' : '#e0e0e0'
@@ -148,7 +148,7 @@ const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, 
     } else if (line.type === 'basmallah') {
       renderedLines.push(
         <View key={`line-${i}`} style={styles.lineSlot}>
-          <MushafBismillah surahId={0} textColor={txtColor} />
+          <MushafBismillah surahId={0} />
         </View>
       )
     } else if (line.type === 'ayah') {
@@ -174,6 +174,8 @@ const MushafPageInner = function MushafPageInner({ pageNumber, onAyahLongPress, 
                 {
                   fontFamily: fontName,
                   textAlign: line.centered ? 'center' : 'justify',
+                  // Sets COLRv1 foreground color ref — base text becomes white in dark mode
+                  // while tajweed color layers are preserved.
                   color: txtColor,
                 },
               ]}
