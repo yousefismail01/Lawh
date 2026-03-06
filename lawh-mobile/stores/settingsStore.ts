@@ -9,6 +9,9 @@ export type ReadingMode = 'mushaf' | 'arabic-cards' | 'translation-cards'
 export type BannerTheme = 'bw' | 'classic' | 'blue' | 'pink'
 export type PageDesign = 'fullscreen' | 'book'
 export type LandscapeLayout = 'single' | 'double'
+export type AppThemeMode = 'auto' | 'light' | 'dark'
+export type LightVariant = 'white' | 'parchment'
+export type DarkVariant = 'black' | 'navy'
 
 interface SettingsState {
   riwayah: Riwayah
@@ -27,6 +30,9 @@ interface SettingsState {
   bannerTheme: BannerTheme
   pageDesign: PageDesign
   landscapeLayout: LandscapeLayout
+  appThemeMode: AppThemeMode
+  lightVariant: LightVariant
+  darkVariant: DarkVariant
   thematicHighlighting: boolean
   _hasHydrated: boolean
   setRiwayah: (riwayah: Riwayah) => void
@@ -44,6 +50,9 @@ interface SettingsState {
   setBannerTheme: (theme: BannerTheme) => void
   setPageDesign: (pageDesign: PageDesign) => void
   setLandscapeLayout: (landscapeLayout: LandscapeLayout) => void
+  setAppThemeMode: (mode: AppThemeMode) => void
+  setLightVariant: (variant: LightVariant) => void
+  setDarkVariant: (variant: DarkVariant) => void
   setThematicHighlighting: (thematicHighlighting: boolean) => void
   setHasHydrated: (hydrated: boolean) => void
 }
@@ -67,6 +76,9 @@ export const useSettingsStore = create<SettingsState>()(
       bannerTheme: 'bw',
       pageDesign: 'fullscreen',
       landscapeLayout: 'double',
+      appThemeMode: 'auto',
+      lightVariant: 'white',
+      darkVariant: 'black',
       thematicHighlighting: false,
       _hasHydrated: false,
       setRiwayah: (riwayah) => set({ riwayah }),
@@ -84,6 +96,9 @@ export const useSettingsStore = create<SettingsState>()(
       setBannerTheme: (bannerTheme) => set({ bannerTheme }),
       setPageDesign: (pageDesign) => set({ pageDesign }),
       setLandscapeLayout: (landscapeLayout) => set({ landscapeLayout }),
+      setAppThemeMode: (appThemeMode) => set({ appThemeMode }),
+      setLightVariant: (lightVariant) => set({ lightVariant }),
+      setDarkVariant: (darkVariant) => set({ darkVariant }),
       setThematicHighlighting: (thematicHighlighting) => set({ thematicHighlighting }),
       setHasHydrated: (_hasHydrated) => set({ _hasHydrated }),
     }),
@@ -111,6 +126,9 @@ export const useSettingsStore = create<SettingsState>()(
         bannerTheme: state.bannerTheme,
         pageDesign: state.pageDesign,
         landscapeLayout: state.landscapeLayout,
+        appThemeMode: state.appThemeMode,
+        lightVariant: state.lightVariant,
+        darkVariant: state.darkVariant,
         thematicHighlighting: state.thematicHighlighting,
       }),
     }
