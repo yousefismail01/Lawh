@@ -6,6 +6,9 @@ import { DEFAULT_RIWAYAH } from '@/types/riwayah'
 
 type ContentsSortOrder = 'ascending' | 'descending' | 'revelation'
 export type ReadingMode = 'mushaf' | 'arabic-cards' | 'translation-cards'
+export type BannerTheme = 'bw' | 'classic' | 'blue' | 'pink'
+export type PageDesign = 'fullscreen' | 'book'
+export type LandscapeLayout = 'single' | 'double'
 
 interface SettingsState {
   riwayah: Riwayah
@@ -21,6 +24,10 @@ interface SettingsState {
   showTranslation: boolean
   arabicFontSize: number
   translationFontSize: number
+  bannerTheme: BannerTheme
+  pageDesign: PageDesign
+  landscapeLayout: LandscapeLayout
+  thematicHighlighting: boolean
   _hasHydrated: boolean
   setRiwayah: (riwayah: Riwayah) => void
   setGoals: (minutes: number, ayahs: number) => void
@@ -34,6 +41,10 @@ interface SettingsState {
   setShowTranslation: (show: boolean) => void
   setArabicFontSize: (size: number) => void
   setTranslationFontSize: (size: number) => void
+  setBannerTheme: (theme: BannerTheme) => void
+  setPageDesign: (pageDesign: PageDesign) => void
+  setLandscapeLayout: (landscapeLayout: LandscapeLayout) => void
+  setThematicHighlighting: (thematicHighlighting: boolean) => void
   setHasHydrated: (hydrated: boolean) => void
 }
 
@@ -53,6 +64,10 @@ export const useSettingsStore = create<SettingsState>()(
       showTranslation: true,
       arabicFontSize: 26,
       translationFontSize: 15,
+      bannerTheme: 'bw',
+      pageDesign: 'fullscreen',
+      landscapeLayout: 'double',
+      thematicHighlighting: false,
       _hasHydrated: false,
       setRiwayah: (riwayah) => set({ riwayah }),
       setGoals: (dailyGoalMinutes, dailyGoalAyahs) => set({ dailyGoalMinutes, dailyGoalAyahs }),
@@ -66,6 +81,10 @@ export const useSettingsStore = create<SettingsState>()(
       setShowTranslation: (showTranslation) => set({ showTranslation }),
       setArabicFontSize: (arabicFontSize) => set({ arabicFontSize }),
       setTranslationFontSize: (translationFontSize) => set({ translationFontSize }),
+      setBannerTheme: (bannerTheme) => set({ bannerTheme }),
+      setPageDesign: (pageDesign) => set({ pageDesign }),
+      setLandscapeLayout: (landscapeLayout) => set({ landscapeLayout }),
+      setThematicHighlighting: (thematicHighlighting) => set({ thematicHighlighting }),
       setHasHydrated: (_hasHydrated) => set({ _hasHydrated }),
     }),
     {
@@ -89,6 +108,10 @@ export const useSettingsStore = create<SettingsState>()(
         showTranslation: state.showTranslation,
         arabicFontSize: state.arabicFontSize,
         translationFontSize: state.translationFontSize,
+        bannerTheme: state.bannerTheme,
+        pageDesign: state.pageDesign,
+        landscapeLayout: state.landscapeLayout,
+        thematicHighlighting: state.thematicHighlighting,
       }),
     }
   )
