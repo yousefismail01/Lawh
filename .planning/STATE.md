@@ -66,10 +66,11 @@ See: .planning/PROJECT.md
 |---|-------------|------|--------|-----------|
 | 3 | Add page break indicators and replace mushaf header with standard surah header | 2026-03-05 | 0614531 | [3-add-page-break-indicators-and-replace-mu](./quick/3-add-page-break-indicators-and-replace-mu/) |
 | 4 | Add configurable reading options to layout selector | 2026-03-05 | 078a750 | [4-add-configurable-reading-options-to-layo](./quick/4-add-configurable-reading-options-to-layo/) |
+| 5 | Add ayah separator lines, [surah:ayah] labels, and three-dot menu to card view | 2026-03-06 | 86ec7e9 | [5-ayah-separator-lines-chapter-ayah-labels](./quick/5-ayah-separator-lines-chapter-ayah-labels/) |
 
 ### Last Session
 
-- **Stopped at:** Completed quick task 4
-- **Timestamp:** 2026-03-05T22:16:00Z
+- **Stopped at:** Completed quick task 5
+- **Timestamp:** 2026-03-06T04:59:00Z
 
-Last activity: 2026-03-05 - Completed quick task 4: Add configurable reading options to layout selector
+Last activity: 2026-03-06 - Completed quick task 5: Add ayah separator lines, [surah:ayah] labels, and three-dot menu to card view
