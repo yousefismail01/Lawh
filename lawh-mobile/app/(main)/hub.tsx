@@ -1,75 +1,210 @@
-import React from 'react'
-import { View, Text, Pressable, ScrollView, StyleSheet, Dimensions } from 'react-native'
+import React, { useState } from 'react'
+import {
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useColorScheme,
+} from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-interface FeatureCard {
-  key: string
-  title: string
-  subtitle: string
-  symbol: string
-  route: string
+type TabKey = 'dashboard' | 'goals' | 'hifz' | 'activity'
+
+interface Tab {
+  key: TabKey
+  label: string
+  icon: string
 }
 
-const FEATURES: FeatureCard[] = [
-  { key: 'hifz', title: 'Hifz', subtitle: 'Track your memorization', symbol: 'H', route: '/(main)/hifz' },
-  { key: 'recite', title: 'Recite', subtitle: 'Practice recitation', symbol: 'R', route: '/(main)/recite' },
-  { key: 'review', title: 'Review', subtitle: 'Spaced repetition', symbol: 'V', route: '/(main)/review' },
-  { key: 'profile', title: 'Profile', subtitle: 'Your progress', symbol: 'P', route: '/(main)/profile' },
-  { key: 'settings', title: 'Settings', subtitle: 'App preferences', symbol: 'S', route: '/(main)/settings' },
+const TABS: Tab[] = [
+  { key: 'dashboard', label: 'Dashboard', icon: '\u229E' },
+  { key: 'goals', label: 'Goals', icon: '\u25CE' },
+  { key: 'hifz', label: 'Hifz', icon: '\u263E' },
+  { key: 'activity', label: 'Activity', icon: '\u224B' },
 ]
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window')
-const CARD_GAP = 12
-const CARD_WIDTH = (SCREEN_WIDTH - 16 * 2 - CARD_GAP) / 2
+function DashboardTab({ colors }: { colors: ReturnType<typeof buildColors> }) {
+  const router = useRouter()
+  return (
+    <ScrollView
+      contentContainerStyle={[styles.tabContent, { paddingBottom: 40 }]}
+      showsVerticalScrollIndicator={false}
+    >
+      <Pressable
+        style={({ pressed }) => [
+          styles.mushafCard,
+          { backgroundColor: colors.card },
+          pressed && styles.pressed,
+        ]}
+        onPress={() => router.back()}
+      >
+        <Text style={styles.mushafCardTitle}>Open Mushaf</Text>
+        <Text style={styles.mushafCardSub}>Continue reading where you left off</Text>
+      </Pressable>
+      <View style={[styles.comingSoonBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Text style={[styles.comingSoonTitle, { color: colors.text }]}>Dashboard</Text>
+        <Text style={[styles.comingSoonText, { color: colors.muted }]}>Dashboard features coming soon</Text>
+      </View>
+    </ScrollView>
+  )
+}
+
+function PlaceholderTab({
+  title,
+  subtitle,
+  colors,
+}: {
+  title: string
+  subtitle: string
+  colors: ReturnType<typeof buildColors>
+}) {
+  return (
+    <ScrollView
+      contentContainerStyle={[styles.tabContent, styles.tabContentCenter]}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={[styles.placeholderBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Text style={[styles.placeholderTitle, { color: colors.text }]}>{title}</Text>
+        <Text style={[styles.placeholderSubtitle, { color: colors.muted }]}>{subtitle}</Text>
+        <Text style={[styles.comingSoonBadge, { color: colors.muted, borderColor: colors.border }]}>
+          Coming Soon
+        </Text>
+      </View>
+    </ScrollView>
+  )
+}
+
+function buildColors(isDark: boolean) {
+  return {
+    bg: isDark ? '#111' : '#fff',
+    surface: isDark ? '#1e1e1e' : '#f5f5f5',
+    border: isDark ? '#2a2a2a' : '#e8e8e8',
+    text: isDark ? '#fff' : '#1a1a1a',
+    muted: isDark ? '#666' : '#999',
+    card: isDark ? '#1a1a1a' : '#333',
+    tabBar: isDark ? '#1a1a1a' : '#fff',
+    activeTab: isDark ? '#fff' : '#1a1a1a',
+  }
+}
 
 export default function HubScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const scheme = useColorScheme()
+  const isDark = scheme === 'dark'
+  const colors = buildColors(isDark)
+  const [activeTab, setActiveTab] = useState<TabKey>('dashboard')
+
+  function renderTabContent() {
+    switch (activeTab) {
+      case 'dashboard':
+        return <DashboardTab colors={colors} />
+      case 'goals':
+        return (
+          <PlaceholderTab
+            title="Goals"
+            subtitle="Track your memorization targets"
+            colors={colors}
+          />
+        )
+      case 'hifz':
+        return (
+          <PlaceholderTab
+            title="Hifz"
+            subtitle="Your memorization progress"
+            colors={colors}
+          />
+        )
+      case 'activity':
+        return (
+          <PlaceholderTab
+            title="Activity"
+            subtitle="Recent sessions and streaks"
+            colors={colors}
+          />
+        )
+    }
+  }
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backArrow}>{'\u2190'}</Text>
-          <Text style={styles.backText}>Back to Mushaf</Text>
+    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+      {/* Top bar */}
+      <View
+        style={[
+          styles.topBar,
+          {
+            paddingTop: insets.top + 8,
+            backgroundColor: colors.bg,
+            borderBottomColor: colors.border,
+          },
+        ]}
+      >
+        <Pressable
+          onPress={() => router.push('/(main)/settings')}
+          hitSlop={12}
+          style={styles.topBarIcon}
+        >
+          <Text style={[styles.topBarIconText, { color: colors.text }]}>{'\u2699'}</Text>
+        </Pressable>
+
+        <Text style={[styles.topBarTitle, { color: colors.text }]}>Lawh</Text>
+
+        <Pressable
+          onPress={() => router.push('/(main)/profile')}
+          hitSlop={12}
+          style={styles.topBarIcon}
+        >
+          <Text style={[styles.topBarIconText, { color: colors.text }]}>{'\uD83D\uDC64'}</Text>
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* App title area */}
-        <View style={styles.titleArea}>
-          <Text style={styles.appTitle}>Lawh</Text>
-          <Text style={styles.appSubtitle}>Your Quran Companion</Text>
-        </View>
+      {/* Tab content */}
+      <View style={styles.contentArea}>{renderTabContent()}</View>
 
-        {/* Mushaf card (prominent) */}
-        <Pressable
-          style={({ pressed }) => [styles.mushafCard, pressed && styles.cardPressed]}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.mushafCardTitle}>Open Mushaf</Text>
-          <Text style={styles.mushafCardSub}>Continue reading where you left off</Text>
-        </Pressable>
-
-        {/* Feature cards grid */}
-        <View style={styles.grid}>
-          {FEATURES.map((feature) => (
+      {/* Bottom tab bar */}
+      <View
+        style={[
+          styles.tabBar,
+          {
+            paddingBottom: insets.bottom,
+            backgroundColor: colors.tabBar,
+            borderTopColor: colors.border,
+          },
+        ]}
+      >
+        {TABS.map((tab) => {
+          const isActive = tab.key === activeTab
+          return (
             <Pressable
-              key={feature.key}
-              style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-              onPress={() => router.push(feature.route as never)}
+              key={tab.key}
+              style={[
+                styles.tabItem,
+                isActive && { borderTopColor: colors.activeTab, borderTopWidth: 2 },
+              ]}
+              onPress={() => setActiveTab(tab.key)}
             >
-              <View style={styles.symbolCircle}>
-                <Text style={styles.symbolText}>{feature.symbol}</Text>
-              </View>
-              <Text style={styles.cardTitle}>{feature.title}</Text>
-              <Text style={styles.cardSubtitle}>{feature.subtitle}</Text>
+              <Text
+                style={[
+                  styles.tabIcon,
+                  { color: isActive ? colors.activeTab : colors.muted },
+                ]}
+              >
+                {tab.icon}
+              </Text>
+              <Text
+                style={[
+                  styles.tabLabel,
+                  { color: isActive ? colors.activeTab : colors.muted },
+                ]}
+              >
+                {tab.label}
+              </Text>
             </Pressable>
-          ))}
-        </View>
-      </ScrollView>
+          )
+        })}
+      </View>
     </View>
   )
 }
@@ -77,52 +212,46 @@ export default function HubScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#fff',
   },
-  header: {
+  topBar: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingBottom: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  backButton: {
-    flexDirection: 'row',
+  topBarIcon: {
+    width: 36,
+    height: 36,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  backArrow: {
-    fontSize: 18,
-    color: '#333',
-    marginRight: 4,
+  topBarIconText: {
+    fontSize: 22,
   },
-  backText: {
-    fontSize: 16,
-    color: '#333',
+  topBarTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 40,
+  contentArea: {
+    flex: 1,
   },
-  titleArea: {
+  tabContent: {
+    padding: 16,
+  },
+  tabContentCenter: {
+    flex: 1,
     alignItems: 'center',
-    marginVertical: 24,
-  },
-  appTitle: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#1a1a1a',
-    letterSpacing: 1,
-  },
-  appSubtitle: {
-    fontSize: 14,
-    color: '#888',
-    marginTop: 4,
+    justifyContent: 'center',
+    minHeight: 400,
   },
   mushafCard: {
-    backgroundColor: '#333',
     borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
+    padding: 24,
     alignItems: 'center',
+    marginBottom: 16,
   },
   mushafCardTitle: {
     fontSize: 18,
@@ -134,44 +263,65 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#ccc',
   },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: CARD_GAP,
-  },
-  card: {
-    width: CARD_WIDTH,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 14,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#e8e8e8',
-  },
-  cardPressed: {
+  pressed: {
     opacity: 0.8,
   },
-  symbolCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#333',
+  comingSoonBox: {
+    borderRadius: 14,
+    padding: 20,
+    borderWidth: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
   },
-  symbolText: {
+  comingSoonTitle: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#fff',
+    fontWeight: '600',
+    marginBottom: 6,
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: 4,
+  comingSoonText: {
+    fontSize: 14,
   },
-  cardSubtitle: {
+  placeholderBox: {
+    borderRadius: 16,
+    padding: 32,
+    alignItems: 'center',
+    borderWidth: 1,
+    width: '100%',
+  },
+  placeholderTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  placeholderSubtitle: {
+    fontSize: 14,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  comingSoonBadge: {
     fontSize: 12,
-    color: '#888',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    paddingTop: 10,
+    paddingBottom: 6,
+    borderTopWidth: 2,
+    borderTopColor: 'transparent',
+  },
+  tabIcon: {
+    fontSize: 20,
+    marginBottom: 2,
+  },
+  tabLabel: {
+    fontSize: 11,
+    fontWeight: '500',
   },
 })
