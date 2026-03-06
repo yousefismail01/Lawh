@@ -62,6 +62,9 @@ See: .planning/PROJECT.md
 - [Quick 6]: Used state-based tab switching (useState) in hub.tsx to avoid expo-router nested tab restructuring
 - [Quick 6]: Post-logout navigation goes to /auth/sign-in (typed route; /auth alone has no index route)
 - [Quick 7]: Used react-native Clipboard.setString() instead of expo-clipboard (not installed in project)
+- [Quick 8]: Used individual zustand selectors per setting to minimize re-renders in quran-settings
+- [Quick 8]: Cropped left-half SVG preview (80x48 container, 160px SVG, overflow hidden) for theme previews
+- [Quick 8]: Classic theme preview uses QuranCommon font header ligature on dark green background
 
 ### Quick Tasks Completed
 
@@ -72,10 +75,11 @@ See: .planning/PROJECT.md
 | 5 | Add ayah separator lines, [surah:ayah] labels, and three-dot menu to card view | 2026-03-06 | 86ec7e9 | [5-ayah-separator-lines-chapter-ayah-labels](./quick/5-ayah-separator-lines-chapter-ayah-labels/) |
 | 6 | Home page with bottom tabs (Dashboard/Goals/Hifz/Activity) and full profile screen | 2026-03-06 | 64da0aa | [6-home-page-with-bottom-tabs-hifz-goals-da](./quick/6-home-page-with-bottom-tabs-hifz-goals-da/) |
 | 7 | Redesign AyahActionSheet as full-height swipe-up sheet with structured sections | 2026-03-06 | 5f54ced | [7-redesign-ayahactionsheet-as-full-height-](./quick/7-redesign-ayahactionsheet-as-full-height-/) |
+| 8 | Redesign Quran settings page with 5-section card layout | 2026-03-06 | f7c057f | [8-redesign-quran-settings-page-with-scroll](./quick/8-redesign-quran-settings-page-with-scroll/) |
 
 ### Last Session
 
-- **Stopped at:** Completed quick task 7
-- **Timestamp:** 2026-03-06T06:00:00Z
+- **Stopped at:** Completed quick task 8
+- **Timestamp:** 2026-03-06T09:47:00Z
 
-Last activity: 2026-03-06 - Completed quick task 7: Redesign AyahActionSheet as full-height swipe-up sheet with structured sections
+Last activity: 2026-03-06 - Completed quick task 8: Redesign Quran settings page with 5-section card layout, cropped SVG theme previews, and new settings persistence
