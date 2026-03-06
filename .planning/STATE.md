@@ -68,6 +68,9 @@ See: .planning/PROJECT.md
 - [Quick 9]: Used inline theme resolution in MushafPage (zustand selectors + useColorScheme) instead of prop drilling isDark
 - [Quick 9]: Created separate theme-settings.tsx page instead of embedding in quran-settings
 - [Quick 9]: Used 'parchment' naming for light warm variant (user-facing label matches store value)
+- [Quick 10]: Used optional color prop objects with backward-compatible defaults for contents sub-components
+- [Quick 10]: Renamed Navy dark variant to Dark Gray (#1C1C1E, ellipse-outline icon)
+- [Quick 10]: Toggle pills invert in dark mode (white bg + black text active, vs black bg + white text in light)
 
 ### Quick Tasks Completed
 
@@ -80,10 +83,11 @@ See: .planning/PROJECT.md
 | 7 | Redesign AyahActionSheet as full-height swipe-up sheet with structured sections | 2026-03-06 | 5f54ced | [7-redesign-ayahactionsheet-as-full-height-](./quick/7-redesign-ayahactionsheet-as-full-height-/) |
 | 8 | Redesign Quran settings page with 5-section card layout | 2026-03-06 | f7c057f | [8-redesign-quran-settings-page-with-scroll](./quick/8-redesign-quran-settings-page-with-scroll/) |
 | 9 | App theme settings with Auto/Light/Dark mode and mushaf wiring | 2026-03-06 | 699ae64 | [9-add-app-theme-settings-with-auto-light-d](./quick/9-add-app-theme-settings-with-auto-light-d/) |
+| 10 | Fix app-wide theme, basmallah dark mode, and theme wiring | 2026-03-06 | b1264f7 | [10-fix-app-wide-theme-basmallah-dark-mode-t](./quick/10-fix-app-wide-theme-basmallah-dark-mode-t/) |
 
 ### Last Session
 
-- **Stopped at:** Completed quick task 9
-- **Timestamp:** 2026-03-06T06:17:09Z
+- **Stopped at:** Completed quick task 10
+- **Timestamp:** 2026-03-06T06:31:34Z
 
-Last activity: 2026-03-06 - Completed quick task 9: Theme settings with Auto/Light/Dark mode, Parchment/Navy sub-variants, and full mushaf component color wiring
+Last activity: 2026-03-06 - Completed quick task 10: App-wide dark mode wiring to all screens, Navy→Dark Gray rename, themed contents sub-components
