@@ -4,7 +4,6 @@ import {
   Text,
   Pressable,
   StyleSheet,
-  useColorScheme,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BlurView } from 'expo-blur'
@@ -13,6 +12,7 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 import { PageNavigator } from './PageNavigator'
 import { MicPlaceholderButton } from './MicPlaceholderButton'
 import { LayoutSelectorPopover } from './LayoutSelectorPopover'
+import { useResolvedTheme } from '@/hooks/useResolvedTheme'
 
 interface MushafFooterProps {
   currentPage: number
@@ -29,8 +29,7 @@ export const MushafFooter = React.memo(function MushafFooter({
   onPopoverOpen,
   onPopoverClose,
 }: MushafFooterProps) {
-  const colorScheme = useColorScheme()
-  const isDark = colorScheme === 'dark'
+  const { isDark } = useResolvedTheme()
   const insets = useSafeAreaInsets()
   const [popoverVisible, setPopoverVisible] = useState(false)
 

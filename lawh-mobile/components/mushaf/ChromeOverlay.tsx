@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
+import { useResolvedTheme } from '@/hooks/useResolvedTheme'
 
 interface ChromeOverlayProps {
   surahName: string
@@ -23,12 +24,16 @@ export const ChromeOverlay = React.memo(function ChromeOverlay({
 }: ChromeOverlayProps) {
   const insets = useSafeAreaInsets()
   const router = useRouter()
+  const { isDark, textColor, secondaryTextColor, separatorColor, cardColor } = useResolvedTheme()
+
+  const containerBg = isDark ? 'rgba(0, 0, 0, 0.92)' : 'rgba(255, 255, 255, 0.95)'
+  const iconColor = isDark ? '#ccc' : '#333'
 
   return (
     <Animated.View
       entering={FadeIn.duration(200)}
       exiting={FadeOut.duration(300)}
-      style={[styles.container, { paddingTop: insets.top + 4 }]}
+      style={[styles.container, { paddingTop: insets.top + 4, backgroundColor: containerBg, borderBottomColor: separatorColor }]}
       pointerEvents="box-none"
     >
       <View style={styles.bar}>
@@ -38,16 +43,16 @@ export const ChromeOverlay = React.memo(function ChromeOverlay({
           hitSlop={12}
           style={styles.iconButton}
         >
-          <Text style={styles.menuIcon}>{'\u2630'}</Text>
+          <Text style={[styles.menuIcon, { color: iconColor }]}>{'\u2630'}</Text>
         </Pressable>
 
         {/* Surah info pill */}
         <Pressable
           onPress={() => router.push('/(main)/contents')}
-          style={styles.infoPill}
+          style={[styles.infoPill, { backgroundColor: cardColor }]}
         >
-          <Text style={styles.surahName}>{surahName}</Text>
-          <Text style={styles.pageInfo}>
+          <Text style={[styles.surahName, { color: textColor }]}>{surahName}</Text>
+          <Text style={[styles.pageInfo, { color: secondaryTextColor }]}>
             Page {pageNumber} | Juz {juz} | Hizb {hizb}
           </Text>
         </Pressable>
@@ -55,14 +60,14 @@ export const ChromeOverlay = React.memo(function ChromeOverlay({
         {/* Right icons */}
         <View style={styles.rightIcons}>
           <Pressable hitSlop={12} style={styles.iconButton}>
-            <Text style={styles.icon}>{'\uD83D\uDD16'}</Text>
+            <Text style={[styles.icon, { color: iconColor }]}>{'\uD83D\uDD16'}</Text>
           </Pressable>
           <Pressable
             onPress={() => router.push('/(main)/settings')}
             hitSlop={12}
             style={styles.iconButton}
           >
-            <Text style={styles.icon}>{'\u2699'}</Text>
+            <Text style={[styles.icon, { color: iconColor }]}>{'\u2699'}</Text>
           </Pressable>
         </View>
       </View>
@@ -77,9 +82,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e0e0e0',
   },
   bar: {
     flexDirection: 'row',
@@ -96,11 +99,9 @@ const styles = StyleSheet.create({
   },
   menuIcon: {
     fontSize: 22,
-    color: '#333',
   },
   infoPill: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 6,
@@ -108,11 +109,9 @@ const styles = StyleSheet.create({
   surahName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1a1a1a',
   },
   pageInfo: {
     fontSize: 11,
-    color: '#888',
     marginTop: 1,
   },
   rightIcons: {
@@ -122,6 +121,5 @@ const styles = StyleSheet.create({
   },
   icon: {
     fontSize: 18,
-    color: '#333',
   },
 })

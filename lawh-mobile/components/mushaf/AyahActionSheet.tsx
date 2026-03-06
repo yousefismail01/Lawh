@@ -4,7 +4,6 @@ import {
   Text,
   Pressable,
   StyleSheet,
-  useColorScheme,
   Alert,
   Modal,
   ActivityIndicator,
@@ -19,6 +18,7 @@ import { tafsirService } from '@/services/tafsirService'
 import { translationService } from '@/services/translationService'
 import { chapters } from '@/lib/data/mushafData'
 import { AyahAudioPlayer } from './AyahAudioPlayer'
+import { useResolvedTheme } from '@/hooks/useResolvedTheme'
 
 interface AyahActionSheetProps {
   visible: boolean
@@ -31,8 +31,7 @@ export const AyahActionSheet = React.memo(function AyahActionSheet({
   ayahInfo,
   onClose,
 }: AyahActionSheetProps) {
-  const colorScheme = useColorScheme()
-  const isDark = colorScheme === 'dark'
+  const { isDark } = useResolvedTheme()
   const insets = useSafeAreaInsets()
 
   const [loadingTafsir, setLoadingTafsir] = useState(false)
@@ -137,13 +136,15 @@ export const AyahActionSheet = React.memo(function AyahActionSheet({
       onRequestClose={handleClose}
     >
       <View style={styles.overlay}>
-        <Pressable style={styles.dismissArea} onPress={handleClose} />
+        <Pressable
+          style={[styles.dismissArea, { height: insets.top + 10 }]}
+          onPress={handleClose}
+        />
         <View
           style={[
             styles.sheet,
             {
               backgroundColor: bgColor,
-              marginTop: insets.top + 10,
               paddingBottom: insets.bottom + 16,
             },
           ]}
@@ -319,12 +320,11 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
   },
   dismissArea: {
-    flex: 1,
   },
   sheet: {
+    flex: 1,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     overflow: 'hidden',

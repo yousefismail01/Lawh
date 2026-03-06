@@ -7,12 +7,12 @@ import {
   ScrollView,
   Switch,
   StyleSheet,
-  useColorScheme,
-  LayoutChangeEvent,
-  GestureResponderEvent,
 } from 'react-native'
+import Slider from '@react-native-community/slider'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useSettingsStore, type ReadingMode } from '@/stores/settingsStore'
+import { TajweedInfoSheet } from './TajweedInfoSheet'
+import { useResolvedTheme } from '@/hooks/useResolvedTheme'
 
 interface LayoutSelectorPopoverProps {
   visible: boolean
@@ -39,9 +39,8 @@ interface ToggleRowProps {
   disabled?: boolean
 }
 
-function ToggleRow({ label, value, onValueChange, disabled }: ToggleRowProps) {
-  const colorScheme = useColorScheme()
-  const isDark = colorScheme === 'dark'
+const ToggleRow = React.memo(function ToggleRow({ label, value, onValueChange, disabled }: ToggleRowProps) {
+  const { isDark } = useResolvedTheme()
   const textColor = isDark ? '#ffffff' : '#000000'
 
   return (
@@ -58,48 +57,39 @@ function ToggleRow({ label, value, onValueChange, disabled }: ToggleRowProps) {
       />
     </View>
   )
-}
+})
 
 /* ---------- Font Size Slider ---------- */
 
 interface FontSizeSliderProps {
   value: number
   onValueChange: (v: number) => void
-  steps: number[]
+  min: number
+  max: number
+  step: number
   label: string
   isArabic?: boolean
 }
 
-function FontSizeSlider({ value, onValueChange, steps, label, isArabic }: FontSizeSliderProps) {
-  const colorScheme = useColorScheme()
-  const isDark = colorScheme === 'dark'
+const FontSizeSlider = React.memo(function FontSizeSlider({ value, onValueChange, min, max, step, label, isArabic }: FontSizeSliderProps) {
+  const { isDark } = useResolvedTheme()
   const textColor = isDark ? '#ffffff' : '#000000'
-  const trackColor = isDark ? '#48484a' : '#d1d1d6'
-  const dotInactiveColor = isDark ? '#636366' : '#c7c7cc'
-  const dotActiveColor = isDark ? '#ffffff' : '#000000'
   const labelColor = isDark ? '#8e8e93' : '#6d6d72'
+  const trackTint = isDark ? '#48484a' : '#d1d1d6'
+  const thumbTint = isDark ? '#ffffff' : '#000000'
 
-  const trackWidthRef = useRef(0)
+  const lastCommitted = useRef(value)
 
-  const activeIndex = steps.indexOf(value)
-  const currentIndex = activeIndex >= 0 ? activeIndex : 0
-
-  const handleTrackLayout = useCallback((e: LayoutChangeEvent) => {
-    trackWidthRef.current = e.nativeEvent.layout.width
-  }, [])
-
-  const handleTrackPress = useCallback(
-    (e: GestureResponderEvent) => {
-      const x = e.nativeEvent.locationX
-      const width = trackWidthRef.current
-      if (width <= 0) return
-
-      const ratio = x / width
-      const idx = Math.round(ratio * (steps.length - 1))
-      const clamped = Math.max(0, Math.min(steps.length - 1, idx))
-      onValueChange(steps[clamped])
+  const handleValueChange = useCallback(
+    (v: number) => {
+      const snapped = Math.round(v / step) * step
+      const clamped = Math.max(min, Math.min(max, snapped))
+      if (clamped !== lastCommitted.current) {
+        lastCommitted.current = clamped
+        onValueChange(clamped)
+      }
     },
-    [steps, onValueChange]
+    [min, max, step, onValueChange]
   )
 
   const indicatorSmall = isArabic ? '\u0627\u0644\u0644\u0647' : 'Aa'
@@ -110,60 +100,31 @@ function FontSizeSlider({ value, onValueChange, steps, label, isArabic }: FontSi
     <View style={innerStyles.sliderContainer}>
       <Text style={[innerStyles.sliderLabel, { color: labelColor }]}>{label}</Text>
       <View style={innerStyles.sliderRow}>
-        {/* Small indicator */}
         <Text
           style={[
             innerStyles.sliderIndicator,
-            {
-              fontSize: 12,
-              color: textColor,
-              fontFamily: indicatorFontFamily,
-            },
+            { fontSize: 12, color: textColor, fontFamily: indicatorFontFamily },
           ]}
         >
           {indicatorSmall}
         </Text>
 
-        {/* Track */}
-        <Pressable
-          style={innerStyles.sliderTrack}
-          onLayout={handleTrackLayout}
-          onPress={handleTrackPress}
-        >
-          {/* Background line */}
-          <View style={[innerStyles.sliderTrackLine, { backgroundColor: trackColor }]} />
-          {/* Step dots */}
-          {steps.map((s, i) => {
-            const isActive = i === currentIndex
-            return (
-              <View
-                key={s}
-                style={[
-                  innerStyles.sliderDot,
-                  {
-                    left: `${(i / (steps.length - 1)) * 100}%`,
-                    width: isActive ? 16 : 8,
-                    height: isActive ? 16 : 8,
-                    borderRadius: isActive ? 8 : 4,
-                    backgroundColor: isActive ? dotActiveColor : dotInactiveColor,
-                    marginLeft: isActive ? -8 : -4,
-                    marginTop: isActive ? -8 : -4,
-                  },
-                ]}
-              />
-            )
-          })}
-        </Pressable>
+        <Slider
+          style={innerStyles.slider}
+          minimumValue={min}
+          maximumValue={max}
+          step={step}
+          value={value}
+          onValueChange={handleValueChange}
+          minimumTrackTintColor={thumbTint}
+          maximumTrackTintColor={trackTint}
+          thumbTintColor={thumbTint}
+        />
 
-        {/* Large indicator */}
         <Text
           style={[
             innerStyles.sliderIndicator,
-            {
-              fontSize: 20,
-              color: textColor,
-              fontFamily: indicatorFontFamily,
-            },
+            { fontSize: 20, color: textColor, fontFamily: indicatorFontFamily },
           ]}
         >
           {indicatorLarge}
@@ -171,7 +132,7 @@ function FontSizeSlider({ value, onValueChange, steps, label, isArabic }: FontSi
       </View>
     </View>
   )
-}
+})
 
 /* ---------- Divider ---------- */
 
@@ -181,19 +142,19 @@ function Divider({ color }: { color: string }) {
 
 /* ---------- Main Component ---------- */
 
-const ARABIC_STEPS = [18, 20, 22, 24, 26, 28, 30, 32, 34]
-const TRANSLATION_STEPS = [12, 14, 15, 16, 18, 20, 22, 24]
 
 const LayoutSelectorPopoverInner = function LayoutSelectorPopoverInner({
   visible,
   onClose,
 }: LayoutSelectorPopoverProps) {
-  const colorScheme = useColorScheme()
-  const isDark = colorScheme === 'dark'
+  const { isDark } = useResolvedTheme()
   const insets = useSafeAreaInsets()
+  const [tajweedInfoVisible, setTajweedInfoVisible] = useState(false)
 
   const readingMode = useSettingsStore((s) => s.readingMode)
   const setReadingMode = useSettingsStore((s) => s.setReadingMode)
+  const tajweedEnabled = useSettingsStore((s) => s.tajweedEnabled)
+  const setTajweedEnabled = useSettingsStore((s) => s.setTajweedEnabled)
   const showArabicVerse = useSettingsStore((s) => s.showArabicVerse)
   const setShowArabicVerse = useSettingsStore((s) => s.setShowArabicVerse)
   const showTransliteration = useSettingsStore((s) => s.showTransliteration)
@@ -215,8 +176,6 @@ const LayoutSelectorPopoverInner = function LayoutSelectorPopoverInner({
   const chevronColor = isDark ? '#48484a' : '#c7c7cc'
   const dividerColor = isDark ? '#38383a' : '#e5e5ea'
 
-  const isCardMode = readingMode !== 'mushaf'
-
   const handleModeSelect = (mode: ReadingMode) => {
     setReadingMode(mode)
   }
@@ -228,9 +187,10 @@ const LayoutSelectorPopoverInner = function LayoutSelectorPopoverInner({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <Pressable style={styles.backdrop} onPress={onClose}>
+      <View style={styles.backdrop}>
+        {/* Tappable backdrop area above the sheet */}
+        <Pressable style={styles.backdropTap} onPress={onClose} />
         <View style={[styles.sheet, { backgroundColor: bgColor, paddingBottom: insets.bottom + 16 }]}>
-          <Pressable onPress={(e) => e.stopPropagation()}>
             <ScrollView
               showsVerticalScrollIndicator={false}
               bounces={false}
@@ -286,8 +246,66 @@ const LayoutSelectorPopoverInner = function LayoutSelectorPopoverInner({
                 })}
               </View>
 
-              {/* Reading Options (card modes only) */}
-              {isCardMode && (
+              {/* Tajweed toggle — available in all modes */}
+              <View style={styles.section}>
+                <Text style={[styles.sectionLabel, { color: sectionLabelColor }]}>
+                  TAJWEED
+                </Text>
+              </View>
+              <View style={[innerStyles.card, { backgroundColor: optionBg }]}>
+                <View style={innerStyles.toggleRow}>
+                  <View style={innerStyles.tajweedLabelRow}>
+                    <Text style={[innerStyles.toggleLabel, { color: textColor }]}>
+                      Tajweed Colors
+                    </Text>
+                    <Pressable
+                      onPress={() => setTajweedInfoVisible(true)}
+                      hitSlop={10}
+                      style={innerStyles.infoButton}
+                    >
+                      <Text style={[innerStyles.infoIcon, { color: subtitleColor }]}>
+                        {'\u24D8'}
+                      </Text>
+                    </Pressable>
+                  </View>
+                  <Switch
+                    value={tajweedEnabled}
+                    onValueChange={setTajweedEnabled}
+                    trackColor={{ false: isDark ? '#39393d' : '#e9e9ea', true: '#34c759' }}
+                    thumbColor="#ffffff"
+                  />
+                </View>
+              </View>
+
+              <TajweedInfoSheet
+                visible={tajweedInfoVisible}
+                onClose={() => setTajweedInfoVisible(false)}
+              />
+
+              {/* Reading Options — Quran Text mode: Arabic font size only */}
+              {readingMode === 'arabic-cards' && (
+                <>
+                  <View style={styles.section}>
+                    <Text style={[styles.sectionLabel, { color: sectionLabelColor }]}>
+                      ARABIC VERSE
+                    </Text>
+                  </View>
+                  <View style={[innerStyles.card, { backgroundColor: optionBg }]}>
+                    <FontSizeSlider
+                      label="Font Size \u2014 Quranic Arabic"
+                      value={arabicFontSize}
+                      onValueChange={setArabicFontSize}
+                      min={18}
+                      max={34}
+                      step={2}
+                      isArabic
+                    />
+                  </View>
+                </>
+              )}
+
+              {/* Reading Options — Translation mode: full options */}
+              {readingMode === 'translation-cards' && (
                 <>
                   {/* Arabic Verse Section */}
                   <View style={styles.section}>
@@ -306,7 +324,9 @@ const LayoutSelectorPopoverInner = function LayoutSelectorPopoverInner({
                       label="Font Size \u2014 Quranic Arabic"
                       value={arabicFontSize}
                       onValueChange={setArabicFontSize}
-                      steps={ARABIC_STEPS}
+                      min={18}
+                      max={34}
+                      step={2}
                       isArabic
                     />
                   </View>
@@ -352,7 +372,9 @@ const LayoutSelectorPopoverInner = function LayoutSelectorPopoverInner({
                       label="Font Size \u2014 Translation"
                       value={translationFontSize}
                       onValueChange={setTranslationFontSize}
-                      steps={TRANSLATION_STEPS}
+                      min={12}
+                      max={24}
+                      step={1}
                     />
                   </View>
                 </>
@@ -369,9 +391,8 @@ const LayoutSelectorPopoverInner = function LayoutSelectorPopoverInner({
                 <Text style={[styles.chevron, { color: chevronColor }]}>{'\u203A'}</Text>
               </Pressable>
             </ScrollView>
-          </Pressable>
         </View>
-      </Pressable>
+      </View>
     </Modal>
   )
 }
@@ -383,6 +404,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'flex-end',
+  },
+  backdropTap: {
+    flex: 1,
   },
   sheet: {
     borderTopLeftRadius: 16,
@@ -518,21 +542,9 @@ const innerStyles = StyleSheet.create({
     textAlign: 'center',
     minWidth: 24,
   },
-  sliderTrack: {
+  slider: {
     flex: 1,
     height: 32,
-    justifyContent: 'center',
-  },
-  sliderTrackLine: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: 3,
-    borderRadius: 1.5,
-  },
-  sliderDot: {
-    position: 'absolute',
-    top: '50%',
   },
   translationSourceRow: {
     flexDirection: 'row',
@@ -546,5 +558,19 @@ const innerStyles = StyleSheet.create({
   },
   translationSourceValue: {
     fontSize: 15,
+  },
+  tajweedLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  infoButton: {
+    width: 22,
+    height: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoIcon: {
+    fontSize: 16,
   },
 })
