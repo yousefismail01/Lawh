@@ -13,11 +13,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { chapters } from '@/lib/data/mushafData'
 import { quranService } from '@/services/quranService'
 import { loadTranslations, getTranslationText } from '@/lib/data/translationData'
+import { loadTransliterations, getTransliterationText } from '@/lib/data/transliterationData'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { getPageJuzHizb } from '@/lib/data/pageJuzHizb'
 import { AyahCard } from './AyahCard'
 import { MushafSurahBanner } from './MushafSurahBanner'
 import { MushafBismillah } from './MushafBismillah'
+import { AyahActionSheet } from './AyahActionSheet'
 
 interface CardViewProps {
   mode: 'arabic-cards' | 'translation-cards'
@@ -31,6 +33,7 @@ interface AyahItem {
   ayahNumber: number
   surahName: string
   translationText: string
+  transliterationText: string
   key: string
   page: number
 }
@@ -81,7 +84,9 @@ const LOAD_MORE_SURAHS = 3
 interface CardListItemProps {
   item: AyahItem
   onPress?: () => void
+  onMenuPress?: (surahId: number, ayahNumber: number) => void
   showTranslation: boolean
+  showTransliteration: boolean
   showArabicVerse: boolean
   arabicFontSize: number
   translationFontSize: number
@@ -90,7 +95,9 @@ interface CardListItemProps {
 const CardListItem = React.memo(function CardListItem({
   item,
   onPress,
+  onMenuPress,
   showTranslation,
+  showTransliteration,
   showArabicVerse,
   arabicFontSize,
   translationFontSize,
@@ -101,10 +108,13 @@ const CardListItem = React.memo(function CardListItem({
         surahId={item.surahId}
         ayahNumber={item.ayahNumber}
         translationText={item.translationText}
+        transliterationText={item.transliterationText}
         showTranslation={showTranslation}
+        showTransliteration={showTransliteration}
         showArabicVerse={showArabicVerse}
         arabicFontSize={arabicFontSize}
         translationFontSize={translationFontSize}
+        onMenuPress={onMenuPress ? () => onMenuPress(item.surahId, item.ayahNumber) : undefined}
       />
     </Pressable>
   )
@@ -117,6 +127,7 @@ const CardViewInner = function CardViewInner({ mode, initialPage, onPress }: Car
   const setLastReadPage = useSettingsStore((s) => s.setLastReadPage)
   const showArabicVerse = useSettingsStore((s) => s.showArabicVerse)
   const settingsShowTranslation = useSettingsStore((s) => s.showTranslation)
+  const showTransliteration = useSettingsStore((s) => s.showTransliteration)
   const arabicFontSize = useSettingsStore((s) => s.arabicFontSize)
   const translationFontSize = useSettingsStore((s) => s.translationFontSize)
 
@@ -125,9 +136,19 @@ const CardViewInner = function CardViewInner({ mode, initialPage, onPress }: Car
   const [loadingMore, setLoadingMore] = useState(false)
   const [currentSurahName, setCurrentSurahName] = useState('')
   const [currentPage, setCurrentPage] = useState(initialPage)
+  const [actionSheetAyah, setActionSheetAyah] = useState<{ surahId: number; ayahNumber: number } | null>(null)
   const flatListRef = useRef<FlatList<ListItem>>(null)
   const lastLoadedSurahRef = useRef(0)
   const showTranslation = mode === 'translation-cards' && settingsShowTranslation
+  const effectiveShowTransliteration = mode === 'translation-cards' && showTransliteration
+
+  const handleMenuPress = useCallback((surahId: number, ayahNumber: number) => {
+    setActionSheetAyah({ surahId, ayahNumber })
+  }, [])
+
+  const handleActionSheetClose = useCallback(() => {
+    setActionSheetAyah(null)
+  }, [])
 
   const loadSurahRange = useCallback(
     async (fromSurah: number, toSurah: number): Promise<AyahItem[]> => {
@@ -144,6 +165,7 @@ const CardViewInner = function CardViewInner({ mode, initialPage, onPress }: Car
           const translationText = showTranslation
             ? getTranslationText(sid, ayah.ayahNumber)
             : ''
+          const transliterationText = getTransliterationText(sid, ayah.ayahNumber)
 
           items.push({
             type: 'ayah',
@@ -151,6 +173,7 @@ const CardViewInner = function CardViewInner({ mode, initialPage, onPress }: Car
             ayahNumber: ayah.ayahNumber,
             surahName: ch.nameSimple,
             translationText,
+            transliterationText,
             key: `${sid}:${ayah.ayahNumber}`,
             page: ayah.page,
           })
@@ -202,6 +225,7 @@ const CardViewInner = function CardViewInner({ mode, initialPage, onPress }: Car
     let cancelled = false
 
     async function init() {
+      await loadTransliterations()
       if (showTranslation) {
         await loadTranslations()
       }
@@ -260,7 +284,6 @@ const CardViewInner = function CardViewInner({ mode, initialPage, onPress }: Car
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current
 
   const headerTextColor = isDark ? '#8e8e93' : '#666'
-  const pageNumColor = isDark ? '#8e8e93' : '#999'
   const lineColor = isDark ? '#3a3a3c' : '#d1d1d6'
 
   const { juz } = getPageJuzHizb(currentPage)
@@ -298,14 +321,16 @@ const CardViewInner = function CardViewInner({ mode, initialPage, onPress }: Car
         <CardListItem
           item={item}
           onPress={onPress}
+          onMenuPress={handleMenuPress}
           showTranslation={showTranslation}
+          showTransliteration={effectiveShowTransliteration}
           showArabicVerse={showArabicVerse}
           arabicFontSize={arabicFontSize}
           translationFontSize={translationFontSize}
         />
       )
     },
-    [showTranslation, showArabicVerse, arabicFontSize, translationFontSize, onPress, isDark, lineColor]
+    [showTranslation, effectiveShowTransliteration, showArabicVerse, arabicFontSize, translationFontSize, onPress, isDark, lineColor, handleMenuPress]
   )
 
   const keyExtractor = useCallback((item: ListItem) => item.key, [])
@@ -357,10 +382,11 @@ const CardViewInner = function CardViewInner({ mode, initialPage, onPress }: Car
         contentContainerStyle={[styles.listContent, { paddingBottom: 160 }]}
       />
 
-      {/* Bottom page number */}
-      <View style={[styles.pageNumContainer, { paddingBottom: insets.bottom + 8 }]}>
-        <Text style={[styles.pageNum, { color: pageNumColor }]}>{currentPage}</Text>
-      </View>
+      <AyahActionSheet
+        visible={actionSheetAyah !== null}
+        ayahInfo={actionSheetAyah}
+        onClose={handleActionSheetClose}
+      />
     </View>
   )
 }
@@ -383,8 +409,8 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   headerText: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 11,
+    fontWeight: '400',
   },
   listContent: {
     paddingTop: 8,
@@ -392,16 +418,6 @@ const styles = StyleSheet.create({
   footerLoader: {
     paddingVertical: 20,
     alignItems: 'center',
-  },
-  pageNumContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-  },
-  pageNum: {
-    fontSize: 13,
   },
   pageBreakContainer: {
     flexDirection: 'row',
