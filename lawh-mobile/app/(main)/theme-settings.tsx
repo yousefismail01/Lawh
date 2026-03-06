@@ -7,6 +7,7 @@ import {
   type LightVariant,
   type DarkVariant,
 } from '@/stores/settingsStore'
+import { useResolvedTheme } from '@/hooks/useResolvedTheme'
 
 // --- Reusable row component ---
 
@@ -15,23 +16,27 @@ function SettingRow({
   label,
   selected,
   onPress,
+  iconColor,
+  textColor,
 }: {
   icon: keyof typeof Ionicons.glyphMap
   label: string
   selected: boolean
   onPress: () => void
+  iconColor?: string
+  textColor?: string
 }) {
   return (
     <Pressable style={styles.row} onPress={onPress}>
-      <Ionicons name={icon} size={20} color="#6B5D45" style={styles.rowIcon} />
-      <Text style={styles.rowLabel}>{label}</Text>
+      <Ionicons name={icon} size={20} color={iconColor ?? '#6B5D45'} style={styles.rowIcon} />
+      <Text style={[styles.rowLabel, textColor ? { color: textColor } : undefined]}>{label}</Text>
       {selected && <Ionicons name="checkmark" size={20} color="#4CAF50" />}
     </Pressable>
   )
 }
 
-function Separator() {
-  return <View style={styles.separator} />
+function Separator({ color }: { color?: string }) {
+  return <View style={[styles.separator, color ? { backgroundColor: color } : undefined]} />
 }
 
 // --- Mode options ---
@@ -49,13 +54,14 @@ const LIGHT_OPTIONS: { key: LightVariant; label: string; icon: keyof typeof Ioni
 
 const DARK_OPTIONS: { key: DarkVariant; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { key: 'black', label: 'True Black', icon: 'contrast-outline' },
-  { key: 'navy', label: 'Navy', icon: 'boat-outline' },
+  { key: 'gray', label: 'Dark Gray', icon: 'ellipse-outline' },
 ]
 
 // --- Main screen ---
 
 export default function ThemeSettingsScreen() {
   const router = useRouter()
+  const { isDark, backgroundColor, textColor, secondaryTextColor, cardColor, separatorColor, iconColor, accentColor } = useResolvedTheme()
 
   const appThemeMode = useSettingsStore((s) => s.appThemeMode)
   const setAppThemeMode = useSettingsStore((s) => s.setAppThemeMode)
@@ -68,14 +74,14 @@ export default function ThemeSettingsScreen() {
   const showDarkStyle = appThemeMode === 'dark' || appThemeMode === 'auto'
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor }]}>
         <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={20} color="#007AFF" />
-          <Text style={styles.backText}>Settings</Text>
+          <Ionicons name="chevron-back" size={20} color={accentColor} />
+          <Text style={[styles.backText, { color: accentColor }]}>Settings</Text>
         </Pressable>
-        <Text style={styles.headerTitle}>Theme</Text>
+        <Text style={[styles.headerTitle, { color: textColor }]}>Theme</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -85,16 +91,18 @@ export default function ThemeSettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Mode selection */}
-        <Text style={[styles.sectionTitle, { marginTop: 12 }]}>APPEARANCE</Text>
-        <View style={styles.card}>
+        <Text style={[styles.sectionTitle, { marginTop: 12, color: secondaryTextColor }]}>APPEARANCE</Text>
+        <View style={[styles.card, { backgroundColor: cardColor }]}>
           {MODE_OPTIONS.map((option, index) => (
             <View key={option.key}>
-              {index > 0 && <Separator />}
+              {index > 0 && <Separator color={separatorColor} />}
               <SettingRow
                 icon={option.icon}
                 label={option.label}
                 selected={appThemeMode === option.key}
                 onPress={() => setAppThemeMode(option.key)}
+                iconColor={iconColor}
+                textColor={textColor}
               />
             </View>
           ))}
@@ -103,16 +111,18 @@ export default function ThemeSettingsScreen() {
         {/* Light style sub-card */}
         {showLightStyle && (
           <>
-            <Text style={[styles.sectionTitle, { marginTop: 12 }]}>LIGHT STYLE</Text>
-            <View style={styles.card}>
+            <Text style={[styles.sectionTitle, { marginTop: 12, color: secondaryTextColor }]}>LIGHT STYLE</Text>
+            <View style={[styles.card, { backgroundColor: cardColor }]}>
               {LIGHT_OPTIONS.map((option, index) => (
                 <View key={option.key}>
-                  {index > 0 && <Separator />}
+                  {index > 0 && <Separator color={separatorColor} />}
                   <SettingRow
                     icon={option.icon}
                     label={option.label}
                     selected={lightVariant === option.key}
                     onPress={() => setLightVariant(option.key)}
+                    iconColor={iconColor}
+                    textColor={textColor}
                   />
                 </View>
               ))}
@@ -123,16 +133,18 @@ export default function ThemeSettingsScreen() {
         {/* Dark style sub-card */}
         {showDarkStyle && (
           <>
-            <Text style={[styles.sectionTitle, { marginTop: 12 }]}>DARK STYLE</Text>
-            <View style={styles.card}>
+            <Text style={[styles.sectionTitle, { marginTop: 12, color: secondaryTextColor }]}>DARK STYLE</Text>
+            <View style={[styles.card, { backgroundColor: cardColor }]}>
               {DARK_OPTIONS.map((option, index) => (
                 <View key={option.key}>
-                  {index > 0 && <Separator />}
+                  {index > 0 && <Separator color={separatorColor} />}
                   <SettingRow
                     icon={option.icon}
                     label={option.label}
                     selected={darkVariant === option.key}
                     onPress={() => setDarkVariant(option.key)}
+                    iconColor={iconColor}
+                    textColor={textColor}
                   />
                 </View>
               ))}
