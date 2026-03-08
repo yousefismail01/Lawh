@@ -71,13 +71,13 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Review Queue
 
 - [x] **REVW-01**: User sees today's review queue sorted by urgency (overdue first, then due today)
-- [ ] **REVW-02**: Per ayah in queue: user recites, AI grades, SM-2+ updates, next review date shown
-- [ ] **REVW-03**: User can start auto-built review session from queue
+- [x] **REVW-02**: Per ayah in queue: user recites, AI grades, SM-2+ updates, next review date shown
+- [x] **REVW-03**: User can start auto-built review session from queue
 
 ### Session Modes
 
-- [ ] **SESS-01**: User can start a New Memorization session for unmemorized ayahs
-- [ ] **SESS-02**: User can start a Review session from the review queue
+- [x] **SESS-01**: User can start a New Memorization session for unmemorized ayahs
+- [x] **SESS-02**: User can start a Review session from the review queue
 - [ ] **SESS-03**: Active session shows mushaf Arabic text (hideable in hifz mode) with animated waveform
 - [ ] **SESS-04**: Real-time word highlighting after AI analysis: green (correct), red (wrong), orange (tajweed violation)
 - [ ] **SESS-05**: Post-session summary shows accuracy %, ayahs covered, time, mistakes by type, strength score changes
@@ -193,10 +193,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SM2-04 | Phase 4 | Pending |
 | SM2-05 | Phase 4 | Complete |
 | REVW-01 | Phase 4 | Complete |
-| REVW-02 | Phase 4 | Pending |
-| REVW-03 | Phase 4 | Pending |
-| SESS-01 | Phase 4 | Pending |
-| SESS-02 | Phase 4 | Pending |
+| REVW-02 | Phase 4 | Complete |
+| REVW-03 | Phase 4 | Complete |
+| SESS-01 | Phase 4 | Complete |
+| SESS-02 | Phase 4 | Complete |
 | SESS-03 | Phase 3 | Pending |
 | SESS-04 | Phase 3 | Pending |
 | SESS-05 | Phase 3 | Pending |

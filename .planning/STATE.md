@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 08-hifz-tracker-and-review-scheduler-with-adaptive-spaced-repetition
-current_plan: 2 of 3 in Phase 8
-status: in-progress
-stopped_at: Completed 08-02-PLAN.md
-last_updated: "2026-03-08T20:03:59.000Z"
-last_activity: "2026-03-08 - Completed 08-02: Hifz tracker UI with 114-surah grid, detail sheet, stats panel, review badge"
+current_plan: 3 of 3 in Phase 8
+status: phase-complete
+stopped_at: Completed 08-03-PLAN.md
+last_updated: "2026-03-08T20:15:00.000Z"
+last_activity: "2026-03-08 - Completed 08-03: Review and memorization sessions with blur-reveal-grade loop"
 progress:
   total_phases: 9
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 22
-  completed_plans: 22
+  completed_plans: 23
 ---
 
 # Session State
@@ -25,8 +25,8 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.0 milestone
 **Current phase:** 08-hifz-tracker-and-review-scheduler-with-adaptive-spaced-repetition
-**Current Plan:** 2 of 3 in Phase 8
-**Status:** In Progress
+**Current Plan:** 3 of 3 in Phase 8
+**Status:** Phase Complete
 
 ## Session Log
 
@@ -81,6 +81,10 @@ See: .planning/PROJECT.md
 - [Phase 08]: SurahGrid FlatList scrollEnabled=false since parent ScrollView handles scroll
 - [Phase 08]: Status derivation prioritizes needs_review over in_progress for visual urgency
 - [Phase 08]: SurahDetailSheet uses Modal (consistent with AyahActionSheet) not third-party bottom sheet
+- [Phase 08]: Used expo-blur BlurView (intensity 80) for review session ayah concealment
+- [Phase 08]: Grade projections computed by running sm2plus() for each grade on current card
+- [Phase 08]: AyahActionSheet shows status label instead of action when ayah already tracked
+- [Phase 08]: Memorization session uses markInProgress (not markMemorized) for newly studied ayahs
 
 ### Quick Tasks Completed
 
@@ -97,7 +101,7 @@ See: .planning/PROJECT.md
 
 ### Last Session
 
-- **Stopped at:** Completed 08-02-PLAN.md
-- **Timestamp:** 2026-03-08T20:03:59Z
+- **Stopped at:** Completed 08-03-PLAN.md
+- **Timestamp:** 2026-03-08T20:15:00Z
 
-Last activity: 2026-03-08 - Completed 08-02: Hifz tracker UI with 114-surah grid, detail sheet, stats panel, review badge
+Last activity: 2026-03-08 - Completed 08-03: Review and memorization sessions with blur-reveal-grade loop, AyahActionSheet hifz actions
