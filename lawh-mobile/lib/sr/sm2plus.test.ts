@@ -161,11 +161,8 @@ describe('sm2plus', () => {
     it('is computed correctly from today + interval days', () => {
       const card = newCard({ repetitions: 0 })
       const result = sm2plus(card, 3, TODAY)
-      // Interval ~1 day (with jitter 0.9-1.1), so due date should be Jan 2
-      const due = new Date(result.dueDate)
-      expect(due.getFullYear()).toBe(2026)
-      expect(due.getMonth()).toBe(0) // January
-      expect(due.getDate()).toBe(2) // Jan 2
+      // Interval rounds to 1 day (with jitter 0.9-1.1), so due date should be Jan 2
+      expect(result.dueDate).toBe('2026-01-02')
     })
   })
 })
