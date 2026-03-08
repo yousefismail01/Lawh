@@ -73,7 +73,14 @@ Plans:
   2. After recording, the app shows which words were correct (green), wrong (red), or skipped/added — with an overall accuracy score — within a user-perceptible response time
   3. Recordings made with no internet connection queue locally and upload automatically when the connection restores; no audio data is lost on interruption (including phone calls on iOS)
   4. The FastAPI server validates the user's Supabase JWT on every request; user_id is extracted from verified claims only, never from the request body
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Server foundation: JWT auth, audio validation, Whisper model loader, CUDA Dockerfile, Pydantic schemas, pytest infrastructure
+- [ ] 02-02-PLAN.md — Server AI pipeline: Arabic normalization, Whisper transcription, passage detection, word-level diff, scoring, Supabase writer, inference endpoint
+- [ ] 02-03-PLAN.md — Mobile recording: expo-audio-stream, recording service, state machine store, offline queue with auto-upload, iOS interruption handling
+- [ ] 02-04-PLAN.md — Mobile UI: inference service, RecordButton, WaveformVisualizer, RecitationOverlay with inline highlights, ResultsBottomSheet, mushaf integration
+- [ ] 02-05-PLAN.md — End-to-end verification checkpoint on physical device
 
 ### Phase 3: Tajweed FSM and Session UI
 **Goal**: The app surfaces named Tajweed rule violations with bilingual explanations alongside word-level feedback, and the full recitation session UI is complete
@@ -117,7 +124,7 @@ Phases execute in numeric order: 1 → 01.1 → 2 → 3 → 4 → 5 → 6 → 7
 |-------|----------------|--------|-----------|
 | 1. Foundation | 9/9 | Complete | 2026-03-04 |
 | 01.1. Madinah Mushaf Page View | 4/4 | Complete   | 2026-03-05 |
-| 2. Audio Pipeline and Core AI | 0/TBD | Not started | - |
+| 2. Audio Pipeline and Core AI | 0/5 | Not started | - |
 | 3. Tajweed FSM and Session UI | 0/TBD | Not started | - |
 | 4. Hifz Tracker and SM-2 Engine | 0/TBD | Not started | - |
 | 5. Dashboard, Gamification, and Retention | 0/TBD | Not started | - |
@@ -163,3 +170,13 @@ Plans:
 - [ ] 07-02-PLAN.md — Action sheet: haptic feedback on open/tap, Play Audio with AyahAudioPlayer and Alafasy streaming DB
 - [ ] 07-03-PLAN.md — Layout selector popover, CardView and AyahCard components, reading mode switching in MushafScreen
 - [ ] 07-04-PLAN.md — End-to-end visual verification checkpoint
+
+### Phase 8: Hifz tracker and review scheduler with adaptive spaced repetition
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 7
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 8 to break down)
