@@ -130,7 +130,7 @@ Phases execute in numeric order: 1 → 01.1 → 2 → 3 → 4 → 5 → 6 → 7 
 | 5. Dashboard, Gamification, and Retention | 0/TBD | Not started | - |
 | 6. Mushaf Fullscreen Mode | 1/4 | In progress | - |
 | 7. Expanded Footer | 3/4 | In Progress|  |
-| 8. Hifz Tracker + Review Scheduler | 1/3 | In Progress|  |
+| 8. Hifz Tracker + Review Scheduler | 2/3 | In Progress|  |
 
 ### Phase 6: Mushaf fullscreen mode with tap-toggle UI, menu navigation, and surah glossary
 
@@ -177,7 +177,7 @@ Plans:
 **Goal:** Users can track memorization progress via a 114-surah color-coded grid, review due ayahs with a blur-reveal-grade session flow driven by SM-2+ spaced repetition, and start new memorization sessions -- all offline-first with local SQLite storage and self-assessment grading
 **Requirements**: HIFZ-01, HIFZ-02, HIFZ-03, HIFZ-04, HIFZ-05, SM2-01, SM2-02, SM2-03, SM2-05, REVW-01, REVW-02, REVW-03, SESS-01, SESS-02
 **Depends on:** Phase 7
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] 08-01-PLAN.md — SM-2+ algorithm (TDD), type contracts, SQLite hifz service, Zustand hifzStore

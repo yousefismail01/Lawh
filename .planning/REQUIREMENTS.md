@@ -54,11 +54,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Hifz Tracker
 
-- [ ] **HIFZ-01**: User can view all 114 surahs in a color-coded grid (not started / in progress / memorized / needs review)
-- [ ] **HIFZ-02**: User can tap any surah to see per-ayah strength bars (0-100%)
-- [ ] **HIFZ-03**: Each ayah shows last reviewed date, next review due, and historical mistake count
-- [ ] **HIFZ-04**: User can mark individual ayahs as memorized, schedule review, or practice from ayah detail
-- [ ] **HIFZ-05**: Stats panel shows total memorized / 6,236 and strongest/weakest juz
+- [x] **HIFZ-01**: User can view all 114 surahs in a color-coded grid (not started / in progress / memorized / needs review)
+- [x] **HIFZ-02**: User can tap any surah to see per-ayah strength bars (0-100%)
+- [x] **HIFZ-03**: Each ayah shows last reviewed date, next review due, and historical mistake count
+- [x] **HIFZ-04**: User can mark individual ayahs as memorized, schedule review, or practice from ayah detail
+- [x] **HIFZ-05**: Stats panel shows total memorized / 6,236 and strongest/weakest juz
 
 ### Spaced Repetition (SM-2+)
 
@@ -70,7 +70,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Review Queue
 
-- [ ] **REVW-01**: User sees today's review queue sorted by urgency (overdue first, then due today)
+- [x] **REVW-01**: User sees today's review queue sorted by urgency (overdue first, then due today)
 - [ ] **REVW-02**: Per ayah in queue: user recites, AI grades, SM-2+ updates, next review date shown
 - [ ] **REVW-03**: User can start auto-built review session from queue
 
@@ -182,17 +182,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TAJW-04 | Phase 3 | Pending |
 | TAJW-05 | Phase 3 | Pending |
 | TAJW-06 | Phase 3 | Pending |
-| HIFZ-01 | Phase 4 | Pending |
-| HIFZ-02 | Phase 4 | Pending |
-| HIFZ-03 | Phase 4 | Pending |
-| HIFZ-04 | Phase 4 | Pending |
-| HIFZ-05 | Phase 4 | Pending |
+| HIFZ-01 | Phase 4 | Complete |
+| HIFZ-02 | Phase 4 | Complete |
+| HIFZ-03 | Phase 4 | Complete |
+| HIFZ-04 | Phase 4 | Complete |
+| HIFZ-05 | Phase 4 | Complete |
 | SM2-01 | Phase 4 | Complete |
 | SM2-02 | Phase 4 | Complete |
 | SM2-03 | Phase 4 | Complete |
 | SM2-04 | Phase 4 | Pending |
 | SM2-05 | Phase 4 | Complete |
-| REVW-01 | Phase 4 | Pending |
+| REVW-01 | Phase 4 | Complete |
 | REVW-02 | Phase 4 | Pending |
 | REVW-03 | Phase 4 | Pending |
 | SESS-01 | Phase 4 | Pending |

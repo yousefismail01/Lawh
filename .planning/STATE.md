@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 08-hifz-tracker-and-review-scheduler-with-adaptive-spaced-repetition
-current_plan: 1 of 3 in Phase 8
+current_plan: 2 of 3 in Phase 8
 status: in-progress
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-03-08T19:58:15.000Z"
-last_activity: "2026-03-08 - Completed 08-01: SM-2+ algorithm, hifz data layer (types, service, store)"
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-03-08T20:03:59.000Z"
+last_activity: "2026-03-08 - Completed 08-02: Hifz tracker UI with 114-surah grid, detail sheet, stats panel, review badge"
 progress:
   total_phases: 9
   completed_phases: 3
   total_plans: 22
-  completed_plans: 21
+  completed_plans: 22
 ---
 
 # Session State
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.0 milestone
 **Current phase:** 08-hifz-tracker-and-review-scheduler-with-adaptive-spaced-repetition
-**Current Plan:** 1 of 3 in Phase 8
+**Current Plan:** 2 of 3 in Phase 8
 **Status:** In Progress
 
 ## Session Log
@@ -78,6 +78,9 @@ See: .planning/PROJECT.md
 - [Phase 08]: Strength formula denominator 8: min(1.0, (reps * EF) / (reps * EF + 8))
 - [Phase 08]: hifzStore uses no persist middleware -- SQLite is the single source of truth
 - [Phase 08]: Added consecutive_correct and mistake_count as local-only SQLite columns
+- [Phase 08]: SurahGrid FlatList scrollEnabled=false since parent ScrollView handles scroll
+- [Phase 08]: Status derivation prioritizes needs_review over in_progress for visual urgency
+- [Phase 08]: SurahDetailSheet uses Modal (consistent with AyahActionSheet) not third-party bottom sheet
 
 ### Quick Tasks Completed
 
@@ -94,7 +97,7 @@ See: .planning/PROJECT.md
 
 ### Last Session
 
-- **Stopped at:** Completed 08-01-PLAN.md
-- **Timestamp:** 2026-03-08T19:58:15Z
+- **Stopped at:** Completed 08-02-PLAN.md
+- **Timestamp:** 2026-03-08T20:03:59Z
 
-Last activity: 2026-03-08 - Completed 08-01: SM-2+ algorithm with TDD, SQLite hifz service, Zustand hifz store
+Last activity: 2026-03-08 - Completed 08-02: Hifz tracker UI with 114-surah grid, detail sheet, stats panel, review badge
