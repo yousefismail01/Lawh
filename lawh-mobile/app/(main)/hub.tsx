@@ -1,31 +1,36 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   View,
   Text,
   Pressable,
   ScrollView,
   StyleSheet,
-  useColorScheme,
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Ionicons } from '@expo/vector-icons'
+import { useResolvedTheme } from '@/hooks/useResolvedTheme'
+import { SurahGrid } from '@/components/hifz/SurahGrid'
+import { StatsPanel } from '@/components/hifz/StatsPanel'
+import { ReviewBadge } from '@/components/hifz/ReviewBadge'
+import { useHifzStore } from '@/stores/hifzStore'
 
 type TabKey = 'dashboard' | 'goals' | 'hifz' | 'activity'
 
 interface Tab {
   key: TabKey
   label: string
-  icon: string
+  icon: keyof typeof Ionicons.glyphMap
 }
 
 const TABS: Tab[] = [
-  { key: 'dashboard', label: 'Dashboard', icon: '\u229E' },
-  { key: 'goals', label: 'Goals', icon: '\u25CE' },
-  { key: 'hifz', label: 'Hifz', icon: '\u263E' },
-  { key: 'activity', label: 'Activity', icon: '\u224B' },
+  { key: 'dashboard', label: 'Dashboard', icon: 'grid-outline' },
+  { key: 'goals', label: 'Goals', icon: 'flag-outline' },
+  { key: 'hifz', label: 'Hifz', icon: 'book-outline' },
+  { key: 'activity', label: 'Activity', icon: 'pulse-outline' },
 ]
 
-function DashboardTab({ colors }: { colors: ReturnType<typeof buildColors> }) {
+function DashboardTab({ colors, isDark }: { colors: ReturnType<typeof buildColors>; isDark: boolean }) {
   const router = useRouter()
   return (
     <ScrollView
@@ -43,10 +48,29 @@ function DashboardTab({ colors }: { colors: ReturnType<typeof buildColors> }) {
         <Text style={styles.mushafCardTitle}>Open Mushaf</Text>
         <Text style={styles.mushafCardSub}>Continue reading where you left off</Text>
       </Pressable>
-      <View style={[styles.comingSoonBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Text style={[styles.comingSoonTitle, { color: colors.text }]}>Dashboard</Text>
-        <Text style={[styles.comingSoonText, { color: colors.muted }]}>Dashboard features coming soon</Text>
-      </View>
+      <ReviewBadge
+        onPress={() => router.push('/(main)/review' as never)}
+        isDark={isDark}
+      />
+    </ScrollView>
+  )
+}
+
+function HifzTab({ isDark }: { isDark: boolean }) {
+  const loadProgress = useHifzStore((s) => s.loadProgress)
+  const loaded = useHifzStore((s) => s.loaded)
+
+  useEffect(() => {
+    if (!loaded) loadProgress('hafs')
+  }, [loaded, loadProgress])
+
+  return (
+    <ScrollView
+      contentContainerStyle={styles.tabContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <StatsPanel isDark={isDark} />
+      <SurahGrid isDark={isDark} />
     </ScrollView>
   )
 }
@@ -92,15 +116,14 @@ function buildColors(isDark: boolean) {
 export default function HubScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
-  const scheme = useColorScheme()
-  const isDark = scheme === 'dark'
+  const { isDark } = useResolvedTheme()
   const colors = buildColors(isDark)
   const [activeTab, setActiveTab] = useState<TabKey>('dashboard')
 
   function renderTabContent() {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardTab colors={colors} />
+        return <DashboardTab colors={colors} isDark={isDark} />
       case 'goals':
         return (
           <PlaceholderTab
@@ -110,13 +133,7 @@ export default function HubScreen() {
           />
         )
       case 'hifz':
-        return (
-          <PlaceholderTab
-            title="Hifz"
-            subtitle="Your memorization progress"
-            colors={colors}
-          />
-        )
+        return <HifzTab isDark={isDark} />
       case 'activity':
         return (
           <PlaceholderTab
@@ -142,22 +159,31 @@ export default function HubScreen() {
         ]}
       >
         <Pressable
-          onPress={() => router.push('/(main)/settings')}
+          onPress={() => router.back()}
           hitSlop={12}
           style={styles.topBarIcon}
         >
-          <Text style={[styles.topBarIconText, { color: colors.text }]}>{'\u2699'}</Text>
+          <Ionicons name="chevron-back" size={24} color={colors.text} />
         </Pressable>
 
         <Text style={[styles.topBarTitle, { color: colors.text }]}>Lawh</Text>
 
-        <Pressable
-          onPress={() => router.push('/(main)/profile')}
-          hitSlop={12}
-          style={styles.topBarIcon}
-        >
-          <Text style={[styles.topBarIconText, { color: colors.text }]}>{'\uD83D\uDC64'}</Text>
-        </Pressable>
+        <View style={styles.topBarRight}>
+          <Pressable
+            onPress={() => router.push('/(main)/profile')}
+            hitSlop={12}
+            style={styles.topBarIcon}
+          >
+            <Ionicons name="person-outline" size={22} color={colors.text} />
+          </Pressable>
+          <Pressable
+            onPress={() => router.push('/(main)/settings')}
+            hitSlop={12}
+            style={styles.topBarIcon}
+          >
+            <Ionicons name="settings-outline" size={22} color={colors.text} />
+          </Pressable>
+        </View>
       </View>
 
       {/* Tab content */}
@@ -185,14 +211,11 @@ export default function HubScreen() {
               ]}
               onPress={() => setActiveTab(tab.key)}
             >
-              <Text
-                style={[
-                  styles.tabIcon,
-                  { color: isActive ? colors.activeTab : colors.muted },
-                ]}
-              >
-                {tab.icon}
-              </Text>
+              <Ionicons
+                name={isActive ? (tab.icon.replace('-outline', '') as keyof typeof Ionicons.glyphMap) : tab.icon}
+                size={20}
+                color={isActive ? colors.activeTab : colors.muted}
+              />
               <Text
                 style={[
                   styles.tabLabel,
@@ -227,8 +250,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  topBarIconText: {
-    fontSize: 22,
+  topBarRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   topBarTitle: {
     fontSize: 20,
@@ -317,7 +342,6 @@ const styles = StyleSheet.create({
     borderTopColor: 'transparent',
   },
   tabIcon: {
-    fontSize: 20,
     marginBottom: 2,
   },
   tabLabel: {
