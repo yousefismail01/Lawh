@@ -19,6 +19,9 @@ import { translationService } from '@/services/translationService'
 import { chapters } from '@/lib/data/mushafData'
 import { AyahAudioPlayer } from './AyahAudioPlayer'
 import { useResolvedTheme } from '@/hooks/useResolvedTheme'
+import { useHifzStore } from '@/stores/hifzStore'
+import { hifzService } from '@/services/hifzService'
+import type { HifzStatus } from '@/lib/sr/types'
 
 interface AyahActionSheetProps {
   visible: boolean
@@ -40,23 +43,57 @@ export const AyahActionSheet = React.memo(function AyahActionSheet({
   const [translationText, setTranslationText] = useState<string | null>(null)
   const [audioActive, setAudioActive] = useState(false)
 
-  // Auto-load translation when sheet opens
+  const [hifzStatus, setHifzStatus] = useState<HifzStatus | null>(null)
+  const [hifzMarked, setHifzMarked] = useState(false)
+
+  // Auto-load translation and hifz status when sheet opens
   useEffect(() => {
     if (!visible || !ayahInfo) return
     setLoadingTranslation(true)
+    setHifzMarked(false)
     translationService
       .getTranslation(ayahInfo.surahId, ayahInfo.ayahNumber)
       .then((entry) => setTranslationText(entry.text))
       .catch(() => setTranslationText(null))
       .finally(() => setLoadingTranslation(false))
+
+    // Load hifz status
+    try {
+      hifzService.initHifzDb()
+      const progress = hifzService.getAyahProgress(ayahInfo.surahId, 'hafs')
+      const ayahProgress = progress.find(p => p.ayahNumber === ayahInfo.ayahNumber)
+      setHifzStatus(ayahProgress?.status ?? null)
+    } catch {
+      setHifzStatus(null)
+    }
   }, [visible, ayahInfo])
 
   const handleClose = useCallback(() => {
     setTafsirText(null)
     setTranslationText(null)
     setAudioActive(false)
+    setHifzStatus(null)
+    setHifzMarked(false)
     onClose()
   }, [onClose])
+
+  const handleMarkMemorized = useCallback(async () => {
+    if (!ayahInfo) return
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    useHifzStore.getState().markMemorized(ayahInfo.surahId, ayahInfo.ayahNumber, 'hafs')
+    setHifzStatus('memorized')
+    setHifzMarked(true)
+    setTimeout(() => handleClose(), 600)
+  }, [ayahInfo, handleClose])
+
+  const handleMarkForReview = useCallback(async () => {
+    if (!ayahInfo) return
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    useHifzStore.getState().markInProgress(ayahInfo.surahId, ayahInfo.ayahNumber, 'hafs')
+    setHifzStatus('in_progress')
+    setHifzMarked(true)
+    setTimeout(() => handleClose(), 600)
+  }, [ayahInfo, handleClose])
 
   const handleBookmark = useCallback(async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
@@ -309,6 +346,58 @@ export const AyahActionSheet = React.memo(function AyahActionSheet({
                 <Text style={[styles.thirdButtonLabel, { color: textColor }]}>Share</Text>
               </Pressable>
             </View>
+
+            {/* Hifz section */}
+            <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>Memorization</Text>
+            {hifzMarked ? (
+              <View style={[styles.hifzConfirmation, { backgroundColor: cardBg, borderColor }]}>
+                <Ionicons name="checkmark-circle" size={20} color={isDark ? '#30D158' : '#34C759'} />
+                <Text style={[styles.hifzConfirmText, { color: textColor }]}>
+                  {hifzStatus === 'memorized' ? 'Marked as Memorized' : 'Marked for Review'}
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.buttonRow}>
+                {hifzStatus === 'memorized' ? (
+                  <View style={[styles.halfButton, { backgroundColor: buttonBg }]}>
+                    <Ionicons name="checkmark-circle" size={18} color={isDark ? '#30D158' : '#34C759'} />
+                    <Text style={[styles.halfButtonLabel, { color: isDark ? '#30D158' : '#34C759' }]}>Memorized</Text>
+                  </View>
+                ) : (
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.halfButton,
+                      { backgroundColor: buttonBg },
+                      pressed && { opacity: 0.6 },
+                    ]}
+                    onPress={handleMarkMemorized}
+                  >
+                    <Ionicons name="checkmark-circle-outline" size={18} color={isDark ? '#30D158' : '#34C759'} />
+                    <Text style={[styles.halfButtonLabel, { color: textColor }]}>Mark Memorized</Text>
+                  </Pressable>
+                )}
+                {hifzStatus === 'in_progress' || hifzStatus === 'needs_review' ? (
+                  <View style={[styles.halfButton, { backgroundColor: buttonBg }]}>
+                    <Ionicons name="repeat" size={18} color={isDark ? '#0A84FF' : '#007AFF'} />
+                    <Text style={[styles.halfButtonLabel, { color: isDark ? '#0A84FF' : '#007AFF' }]}>
+                      {hifzStatus === 'needs_review' ? 'Needs Review' : 'In Progress'}
+                    </Text>
+                  </View>
+                ) : (
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.halfButton,
+                      { backgroundColor: buttonBg },
+                      pressed && { opacity: 0.6 },
+                    ]}
+                    onPress={handleMarkForReview}
+                  >
+                    <Ionicons name="repeat-outline" size={18} color={isDark ? '#0A84FF' : '#007AFF'} />
+                    <Text style={[styles.halfButtonLabel, { color: textColor }]}>Mark for Review</Text>
+                  </Pressable>
+                )}
+              </View>
+            )}
           </ScrollView>
         </View>
       </View>
@@ -464,5 +553,18 @@ const styles = StyleSheet.create({
   tafsirText: {
     fontSize: 14,
     lineHeight: 22,
+  },
+  hifzConfirmation: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  hifzConfirmText: {
+    fontSize: 15,
+    fontWeight: '500',
   },
 })
