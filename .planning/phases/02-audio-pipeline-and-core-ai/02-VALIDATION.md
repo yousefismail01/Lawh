@@ -38,16 +38,16 @@ created: 2026-03-08
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| TBD | TBD | TBD | AUDP-01 | integration | `npx jest --testPathPattern=recording` | W0 | pending |
-| TBD | TBD | TBD | AUDP-02 | unit | `pytest -k test_audio_validation` | W0 | pending |
-| TBD | TBD | TBD | AUDP-03 | integration | `npx jest --testPathPattern=offlineQueue` | W0 | pending |
-| TBD | TBD | TBD | AUDP-04 | integration | `npx jest --testPathPattern=interruption` | W0 | pending |
+| TBD | TBD | TBD | AUDP-01 | manual | *See Manual-Only Verifications* | N/A | pending |
+| TBD | TBD | TBD | AUDP-02 | unit | `npx jest __tests__/services/offlineQueue.test.ts -x` | W0 | pending |
+| TBD | TBD | TBD | AUDP-03 | manual | *See Manual-Only Verifications* | N/A | pending |
+| TBD | TBD | TBD | AUDP-04 | unit | `python -m pytest tests/test_audio_validation.py -x` | W0 | pending |
 | TBD | TBD | TBD | AIRC-01 | integration | `pytest -k test_transcription` | W0 | pending |
 | TBD | TBD | TBD | AIRC-02 | unit | `pytest -k test_word_differ` | W0 | pending |
 | TBD | TBD | TBD | AIRC-03 | unit | `pytest -k test_word_differ` | W0 | pending |
 | TBD | TBD | TBD | AIRC-04 | unit | `pytest -k test_word_differ` | W0 | pending |
 | TBD | TBD | TBD | AIRC-05 | unit | `pytest -k test_scoring` | W0 | pending |
-| TBD | TBD | TBD | AIRC-06 | integration | `pytest -k test_recitation_endpoint` | W0 | pending |
+| TBD | TBD | TBD | AIRC-06 | integration | `pytest -k test_supabase_write` | W0 | pending |
 | TBD | TBD | TBD | AIRC-07 | unit | `pytest -k test_auth` | W0 | pending |
 | TBD | TBD | TBD | AIRC-08 | integration | `pytest -k test_model_loading` | W0 | pending |
 | TBD | TBD | TBD | RIWY-03 | unit | `pytest -k test_riwayah` | W0 | pending |
@@ -71,6 +71,8 @@ Server-side test files (created across Plans 02-01 and 02-02):
 - [ ] `lawh-api/tests/test_scoring.py` — scoring tests (Plan 02-02 Task 1)
 - [ ] `lawh-api/tests/test_passage_detector.py` — passage detector tests (Plan 02-02 Task 1)
 - [ ] `lawh-api/tests/test_transcription.py` — transcription service tests with mock Whisper (Plan 02-02 Task 2)
+- [ ] `lawh-api/tests/test_supabase_write.py` — Supabase writer tests (Plan 02-02 Task 2)
+- [ ] `lawh-api/tests/test_model_loading.py` — model loading tests (Plan 02-01 Task 3)
 
 Mobile-side test files (created in Plan 02-03 Task 2):
 - [ ] `lawh-mobile/__tests__/services/offlineQueue.test.ts` — offline queue tests
