@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 07-expanded-footer-with-reading-layout-selector-microphone-placeholder-and-ayah-long-press-action-sheet-with-haptic-feedback
-current_plan: 4 of 4 in Phase 7
-status: completed
-stopped_at: Phase 8 context gathered
-last_updated: "2026-03-08T19:36:03.933Z"
-last_activity: "2026-03-06 - Completed quick task 10: App-wide dark mode wiring to all screens, Navy→Dark Gray rename, themed contents sub-components"
+current_phase: 08-hifz-tracker-and-review-scheduler-with-adaptive-spaced-repetition
+current_plan: 1 of 3 in Phase 8
+status: in-progress
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-03-08T19:58:15.000Z"
+last_activity: "2026-03-08 - Completed 08-01: SM-2+ algorithm, hifz data layer (types, service, store)"
 progress:
   total_phases: 9
   completed_phases: 3
   total_plans: 22
-  completed_plans: 20
+  completed_plans: 21
 ---
 
 # Session State
@@ -24,9 +24,9 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v1.0 milestone
-**Current phase:** 07-expanded-footer-with-reading-layout-selector-microphone-placeholder-and-ayah-long-press-action-sheet-with-haptic-feedback
-**Current Plan:** 4 of 4 in Phase 7
-**Status:** Phase 7 Complete
+**Current phase:** 08-hifz-tracker-and-review-scheduler-with-adaptive-spaced-repetition
+**Current Plan:** 1 of 3 in Phase 8
+**Status:** In Progress
 
 ## Session Log
 
@@ -73,6 +73,11 @@ See: .planning/PROJECT.md
 - [Quick 10]: Used optional color prop objects with backward-compatible defaults for contents sub-components
 - [Quick 10]: Renamed Navy dark variant to Dark Gray (#1C1C1E, ellipse-outline icon)
 - [Quick 10]: Toggle pills invert in dark mode (white bg + black text active, vs black bg + white text in light)
+- [Phase 08]: UTC-normalized dates in SM-2+ to prevent timezone bugs in interval computation
+- [Phase 08]: Grade type restricted to 0|2|3|5 (4-button Anki-style) not 0-5 range
+- [Phase 08]: Strength formula denominator 8: min(1.0, (reps * EF) / (reps * EF + 8))
+- [Phase 08]: hifzStore uses no persist middleware -- SQLite is the single source of truth
+- [Phase 08]: Added consecutive_correct and mistake_count as local-only SQLite columns
 
 ### Quick Tasks Completed
 
@@ -89,7 +94,7 @@ See: .planning/PROJECT.md
 
 ### Last Session
 
-- **Stopped at:** Phase 8 context gathered
-- **Timestamp:** 2026-03-06T06:31:34Z
+- **Stopped at:** Completed 08-01-PLAN.md
+- **Timestamp:** 2026-03-08T19:58:15Z
 
-Last activity: 2026-03-06 - Completed quick task 10: App-wide dark mode wiring to all screens, Navy→Dark Gray rename, themed contents sub-components
+Last activity: 2026-03-08 - Completed 08-01: SM-2+ algorithm with TDD, SQLite hifz service, Zustand hifz store

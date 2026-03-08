@@ -62,11 +62,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Spaced Repetition (SM-2+)
 
-- [ ] **SM2-01**: SM-2+ algorithm implemented with Wozniak formula plus modifications: proportional overdue credit, ease factor recovery after 3 consecutive correct, ±10% interval jitter
-- [ ] **SM2-02**: Per-ayah strength score (0.0-1.0) computed from SM-2+ repetition count
-- [ ] **SM2-03**: Review schedule computed locally in TypeScript for zero-latency post-session scoring
+- [x] **SM2-01**: SM-2+ algorithm implemented with Wozniak formula plus modifications: proportional overdue credit, ease factor recovery after 3 consecutive correct, ±10% interval jitter
+- [x] **SM2-02**: Per-ayah strength score (0.0-1.0) computed from SM-2+ repetition count
+- [x] **SM2-03**: Review schedule computed locally in TypeScript for zero-latency post-session scoring
 - [ ] **SM2-04**: Review schedule synced to Supabase via calculate-review-schedule Edge Function
-- [ ] **SM2-05**: Ease factor minimum clamped at 1.3 with recovery mechanism to prevent ease hell
+- [x] **SM2-05**: Ease factor minimum clamped at 1.3 with recovery mechanism to prevent ease hell
 
 ### Review Queue
 
@@ -187,11 +187,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HIFZ-03 | Phase 4 | Pending |
 | HIFZ-04 | Phase 4 | Pending |
 | HIFZ-05 | Phase 4 | Pending |
-| SM2-01 | Phase 4 | Pending |
-| SM2-02 | Phase 4 | Pending |
-| SM2-03 | Phase 4 | Pending |
+| SM2-01 | Phase 4 | Complete |
+| SM2-02 | Phase 4 | Complete |
+| SM2-03 | Phase 4 | Complete |
 | SM2-04 | Phase 4 | Pending |
-| SM2-05 | Phase 4 | Pending |
+| SM2-05 | Phase 4 | Complete |
 | REVW-01 | Phase 4 | Pending |
 | REVW-02 | Phase 4 | Pending |
 | REVW-03 | Phase 4 | Pending |
