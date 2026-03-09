@@ -188,7 +188,7 @@ Plans:
 ### Phase 9: Level-adaptive guided daily session UI with heatmap, dhor cycle tracker, and session flow
 
 **Goal:** Transform the Hifz tab into a guided daily session experience with a linear sabaq->sabqi->dhor walkthrough, level-adaptive visual weighting, a 604-page mushaf heatmap colored by confidence, a dhor cycle progress tracker, sabaq pause state UI, missed day recovery banners, and level transition interstitials
-**Requirements**: P9-01, P9-02, P9-03, P9-04, P9-05, P9-06, P9-07, P9-08, P9-09, DASH-06
+**Requirements**: P9-01, P9-02, P9-03, P9-04, P9-05, P9-06, P9-07, P9-08, P9-09
 **Depends on:** Phase 8
 **Plans:** 3 plans
 
