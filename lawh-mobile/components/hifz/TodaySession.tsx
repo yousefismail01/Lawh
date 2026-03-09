@@ -9,7 +9,7 @@ import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useMadinahHifzStore } from '@/stores/madinahHifzStore'
-import type { DailySession, DhorCycleEntry, SabqiAssignment } from '@/lib/algorithm'
+import type { DhorCycleEntry } from '@/lib/algorithm'
 
 interface TodaySessionProps {
   isDark: boolean
