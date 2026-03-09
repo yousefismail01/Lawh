@@ -13,7 +13,14 @@ import { useResolvedTheme } from '@/hooks/useResolvedTheme'
 import { SurahGrid } from '@/components/hifz/SurahGrid'
 import { StatsPanel } from '@/components/hifz/StatsPanel'
 import { ReviewBadge } from '@/components/hifz/ReviewBadge'
+import { HifzSetup } from '@/components/hifz/HifzSetup'
+import { MadinahSetup } from '@/components/hifz/MadinahSetup'
+import { TodaySession } from '@/components/hifz/TodaySession'
+import { CurrentlyMemorizing } from '@/components/hifz/CurrentlyMemorizing'
+import { UpcomingReviews } from '@/components/hifz/UpcomingReviews'
 import { useHifzStore } from '@/stores/hifzStore'
+import { useSettingsStore } from '@/stores/settingsStore'
+import { useMadinahHifzStore } from '@/stores/madinahHifzStore'
 
 type TabKey = 'dashboard' | 'goals' | 'hifz' | 'activity'
 
@@ -59,17 +66,27 @@ function DashboardTab({ colors, isDark }: { colors: ReturnType<typeof buildColor
 function HifzTab({ isDark }: { isDark: boolean }) {
   const loadProgress = useHifzStore((s) => s.loadProgress)
   const loaded = useHifzStore((s) => s.loaded)
+  const madinahSetupComplete = useMadinahHifzStore((s) => s.setupComplete)
+  const generateToday = useMadinahHifzStore((s) => s.generateToday)
 
   useEffect(() => {
     if (!loaded) loadProgress('hafs')
-  }, [loaded, loadProgress])
+    if (madinahSetupComplete) generateToday()
+  }, [loaded, loadProgress, madinahSetupComplete, generateToday])
+
+  if (!madinahSetupComplete) {
+    return <MadinahSetup isDark={isDark} />
+  }
 
   return (
     <ScrollView
       contentContainerStyle={styles.tabContent}
       showsVerticalScrollIndicator={false}
     >
+      <TodaySession isDark={isDark} />
       <StatsPanel isDark={isDark} />
+      <CurrentlyMemorizing isDark={isDark} />
+      <UpcomingReviews isDark={isDark} />
       <SurahGrid isDark={isDark} />
     </ScrollView>
   )
