@@ -51,6 +51,10 @@ export interface StudentState {
   activeDaysPerWeek: number;
   /** Total pages memorized across all juz */
   totalPagesMemorized: number;
+  /** User override for sabaq pages per day (0.5 increments). null = use level default */
+  sabaqPagesOverride?: number | null;
+  /** Specific surah IDs the user has marked as memorized (for partial-juz filtering) */
+  memorizedSurahIds?: number[];
 }
 
 /** A single entry in the dhor rotation cycle */
@@ -125,3 +129,48 @@ export const MAX_DHOR_PAGES_PER_DAY = 20;
 export const QUALITY_THRESHOLD_DHOR = 3.0;
 export const QUALITY_THRESHOLD_SABQI = 3.5;
 export const MAX_MISSED_DAYS = 7;
+
+/** Position of an ayah within a mushaf page's 15-line grid */
+export interface AyahLineRange {
+  surahId: number;
+  ayahNumber: number;
+  lineStart: number;  // 1-15
+  lineEnd: number;    // 1-15
+  lineCount: number;
+}
+
+/** Layout of a single mushaf page with ayah positions */
+export interface PageAyahLayout {
+  page: number;
+  ayahs: AyahLineRange[];
+  /** Number of non-ayah header lines (surah_name + basmallah) */
+  headerLines: number;
+  /** Total ayah-content lines (15 minus headers) */
+  contentLines: number;
+}
+
+/** A concrete memorization unit bounded by ayah numbers */
+export interface MemorizationUnit {
+  surahId: number;
+  surahName: string;
+  startAyah: number;
+  endAyah: number;
+  /** Mushaf page this unit is on */
+  mushafPage: number;
+  /** 0 = first half, 1 = second half */
+  halfIndex: 0 | 1;
+  /** Number of actual content lines */
+  lineCount: number;
+  /** True if a single ayah spans >10 lines */
+  isLongAyah: boolean;
+}
+
+/** Ayah boundary snapping mode */
+export type AyahBoundaryMode = 'round_down' | 'round_up';
+
+/** Half-page settings for the memorization algorithm */
+export interface HalfPageSettings {
+  ayahBoundaryMode: AyahBoundaryMode;
+  /** Number of half-pages to memorize per day */
+  dailyHalfPages: number;
+}
