@@ -101,6 +101,8 @@ export interface SabaqAllowance {
 export interface DailySession {
   /** New memorization assignment, null if paused/throttled */
   sabaq: { juz: number; startPage: number; endPage: number } | null;
+  /** Concrete ayah-bounded memorization unit for sabaq (when half-page mode active) */
+  sabaqUnit?: MemorizationUnit | null;
   /** Recent review assignments */
   sabqi: SabqiAssignment[];
   /** Revision rotation assignments */

@@ -6,12 +6,15 @@
  * Pure TypeScript — no external dependencies.
  */
 
-import type { StudentState, DhorCycle, DailySession, SabqiAssignment } from './types';
+import type { StudentState, DhorCycle, DailySession, SabqiAssignment, AyahBoundaryMode, MemorizationUnit } from './types';
 import { MAX_DHOR_PAGES_PER_DAY } from './types';
 import { getStudentLevel, getLevelConfig } from './level-calculator';
 import { getDhorAssignment } from './dhor-scheduler';
 import { getSabqiRange, distributeSabqiWeekly } from './sabqi-manager';
 import { getSabaqAllowance } from './sabaq-throttle';
+import { JUZ_START_PAGES } from '@/lib/data/pageJuzHizb';
+import { calculateHalfPage } from './half-page';
+import { buildPageAyahLayout } from './ayah-line-map';
 
 /**
  * Generate a complete daily session for the student.
@@ -38,7 +41,8 @@ export function generateDailySession(
   const config = getLevelConfig(level);
 
   // 1. Dhor assignment (always present if there's memorized juz)
-  let dhor = getDhorAssignment(dhorCycle, dayNumber);
+  // Note: dhor cycle is pre-filtered by memorizedSurahIds in generateDhorCycle
+  let dhor = getDhorAssignment(dhorCycle, dayNumber, level);
 
   // Non-active day: reduce dhor to ~50%
   if (!isActiveDay && dhor.length > 0) {
@@ -83,7 +87,7 @@ export function generateDailySession(
     studentState.memorizedJuz,
     level,
   );
-  const sabqiWeekly = distributeSabqiWeekly(sabqiJuz, studentState.activeDaysPerWeek, level);
+  const sabqiWeekly = distributeSabqiWeekly(sabqiJuz, studentState.activeDaysPerWeek, level, studentState.memorizedSurahIds);
   const sabqiDayIndex = dayOfWeek % Math.max(studentState.activeDaysPerWeek, 1);
   const sabqi: SabqiAssignment[] = sabqiWeekly.get(sabqiDayIndex) ?? [];
 
@@ -117,4 +121,40 @@ export function generateDailySession(
     totalPages,
     sessionDate,
   };
+}
+
+/**
+ * Resolve a page-based sabaq assignment to a concrete ayah-bounded MemorizationUnit.
+ *
+ * This is async because it needs the layout DB to build the PageAyahLayout.
+ * Call this after generateDailySession() to get the concrete unit.
+ *
+ * @param session - The generated daily session
+ * @param mode - Ayah boundary snapping mode ('round_down' or 'round_up')
+ * @returns The MemorizationUnit, or null if no sabaq assignment
+ */
+export async function resolveSabaqUnit(
+  session: DailySession,
+  mode: AyahBoundaryMode,
+): Promise<MemorizationUnit | null> {
+  if (!session.sabaq) return null;
+
+  const { juz, startPage } = session.sabaq;
+
+  // Convert juz-relative page to mushaf page
+  const juzStartPage = JUZ_START_PAGES[juz - 1];
+  const mushafPage = juzStartPage + startPage - 1;
+
+  try {
+    const layout = await buildPageAyahLayout(mushafPage);
+
+    // For a half-page assignment, use halfIndex=0 (first half of the page)
+    // For a full page, we still return the first half — the UI can request both halves
+    const unit = calculateHalfPage(layout, 0, mode);
+
+    return unit;
+  } catch (err) {
+    console.error('[resolveSabaqUnit] Failed to resolve ayah layout:', err);
+    return null;
+  }
 }

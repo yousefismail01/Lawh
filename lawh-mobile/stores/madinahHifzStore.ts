@@ -16,13 +16,20 @@ import type {
   StudentState,
   DailySession,
   DhorCycle,
+  AyahBoundaryMode,
+  MemorizationUnit,
 } from '@/lib/algorithm'
 import {
   getStudentLevel,
   generateDhorCycle,
   generateDailySession,
+  resolveSabaqUnit,
   PAGES_PER_JUZ,
 } from '@/lib/algorithm'
+import { useHifzStore } from '@/stores/hifzStore'
+import { chapters } from '@/lib/data/mushafData'
+import { JUZ_START_PAGES } from '@/lib/data/pageJuzHizb'
+import { SURAH_START_PAGES } from '@/lib/data/contentsData'
 
 /** A single completed session record for history tracking */
 interface SessionRecord {
@@ -35,6 +42,9 @@ interface SessionRecord {
   totalMinutes: number
 }
 
+/** Sabaq amount unit */
+type SabaqUnit = 'pages'
+
 interface MadinahHifzState {
   // Persisted student profile (set during setup)
   setupComplete: boolean
@@ -43,8 +53,14 @@ interface MadinahHifzState {
   currentSabaqJuz: number | null
   currentSabaqPage: number
   activeDaysPerWeek: number
+  /** Specific active day-of-week numbers (0=Sun..6=Sat). When set, used for isActiveDay checks. */
+  activeDayNumbers: number[]
   juzQualityScores: Record<number, number>
   dhorDayNumber: number
+  /** User override for sabaq pages per day (0.5 increments). null = use level default */
+  sabaqPagesOverride: number | null
+  /** Ayah boundary snapping mode for half-page units */
+  ayahBoundaryMode: AyahBoundaryMode
 
   // Session tracking (persisted)
   lastSessionDate: string | null
@@ -57,6 +73,8 @@ interface MadinahHifzState {
   todaySession: DailySession | null
   dhorCycle: DhorCycle | null
   levelTransitionDetected: boolean
+  /** Resolved ayah-bounded memorization unit for current sabaq */
+  sabaqUnit: MemorizationUnit | null
 
   // Hydration
   _hasHydrated: boolean
@@ -69,9 +87,12 @@ interface MadinahHifzState {
     currentSabaqJuz: number | null
     currentSabaqPage: number
     activeDaysPerWeek: number
+    activeDayNumbers?: number[]
   }) => void
   generateToday: () => void
   resetSetup: () => void
+  setSabaqPagesOverride: (pages: number | null) => void
+  setAyahBoundaryMode: (mode: AyahBoundaryMode) => void
   completeSession: (ratings: Record<number, number>, totalMinutes: number) => void
   getMissedDays: () => number
   dismissLevelTransition: () => void
@@ -91,8 +112,11 @@ function buildMemorizedJuz(
   }))
 }
 
-function computeIsActiveDay(dayOfWeek: number, activeDaysPerWeek: number): boolean {
-  // First N days of the week are active, starting Sunday=0
+function computeIsActiveDay(dayOfWeek: number, activeDaysPerWeek: number, activeDayNumbers?: number[]): boolean {
+  // Use specific day numbers if available, otherwise fall back to first N days
+  if (activeDayNumbers && activeDayNumbers.length > 0) {
+    return activeDayNumbers.includes(dayOfWeek)
+  }
   return dayOfWeek < activeDaysPerWeek
 }
 
@@ -106,8 +130,11 @@ export const useMadinahHifzStore = create<MadinahHifzState>()(
       currentSabaqJuz: null,
       currentSabaqPage: 1,
       activeDaysPerWeek: 5,
+      activeDayNumbers: [0, 1, 2, 3, 4],
       juzQualityScores: {},
       dhorDayNumber: 0,
+      sabaqPagesOverride: null,
+      ayahBoundaryMode: 'round_down' as AyahBoundaryMode,
 
       // Session tracking defaults
       lastSessionDate: null,
@@ -120,6 +147,7 @@ export const useMadinahHifzStore = create<MadinahHifzState>()(
       todaySession: null,
       dhorCycle: null,
       levelTransitionDetected: false,
+      sabaqUnit: null,
 
       // Hydration
       _hasHydrated: false,
@@ -133,73 +161,130 @@ export const useMadinahHifzStore = create<MadinahHifzState>()(
           currentSabaqJuz: config.currentSabaqJuz,
           currentSabaqPage: config.currentSabaqPage,
           activeDaysPerWeek: config.activeDaysPerWeek,
+          activeDayNumbers: config.activeDayNumbers ?? [],
           dhorDayNumber: 0,
           juzQualityScores: Object.fromEntries(
             config.memorizedJuz.map((j) => [j, 3.5]),
           ),
         })
-        // Generate session after state is saved
-        setTimeout(() => get().generateToday(), 0)
+        // Auto-adjust sabaqPage based on memorized surahs within the sabaq juz
+        if (config.currentSabaqJuz !== null && config.memorizedSurahIds && config.memorizedSurahIds.length > 0) {
+          const juz = config.currentSabaqJuz
+          const juzStartPage = JUZ_START_PAGES[juz - 1]
+          const juzEndPage = juz < 30 ? JUZ_START_PAGES[juz] - 1 : 604
+
+          const memorizedSet = new Set(config.memorizedSurahIds)
+          let lastMemorizedSurahInJuz = -1
+          for (let s = 1; s <= 114; s++) {
+            if (SURAH_START_PAGES[s] >= juzStartPage && SURAH_START_PAGES[s] <= juzEndPage) {
+              if (memorizedSet.has(s)) {
+                lastMemorizedSurahInJuz = s
+              }
+            }
+          }
+
+          if (lastMemorizedSurahInJuz > 0) {
+            const nextSurah = lastMemorizedSurahInJuz + 1
+            if (nextSurah <= 114 && SURAH_START_PAGES[nextSurah] <= juzEndPage) {
+              const relativePage = SURAH_START_PAGES[nextSurah] - juzStartPage + 1
+              set({ currentSabaqPage: relativePage })
+            }
+          }
+        }
+
+        // Generate session after state is saved, then sync to SQLite
+        setTimeout(() => {
+          get().generateToday()
+
+          // Sync memorized surahs to hifzStore (SQLite)
+          const surahIds = config.memorizedSurahIds ?? []
+          const hifzStore = useHifzStore.getState()
+          for (const surahId of surahIds) {
+            const ch = chapters[surahId]
+            if (ch) {
+              hifzStore.markSurahMemorized(surahId, ch.versesCount, 'hafs')
+            }
+          }
+          // Reload hifzStore progress
+          hifzStore.loadProgress('hafs')
+        }, 0)
       },
 
       generateToday: () => {
         const state = get()
-        if (!state.setupComplete || state.memorizedJuzNumbers.length === 0) {
+        if (!state.setupComplete || (state.memorizedJuzNumbers.length === 0 && (!state.memorizedSurahIds || state.memorizedSurahIds.length === 0))) {
           set({ todaySession: null, studentLevel: null, dhorCycle: null })
           return
         }
 
-        const memorizedJuz = buildMemorizedJuz(
-          state.memorizedJuzNumbers,
-          state.juzQualityScores,
-        )
+        try {
+          const memorizedJuz = buildMemorizedJuz(
+            state.memorizedJuzNumbers,
+            state.juzQualityScores,
+          )
 
-        const level = getStudentLevel(state.memorizedJuzNumbers.length)
-        const dhorCycle = generateDhorCycle(memorizedJuz, level)
+          const level = getStudentLevel(state.memorizedJuzNumbers.length)
+          const dhorCycle = generateDhorCycle(memorizedJuz, level, state.memorizedSurahIds)
 
-        const now = new Date()
-        const sessionDate = now.toISOString().slice(0, 10)
-        const dayOfWeek = now.getDay()
-        const isActiveDay = computeIsActiveDay(dayOfWeek, state.activeDaysPerWeek)
+          const now = new Date()
+          const sessionDate = now.toISOString().slice(0, 10)
+          const dayOfWeek = now.getDay()
+          const isActiveDay = computeIsActiveDay(dayOfWeek, state.activeDaysPerWeek, state.activeDayNumbers)
 
-        // Compute average dhor quality
-        const qualityValues = Object.values(state.juzQualityScores)
-        const dhorAvgQuality =
-          qualityValues.length > 0
-            ? qualityValues.reduce((a, b) => a + b, 0) / qualityValues.length
-            : 3.5
+          // Compute average dhor quality
+          const qualityValues = Object.values(state.juzQualityScores)
+          const dhorAvgQuality =
+            qualityValues.length > 0
+              ? qualityValues.reduce((a, b) => a + b, 0) / qualityValues.length
+              : 3.5
 
-        const studentState: StudentState = {
-          memorizedJuz,
-          currentSabaqJuz: state.currentSabaqJuz,
-          currentSabaqPage: state.currentSabaqPage,
-          activeDaysPerWeek: state.activeDaysPerWeek,
-          totalPagesMemorized: state.memorizedJuzNumbers.length * PAGES_PER_JUZ,
+          const studentState: StudentState = {
+            memorizedJuz,
+            currentSabaqJuz: state.currentSabaqJuz,
+            currentSabaqPage: state.currentSabaqPage,
+            activeDaysPerWeek: state.activeDaysPerWeek,
+            totalPagesMemorized: state.memorizedJuzNumbers.length * PAGES_PER_JUZ,
+            sabaqPagesOverride: state.sabaqPagesOverride,
+            memorizedSurahIds: state.memorizedSurahIds,
+          }
+
+          const todaySession = generateDailySession(
+            studentState,
+            dhorCycle,
+            state.dhorDayNumber,
+            dayOfWeek,
+            isActiveDay,
+            dhorAvgQuality,
+            0, // consecutiveWeakDhorDays
+            sessionDate,
+          )
+
+          // Detect level transition
+          const prevLevel = state.previousLevel
+          const isTransition = prevLevel !== null && prevLevel !== level
+          const newPreviousLevel = prevLevel === null ? level : (isTransition ? level : prevLevel)
+
+          set({
+            studentLevel: level,
+            todaySession,
+            dhorCycle,
+            previousLevel: newPreviousLevel,
+            levelTransitionDetected: isTransition,
+            sabaqUnit: null, // Reset while resolving
+          })
+
+          // Resolve sabaq to concrete ayah-bounded unit (async)
+          if (todaySession.sabaq) {
+            resolveSabaqUnit(todaySession, state.ayahBoundaryMode).then(unit => {
+              set({ sabaqUnit: unit })
+            }).catch(err => {
+              console.error('[generateToday] Failed to resolve sabaq unit:', err)
+            })
+          }
+        } catch (err) {
+          console.error('[generateToday] Session generation failed:', err)
+          set({ todaySession: null, studentLevel: null, dhorCycle: null })
         }
-
-        const todaySession = generateDailySession(
-          studentState,
-          dhorCycle,
-          state.dhorDayNumber,
-          dayOfWeek,
-          isActiveDay,
-          dhorAvgQuality,
-          0, // consecutiveWeakDhorDays
-          sessionDate,
-        )
-
-        // Detect level transition
-        const prevLevel = state.previousLevel
-        const isTransition = prevLevel !== null && prevLevel !== level
-        const newPreviousLevel = prevLevel === null ? level : (isTransition ? level : prevLevel)
-
-        set({
-          studentLevel: level,
-          todaySession,
-          dhorCycle,
-          previousLevel: newPreviousLevel,
-          levelTransitionDetected: isTransition,
-        })
       },
 
       completeSession: (ratings, totalMinutes) => {
@@ -270,6 +355,18 @@ export const useMadinahHifzStore = create<MadinahHifzState>()(
         return Math.max(0, diffDays - 1)
       },
 
+      setSabaqPagesOverride: (pages) => {
+        set({ sabaqPagesOverride: pages })
+        // Regenerate session with new amount
+        setTimeout(() => get().generateToday(), 0)
+      },
+
+      setAyahBoundaryMode: (mode) => {
+        set({ ayahBoundaryMode: mode })
+        // Re-resolve sabaq unit with new mode
+        setTimeout(() => get().generateToday(), 0)
+      },
+
       dismissLevelTransition: () => {
         set({ levelTransitionDetected: false })
       },
@@ -282,8 +379,11 @@ export const useMadinahHifzStore = create<MadinahHifzState>()(
           currentSabaqJuz: null,
           currentSabaqPage: 1,
           activeDaysPerWeek: 5,
+          activeDayNumbers: [0, 1, 2, 3, 4],
           juzQualityScores: {},
           dhorDayNumber: 0,
+          sabaqPagesOverride: null,
+          ayahBoundaryMode: 'round_down' as AyahBoundaryMode,
           lastSessionDate: null,
           completedSessionDates: [],
           previousLevel: null,
@@ -292,6 +392,7 @@ export const useMadinahHifzStore = create<MadinahHifzState>()(
           todaySession: null,
           dhorCycle: null,
           levelTransitionDetected: false,
+          sabaqUnit: null,
         })
       },
     }),
@@ -314,8 +415,11 @@ export const useMadinahHifzStore = create<MadinahHifzState>()(
         currentSabaqJuz: state.currentSabaqJuz,
         currentSabaqPage: state.currentSabaqPage,
         activeDaysPerWeek: state.activeDaysPerWeek,
+        activeDayNumbers: state.activeDayNumbers,
         juzQualityScores: state.juzQualityScores,
         dhorDayNumber: state.dhorDayNumber,
+        sabaqPagesOverride: state.sabaqPagesOverride,
+        ayahBoundaryMode: state.ayahBoundaryMode,
         lastSessionDate: state.lastSessionDate,
         completedSessionDates: state.completedSessionDates,
         previousLevel: state.previousLevel,

@@ -18,6 +18,11 @@ export type {
   SabaqAllowance,
   DailySession,
   RecoveryPlan,
+  AyahLineRange,
+  PageAyahLayout,
+  MemorizationUnit,
+  AyahBoundaryMode,
+  HalfPageSettings,
 } from './types';
 
 export {
@@ -43,7 +48,13 @@ export { getSabqiRange, distributeSabqiWeekly } from './sabqi-manager';
 export { shouldThrottleSabaq, getSabaqAllowance } from './sabaq-throttle';
 
 // Session generator
-export { generateDailySession } from './session-generator';
+export { generateDailySession, resolveSabaqUnit } from './session-generator';
+
+// Half-page calculator
+export { calculateHalfPage } from './half-page';
+
+// Ayah-line mapping
+export { buildPageAyahLayout, preloadPageLayouts } from './ayah-line-map';
 
 // Recovery
 export { generateRecoveryPlan } from './recovery';
