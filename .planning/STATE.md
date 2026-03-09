@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 08-hifz-tracker-and-review-scheduler-with-adaptive-spaced-repetition
-current_plan: Not started
-status: completed
-stopped_at: "Completed quick-11: Madinah-method hifz review algorithm"
-last_updated: "2026-03-09T04:02:39.534Z"
-last_activity: "2026-03-08 - Completed 08-03: Review and memorization sessions with blur-reveal-grade loop, AyahActionSheet hifz actions"
+current_phase: 09-level-adaptive-guided-daily-session-ui-with-heatmap-dhor-cycle-tracker-and-session-flow
+current_plan: 1 of 4
+status: in_progress
+stopped_at: "Completed 09-01: Session completion and rating components"
+last_updated: "2026-03-09T04:55:00Z"
+last_activity: "2026-03-09 - Completed 09-01: Session completion tracking and rating components"
 progress:
   total_phases: 9
   completed_phases: 4
   total_plans: 29
-  completed_plans: 23
+  completed_plans: 24
 ---
 
 # Session State
@@ -24,9 +24,9 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v1.0 milestone
-**Current phase:** 08-hifz-tracker-and-review-scheduler-with-adaptive-spaced-repetition
-**Current Plan:** Not started
-**Status:** Milestone complete
+**Current phase:** 09-level-adaptive-guided-daily-session-ui-with-heatmap-dhor-cycle-tracker-and-session-flow
+**Current Plan:** 1 of 4
+**Status:** In progress
 
 ## Session Log
 
@@ -40,6 +40,7 @@ See: .planning/PROJECT.md
 - Phase 6 added: Mushaf fullscreen mode with tap-toggle UI, menu navigation, and surah glossary
 - Phase 7 added: Expanded footer with reading layout selector, microphone placeholder, and ayah long-press action sheet with haptic feedback
 - Phase 8 added: Hifz tracker and review scheduler with adaptive spaced repetition
+- Phase 9 added: Level-adaptive guided daily session UI with heatmap, dhor cycle tracker, and session flow
 
 ### Decisions
 
@@ -89,6 +90,9 @@ See: .planning/PROJECT.md
 - [Quick 12]: Hub HifzTab gates on madinahHifzStore.setupComplete instead of settingsStore.hifzSetupComplete
 - [Quick 12]: Default 5 active days (Sun-Thu) for MadinahSetup wizard
 - [Quick 12]: All 30 juz selected auto-skips sabaq step and enters review-only mode
+- [Phase 09]: EMA weight 0.7 for new quality rating gives responsive tracking while smoothing outliers
+- [Phase 09]: 90-entry cap for sessionHistory and completedSessionDates keeps storage bounded
+- [Phase 09]: Level transition detected in generateToday by comparing previousLevel with computed level
 
 ### Quick Tasks Completed
 
@@ -107,7 +111,7 @@ See: .planning/PROJECT.md
 
 ### Last Session
 
-- **Stopped at:** Completed quick-12: Wire Madinah algorithm into hifz UI
-- **Timestamp:** 2026-03-09T04:15:43Z
+- **Stopped at:** Completed 09-01: Session completion and rating components
+- **Timestamp:** 2026-03-09T04:55:00Z
 
-Last activity: 2026-03-09 - Completed quick task 12: Wire Madinah algorithm into hifz tab with setup wizard, session card, and store
+Last activity: 2026-03-09 - Completed 09-01: Extended madinahHifzStore with session completion, created QualityRating and MadinahSessionSummary

@@ -131,7 +131,7 @@ Phases execute in numeric order: 1 → 01.1 → 2 → 3 → 4 → 5 → 6 → 7 
 | 6. Mushaf Fullscreen Mode | 1/4 | In progress | - |
 | 7. Expanded Footer | 3/4 | In Progress|  |
 | 8. Hifz Tracker + Review Scheduler | 3/3 | Complete   | 2026-03-08 |
-| 9. Guided Daily Session UI | 0/3 | Not started | - |
+| 9. Guided Daily Session UI | 1/3 | In Progress|  |
 
 ### Phase 6: Mushaf fullscreen mode with tap-toggle UI, menu navigation, and surah glossary
 
@@ -190,7 +190,7 @@ Plans:
 **Goal:** Transform the Hifz tab into a guided daily session experience with a linear sabaq->sabqi->dhor walkthrough, level-adaptive visual weighting, a 604-page mushaf heatmap colored by confidence, a dhor cycle progress tracker, sabaq pause state UI, missed day recovery banners, and level transition interstitials
 **Requirements**: P9-01, P9-02, P9-03, P9-04, P9-05, P9-06, P9-07, P9-08, P9-09
 **Depends on:** Phase 8
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] 09-01-PLAN.md — Store extension (session completion, quality tracking, missed day detection), QualityRating and MadinahSessionSummary components
