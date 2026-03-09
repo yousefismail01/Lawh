@@ -86,6 +86,9 @@ See: .planning/PROJECT.md
 - [Phase 08]: AyahActionSheet shows status label instead of action when ayah already tracked
 - [Phase 08]: Memorization session uses markInProgress (not markMemorized) for newly studied ayahs
 - [Phase quick-11]: Pure TypeScript Madinah-method algorithm with zero external dependencies
+- [Quick 12]: Hub HifzTab gates on madinahHifzStore.setupComplete instead of settingsStore.hifzSetupComplete
+- [Quick 12]: Default 5 active days (Sun-Thu) for MadinahSetup wizard
+- [Quick 12]: All 30 juz selected auto-skips sabaq step and enters review-only mode
 
 ### Quick Tasks Completed
 
@@ -100,10 +103,11 @@ See: .planning/PROJECT.md
 | 9 | App theme settings with Auto/Light/Dark mode and mushaf wiring | 2026-03-06 | 699ae64 | [9-add-app-theme-settings-with-auto-light-d](./quick/9-add-app-theme-settings-with-auto-light-d/) |
 | 10 | Fix app-wide theme, basmallah dark mode, and theme wiring | 2026-03-06 | b1264f7 | [10-fix-app-wide-theme-basmallah-dark-mode-t](./quick/10-fix-app-wide-theme-basmallah-dark-mode-t/) |
 | 11 | Implement Madinah-method hifz review algorithm (Sabaq/Sabqi/Dhor) | 2026-03-09 | 5ba8d23 | [11-implement-madinah-method-hifz-review-alg](./quick/11-implement-madinah-method-hifz-review-alg/) |
+| 12 | Wire Madinah algorithm into redesigned hifz tab | 2026-03-09 | 8fb2f0f | [12-wire-madinah-algorithm-into-redesigned-h](./quick/12-wire-madinah-algorithm-into-redesigned-h/) |
 
 ### Last Session
 
-- **Stopped at:** Completed quick-11: Madinah-method hifz review algorithm
-- **Timestamp:** 2026-03-08T20:15:00Z
+- **Stopped at:** Completed quick-12: Wire Madinah algorithm into hifz UI
+- **Timestamp:** 2026-03-09T04:15:43Z
 
-Last activity: 2026-03-09 - Completed quick task 11: Implement Madinah-method hifz review algorithm with Sabaq Sabqi Dhor three-tier scheduling
+Last activity: 2026-03-09 - Completed quick task 12: Wire Madinah algorithm into hifz tab with setup wizard, session card, and store
