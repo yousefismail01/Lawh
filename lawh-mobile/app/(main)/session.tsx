@@ -25,12 +25,22 @@ import { getSabaqAllowance, getLevelConfig } from '@/lib/algorithm'
 import type { StudentLevel, DailySession, DhorCycleEntry, SabqiAssignment } from '@/lib/algorithm'
 import { SessionTierCard } from '@/components/hifz/SessionTierCard'
 import { MadinahSessionSummary } from '@/components/hifz/MadinahSessionSummary'
+import { JUZ_START_PAGES } from '@/lib/data/pageJuzHizb'
 
 type SessionPhase = 'sabaq' | 'sabqi' | 'dhor' | 'summary'
 
+/** Convert juz-relative page to actual mushaf page number */
+function toMushafPage(juz: number, relativePage: number): number {
+  return JUZ_START_PAGES[juz - 1] + relativePage - 1
+}
+
 /** Format a sabaq/sabqi/dhor entry as human-readable assignment string */
 function formatAssignment(entry: { juz: number; startPage: number; endPage: number }): string {
-  return `Juz ${entry.juz}, p.${entry.startPage}-${entry.endPage}`
+  const start = toMushafPage(entry.juz, entry.startPage)
+  const end = toMushafPage(entry.juz, entry.endPage)
+  return start === end
+    ? `Juz ${entry.juz}, p.${start}`
+    : `Juz ${entry.juz}, p.${start}-${end}`
 }
 
 function pageCount(entry: { startPage: number; endPage: number }): number {

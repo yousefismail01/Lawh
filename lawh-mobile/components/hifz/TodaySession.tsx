@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router'
 import { useMadinahHifzStore } from '@/stores/madinahHifzStore'
 import { getLevelConfig } from '@/lib/algorithm'
 import type { DhorCycleEntry, StudentLevel } from '@/lib/algorithm'
+import { JUZ_START_PAGES } from '@/lib/data/pageJuzHizb'
 
 interface TodaySessionProps {
   isDark: boolean
@@ -23,11 +24,20 @@ const SABAQ_MIN_PER_PAGE = 5
 const SABQI_MIN_PER_PAGE = 3
 const DHOR_MIN_PER_PAGE = 2
 
+/** Convert juz-relative page to actual mushaf page number */
+function toMushafPage(juz: number, relativePage: number): number {
+  return JUZ_START_PAGES[juz - 1] + relativePage - 1
+}
+
 function formatRange(entries: { juz: number; startPage: number; endPage: number }[]): string {
   if (entries.length === 0) return 'None'
   if (entries.length === 1) {
     const e = entries[0]
-    return `Juz ${e.juz}, p.${e.startPage}-${e.endPage}`
+    const start = toMushafPage(e.juz, e.startPage)
+    const end = toMushafPage(e.juz, e.endPage)
+    return start === end
+      ? `Juz ${e.juz}, p.${start}`
+      : `Juz ${e.juz}, p.${start}-${end}`
   }
   // Multiple entries: show juz range summary
   const juzSet = new Set(entries.map((e) => e.juz))
@@ -170,7 +180,11 @@ export function TodaySession({ isDark }: TodaySessionProps) {
             <Text style={[styles.tierLabel, { color: c.text }]}>Sabaq</Text>
             <Text style={[styles.tierDetail, { color: c.muted }]}>
               {todaySession.sabaq
-                ? `Juz ${todaySession.sabaq.juz}, p.${todaySession.sabaq.startPage}-${todaySession.sabaq.endPage}`
+                ? (() => {
+                    const s = toMushafPage(todaySession.sabaq.juz, todaySession.sabaq.startPage)
+                    const e = toMushafPage(todaySession.sabaq.juz, todaySession.sabaq.endPage)
+                    return s === e ? `Juz ${todaySession.sabaq.juz}, p.${s}` : `Juz ${todaySession.sabaq.juz}, p.${s}-${e}`
+                  })()
                 : 'Paused'}
             </Text>
           </View>
