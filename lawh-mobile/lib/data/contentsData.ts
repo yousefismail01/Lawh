@@ -21,6 +21,8 @@ const SURAH_START_PAGES: number[] = [
   603, 604, 604, 604,
 ]
 
+export type SortOrder = 'ascending' | 'descending' | 'revelation'
+
 export interface SurahInfo {
   id: number
   nameArabic: string
@@ -28,6 +30,65 @@ export interface SurahInfo {
   versesCount: number
   revelationPlace: string
   pageStart: number
+}
+
+// Standard revelation order of the 114 surahs
+const REVELATION_ORDER: number[] = [
+  96, 68, 73, 74, 1, 111, 81, 87, 92, 89,
+  93, 94, 103, 100, 108, 102, 107, 109, 105, 113,
+  114, 112, 53, 80, 97, 91, 85, 95, 106, 101,
+  75, 104, 77, 50, 90, 86, 54, 38, 7, 72,
+  36, 25, 35, 19, 20, 56, 26, 27, 28, 17,
+  10, 11, 12, 15, 6, 37, 31, 34, 39, 40,
+  41, 42, 43, 44, 45, 46, 51, 88, 18, 16,
+  71, 14, 21, 23, 32, 52, 67, 69, 70, 78,
+  79, 82, 84, 30, 29, 83, 2, 8, 3, 33,
+  60, 4, 99, 57, 47, 13, 55, 76, 65, 98,
+  59, 24, 22, 63, 58, 49, 66, 64, 61, 62,
+  48, 5, 9, 110,
+]
+
+// Build a map: surahId -> revelation order position (1-indexed)
+const _revelationRank: Record<number, number> = {}
+for (let i = 0; i < REVELATION_ORDER.length; i++) {
+  _revelationRank[REVELATION_ORDER[i]] = i + 1
+}
+
+export function getRevelationRank(surahId: number): number {
+  return _revelationRank[surahId] ?? surahId
+}
+
+let _cachedAllSurahs: SurahInfo[] | null = null
+
+export function buildAllSurahs(): SurahInfo[] {
+  if (_cachedAllSurahs) return _cachedAllSurahs
+  const result: SurahInfo[] = []
+  for (let id = 1; id <= 114; id++) {
+    const ch = chapters[id]
+    if (!ch) continue
+    result.push({
+      id,
+      nameArabic: ch.nameArabic,
+      nameSimple: ch.nameSimple,
+      versesCount: ch.versesCount,
+      revelationPlace: ch.revelationPlace,
+      pageStart: SURAH_START_PAGES[id],
+    })
+  }
+  _cachedAllSurahs = result
+  return result
+}
+
+export function sortSurahs(surahs: SurahInfo[], order: SortOrder): SurahInfo[] {
+  const copy = [...surahs]
+  switch (order) {
+    case 'ascending':
+      return copy.sort((a, b) => a.id - b.id)
+    case 'descending':
+      return copy.sort((a, b) => b.id - a.id)
+    case 'revelation':
+      return copy.sort((a, b) => getRevelationRank(a.id) - getRevelationRank(b.id))
+  }
 }
 
 export interface JuzSection {
@@ -38,6 +99,20 @@ export interface JuzSection {
 
 export function getSurahStartPage(surahId: number): number {
   return SURAH_START_PAGES[surahId] ?? 1
+}
+
+/** Get the surah that contains a given mushaf page */
+export function getSurahForPage(page: number): { id: number; nameSimple: string } {
+  // Binary-search-style: find the last surah whose start page <= page
+  let surahId = 1
+  for (let i = 114; i >= 1; i--) {
+    if (SURAH_START_PAGES[i] <= page) {
+      surahId = i
+      break
+    }
+  }
+  const ch = chapters[surahId]
+  return { id: surahId, nameSimple: ch?.nameSimple ?? `Surah ${surahId}` }
 }
 
 let _cachedJuzSections: JuzSection[] | null = null
@@ -85,6 +160,35 @@ export function buildJuzSections(): JuzSection[] {
   }
 
   _cachedJuzSections = sections
+  return sections
+}
+
+// Chapter sections grouped by juz (for Chapters tab — always uses surah's actual start page)
+let _cachedChapterSections: Record<SortOrder, JuzSection[]> = {} as Record<SortOrder, JuzSection[]>
+
+export function buildChapterSections(order: SortOrder): JuzSection[] {
+  if (_cachedChapterSections[order]) return _cachedChapterSections[order]
+
+  const allSurahs = buildAllSurahs()
+
+  // Group surahs by which juz their start page falls in
+  const juzMap = new Map<number, SurahInfo[]>()
+  for (let juz = 1; juz <= 30; juz++) juzMap.set(juz, [])
+
+  for (const surah of allSurahs) {
+    const { juz } = getPageJuzHizb(surah.pageStart)
+    juzMap.get(juz)!.push(surah)
+  }
+
+  const sections: JuzSection[] = []
+  for (let juz = 1; juz <= 30; juz++) {
+    const surahs = juzMap.get(juz)!
+    if (surahs.length === 0) continue
+    const sorted = sortSurahs(surahs, order)
+    sections.push({ title: `JUZ ${juz}`, juz, data: sorted })
+  }
+
+  _cachedChapterSections[order] = sections
   return sections
 }
 

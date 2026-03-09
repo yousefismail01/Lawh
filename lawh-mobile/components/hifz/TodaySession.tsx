@@ -14,6 +14,7 @@ import { useMadinahHifzStore } from '@/stores/madinahHifzStore'
 import { getLevelConfig } from '@/lib/algorithm'
 import type { DhorCycleEntry, StudentLevel } from '@/lib/algorithm'
 import { JUZ_START_PAGES } from '@/lib/data/pageJuzHizb'
+import { getSurahForPage } from '@/lib/data/contentsData'
 
 interface TodaySessionProps {
   isDark: boolean
@@ -35,9 +36,9 @@ function formatRange(entries: { juz: number; startPage: number; endPage: number 
     const e = entries[0]
     const start = toMushafPage(e.juz, e.startPage)
     const end = toMushafPage(e.juz, e.endPage)
-    return start === end
-      ? `Juz ${e.juz}, p.${start}`
-      : `Juz ${e.juz}, p.${start}-${end}`
+    const surah = getSurahForPage(start)
+    const pageStr = start === end ? `p.${start}` : `p.${start}-${end}`
+    return `${surah.nameSimple} · ${pageStr}`
   }
   // Multiple entries: show juz range summary
   const juzSet = new Set(entries.map((e) => e.juz))
@@ -183,7 +184,9 @@ export function TodaySession({ isDark }: TodaySessionProps) {
                 ? (() => {
                     const s = toMushafPage(todaySession.sabaq.juz, todaySession.sabaq.startPage)
                     const e = toMushafPage(todaySession.sabaq.juz, todaySession.sabaq.endPage)
-                    return s === e ? `Juz ${todaySession.sabaq.juz}, p.${s}` : `Juz ${todaySession.sabaq.juz}, p.${s}-${e}`
+                    const surah = getSurahForPage(s)
+                    const pageStr = s === e ? `p.${s}` : `p.${s}-${e}`
+                    return `${surah.nameSimple} · ${pageStr}`
                   })()
                 : 'Paused'}
             </Text>

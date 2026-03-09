@@ -26,6 +26,7 @@ import type { StudentLevel, DailySession, DhorCycleEntry, SabqiAssignment } from
 import { SessionTierCard } from '@/components/hifz/SessionTierCard'
 import { MadinahSessionSummary } from '@/components/hifz/MadinahSessionSummary'
 import { JUZ_START_PAGES } from '@/lib/data/pageJuzHizb'
+import { getSurahForPage } from '@/lib/data/contentsData'
 
 type SessionPhase = 'sabaq' | 'sabqi' | 'dhor' | 'summary'
 
@@ -38,9 +39,9 @@ function toMushafPage(juz: number, relativePage: number): number {
 function formatAssignment(entry: { juz: number; startPage: number; endPage: number }): string {
   const start = toMushafPage(entry.juz, entry.startPage)
   const end = toMushafPage(entry.juz, entry.endPage)
-  return start === end
-    ? `Juz ${entry.juz}, p.${start}`
-    : `Juz ${entry.juz}, p.${start}-${end}`
+  const surah = getSurahForPage(start)
+  const pageStr = start === end ? `p.${start}` : `p.${start}-${end}`
+  return `${surah.nameSimple} · ${pageStr}`
 }
 
 function pageCount(entry: { startPage: number; endPage: number }): number {
