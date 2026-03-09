@@ -18,6 +18,10 @@ import { MadinahSetup } from '@/components/hifz/MadinahSetup'
 import { TodaySession } from '@/components/hifz/TodaySession'
 import { CurrentlyMemorizing } from '@/components/hifz/CurrentlyMemorizing'
 import { UpcomingReviews } from '@/components/hifz/UpcomingReviews'
+import { HeatmapGrid } from '@/components/hifz/HeatmapGrid'
+import { DhorCycleTracker } from '@/components/hifz/DhorCycleTracker'
+import { LevelTransition } from '@/components/hifz/LevelTransition'
+import { MissedDayBanner } from '@/components/hifz/MissedDayBanner'
 import { useHifzStore } from '@/stores/hifzStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { useMadinahHifzStore } from '@/stores/madinahHifzStore'
@@ -68,6 +72,19 @@ function HifzTab({ isDark }: { isDark: boolean }) {
   const loaded = useHifzStore((s) => s.loaded)
   const madinahSetupComplete = useMadinahHifzStore((s) => s.setupComplete)
   const generateToday = useMadinahHifzStore((s) => s.generateToday)
+  const memorizedJuzNumbers = useMadinahHifzStore((s) => s.memorizedJuzNumbers)
+  const juzQualityScores = useMadinahHifzStore((s) => s.juzQualityScores)
+  const dhorCycle = useMadinahHifzStore((s) => s.dhorCycle)
+  const dhorDayNumber = useMadinahHifzStore((s) => s.dhorDayNumber)
+  const getMissedDays = useMadinahHifzStore((s) => s.getMissedDays)
+  const lastSessionDate = useMadinahHifzStore((s) => s.lastSessionDate)
+  const levelTransitionDetected = useMadinahHifzStore((s) => s.levelTransitionDetected)
+  const previousLevel = useMadinahHifzStore((s) => s.previousLevel)
+  const studentLevel = useMadinahHifzStore((s) => s.studentLevel)
+  const dismissLevelTransition = useMadinahHifzStore((s) => s.dismissLevelTransition)
+
+  const [missedDaysDismissed, setMissedDaysDismissed] = React.useState(false)
+  const missedDays = getMissedDays()
 
   useEffect(() => {
     if (!loaded) loadProgress('hafs')
@@ -79,16 +96,51 @@ function HifzTab({ isDark }: { isDark: boolean }) {
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.tabContent}
-      showsVerticalScrollIndicator={false}
-    >
-      <TodaySession isDark={isDark} />
-      <StatsPanel isDark={isDark} />
-      <CurrentlyMemorizing isDark={isDark} />
-      <UpcomingReviews isDark={isDark} />
-      <SurahGrid isDark={isDark} />
-    </ScrollView>
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        contentContainerStyle={styles.tabContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Missed day banner */}
+        {lastSessionDate && missedDays > 0 && !missedDaysDismissed && (
+          <MissedDayBanner
+            missedDays={missedDays}
+            isDark={isDark}
+            onDismiss={() => setMissedDaysDismissed(true)}
+          />
+        )}
+
+        <TodaySession isDark={isDark} />
+
+        <DhorCycleTracker
+          dhorCycle={dhorCycle}
+          dhorDayNumber={dhorDayNumber}
+          qualityScores={juzQualityScores}
+          isDark={isDark}
+        />
+
+        <HeatmapGrid
+          memorizedJuz={memorizedJuzNumbers}
+          qualityScores={juzQualityScores}
+          isDark={isDark}
+        />
+
+        <StatsPanel isDark={isDark} />
+        <CurrentlyMemorizing isDark={isDark} />
+        <UpcomingReviews isDark={isDark} />
+        <SurahGrid isDark={isDark} />
+      </ScrollView>
+
+      {/* Level transition modal */}
+      {previousLevel !== null && studentLevel !== null && (
+        <LevelTransition
+          visible={levelTransitionDetected}
+          fromLevel={previousLevel}
+          toLevel={studentLevel}
+          onDismiss={dismissLevelTransition}
+        />
+      )}
+    </View>
   )
 }
 
