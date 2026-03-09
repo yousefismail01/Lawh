@@ -76,7 +76,7 @@ export function DhorCycleTracker({
     <View style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
       {/* Header */}
       <View style={styles.headerRow}>
-        <Text style={[styles.title, { color: c.text }]}>Dhor Cycle</Text>
+        <Text style={[styles.title, { color: c.text }]}>Revision Cycle</Text>
         <Text style={[styles.dayLabel, { color: c.amber }]}>
           Day {currentDay} of {dhorCycle.cycleLengthDays}
         </Text>

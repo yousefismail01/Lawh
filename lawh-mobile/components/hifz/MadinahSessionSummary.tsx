@@ -102,7 +102,7 @@ export function MadinahSessionSummary({
             {/* Sabaq */}
             <TierRow
               icon="book-outline"
-              label="Sabaq"
+              label="New Memorization"
               color={TIER_COLORS.sabaq}
               textColor={textColor}
               secondaryColor={secondaryTextColor}
@@ -115,7 +115,7 @@ export function MadinahSessionSummary({
             {/* Sabqi */}
             <TierRow
               icon="reload-outline"
-              label="Sabqi"
+              label="Recent Review"
               color={TIER_COLORS.sabqi}
               textColor={textColor}
               secondaryColor={secondaryTextColor}
@@ -128,7 +128,7 @@ export function MadinahSessionSummary({
             {/* Dhor */}
             <TierRow
               icon="library-outline"
-              label="Dhor"
+              label="Revision"
               color={TIER_COLORS.dhor}
               textColor={textColor}
               secondaryColor={secondaryTextColor}

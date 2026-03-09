@@ -178,7 +178,7 @@ export function TodaySession({ isDark }: TodaySessionProps) {
             <Ionicons name="book-outline" size={16} color={c.sabaq} />
           </View>
           <View style={styles.tierContent}>
-            <Text style={[styles.tierLabel, { color: c.text }]}>Sabaq</Text>
+            <Text style={[styles.tierLabel, { color: c.text }]}>New</Text>
             <Text style={[styles.tierDetail, { color: c.muted }]}>
               {todaySession.sabaq
                 ? (() => {
@@ -219,7 +219,7 @@ export function TodaySession({ isDark }: TodaySessionProps) {
           <Ionicons name="reload-outline" size={16} color={c.sabqi} />
         </View>
         <View style={styles.tierContent}>
-          <Text style={[styles.tierLabel, { color: c.text }]}>Sabqi</Text>
+          <Text style={[styles.tierLabel, { color: c.text }]}>Review</Text>
           <Text style={[styles.tierDetail, { color: c.muted }]}>
             {todaySession.sabqi.length > 0
               ? formatRange(todaySession.sabqi)
@@ -253,7 +253,7 @@ export function TodaySession({ isDark }: TodaySessionProps) {
           <Ionicons name="library-outline" size={16} color={c.dhor} />
         </View>
         <View style={styles.tierContent}>
-          <Text style={[styles.tierLabel, { color: c.text }]}>Dhor</Text>
+          <Text style={[styles.tierLabel, { color: c.text }]}>Revision</Text>
           <Text style={[styles.tierDetail, { color: c.muted }]}>
             {todaySession.dhor.length > 0
               ? formatRange(todaySession.dhor)

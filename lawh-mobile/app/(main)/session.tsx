@@ -63,9 +63,9 @@ function PhaseIndicator({
   isDark: boolean
 }) {
   const phases: { key: SessionPhase; label: string; has: boolean }[] = [
-    { key: 'sabaq', label: 'Sabaq', has: hasSabaq },
-    { key: 'sabqi', label: 'Sabqi', has: hasSabqi },
-    { key: 'dhor', label: 'Dhor', has: hasDhor },
+    { key: 'sabaq', label: 'New', has: hasSabaq },
+    { key: 'sabqi', label: 'Review', has: hasSabqi },
+    { key: 'dhor', label: 'Revision', has: hasDhor },
   ]
   const activeBg = isDark ? '#4ade80' : '#16a34a'
   const inactiveBg = isDark ? '#3a3a3a' : '#d4d4d4'
@@ -158,7 +158,7 @@ export default function SessionScreen() {
     // Sabaq is null -- check if it's because it's paused
     return {
       isPaused: true,
-      reason: 'Sabaq paused -- focus on strengthening your existing memorization.',
+      reason: 'New memorization paused — focus on strengthening your existing memorization.',
     }
   }, [todaySession])
 
@@ -362,7 +362,7 @@ export default function SessionScreen() {
         <Text style={[styles.phaseSubtitle, { color: secondaryTextColor }]}>
           {phase === 'sabaq' &&
             (sabaqPaused
-              ? 'Sabaq is paused to strengthen your revision.'
+              ? 'New memorization is paused to strengthen your revision.'
               : `Read and memorize ${sabaqPages} page${sabaqPages !== 1 ? 's' : ''} of new material.`)}
           {phase === 'sabqi' &&
             `Review ${sabqiEntries.length} recent assignment${sabqiEntries.length !== 1 ? 's' : ''} and rate your quality.`}
@@ -532,7 +532,7 @@ export default function SessionScreen() {
             onPress={advanceFromSabaq}
           >
             <Text style={[styles.skipButtonText, { color: accentColor }]}>
-              Continue to {hasSabqi ? 'Sabqi' : hasDhor ? 'Dhor' : 'Summary'}
+              Continue to {hasSabqi ? 'Review' : hasDhor ? 'Revision' : 'Summary'}
             </Text>
             <Ionicons name="arrow-forward" size={18} color={accentColor} />
           </Pressable>

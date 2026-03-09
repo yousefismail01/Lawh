@@ -36,7 +36,7 @@ const TIER_META: Record<
 > = {
   sabaq: {
     icon: 'book-outline',
-    label: 'Sabaq',
+    label: 'New Memorization',
     lightColor: '#16a34a',
     darkColor: '#4ade80',
     lightBg: 'rgba(22,163,74,0.08)',
@@ -44,7 +44,7 @@ const TIER_META: Record<
   },
   sabqi: {
     icon: 'reload-outline',
-    label: 'Sabqi',
+    label: 'Recent Review',
     lightColor: '#2563eb',
     darkColor: '#60a5fa',
     lightBg: 'rgba(37,99,235,0.08)',
@@ -52,7 +52,7 @@ const TIER_META: Record<
   },
   dhor: {
     icon: 'library-outline',
-    label: 'Dhor',
+    label: 'Revision',
     lightColor: '#d97706',
     darkColor: '#fbbf24',
     lightBg: 'rgba(217,119,6,0.08)',

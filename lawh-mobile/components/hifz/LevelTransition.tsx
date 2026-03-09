@@ -42,28 +42,28 @@ export function LevelTransition({
 
     if (oldCfg.sabaqPagesPerDay !== newCfg.sabaqPagesPerDay) {
       rows.push({
-        label: 'Sabaq pages/day',
+        label: 'New memorization/day',
         oldVal: String(oldCfg.sabaqPagesPerDay),
         newVal: String(newCfg.sabaqPagesPerDay),
       })
     }
     if (oldCfg.dhorPagesPerDay !== newCfg.dhorPagesPerDay) {
       rows.push({
-        label: 'Dhor pages/day',
+        label: 'Revision pages/day',
         oldVal: String(oldCfg.dhorPagesPerDay),
         newVal: String(newCfg.dhorPagesPerDay),
       })
     }
     if (oldCfg.dhorCycleDays !== newCfg.dhorCycleDays) {
       rows.push({
-        label: 'Dhor cycle',
+        label: 'Revision cycle',
         oldVal: `${oldCfg.dhorCycleDays} days`,
         newVal: `${newCfg.dhorCycleDays} days`,
       })
     }
     if (oldCfg.sabqiWindowJuz !== newCfg.sabqiWindowJuz) {
       rows.push({
-        label: 'Sabqi window',
+        label: 'Review window',
         oldVal: `${oldCfg.sabqiWindowJuz} juz`,
         newVal: `${newCfg.sabqiWindowJuz} juz`,
       })
