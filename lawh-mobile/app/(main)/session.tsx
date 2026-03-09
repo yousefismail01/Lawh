@@ -382,7 +382,7 @@ export default function SessionScreen() {
           <>
             {sabqiEntries.map((entry) => (
               <SessionTierCard
-                key={`sabqi-${entry.juz}`}
+                key={`sabqi-${entry.juz}-${entry.startPage}`}
                 tier="sabqi"
                 assignment={formatAssignment(entry)}
                 pages={pageCount(entry)}
@@ -394,9 +394,9 @@ export default function SessionScreen() {
         )}
         {phase === 'sabaq' && hasDhor && (
           <>
-            {dhorEntries.map((entry) => (
+            {dhorEntries.map((entry, i) => (
               <SessionTierCard
-                key={`dhor-${entry.juz}`}
+                key={`dhor-${entry.juz}-${entry.startPage}`}
                 tier="dhor"
                 assignment={formatAssignment(entry)}
                 pages={pageCount(entry)}
@@ -430,7 +430,7 @@ export default function SessionScreen() {
               const rated = sabqiRatings[entry.juz]
               return (
                 <SessionTierCard
-                  key={`sabqi-${entry.juz}`}
+                  key={`sabqi-${entry.juz}-${entry.startPage}`}
                   tier="sabqi"
                   assignment={formatAssignment(entry)}
                   pages={pageCount(entry)}
@@ -446,7 +446,7 @@ export default function SessionScreen() {
             {hasDhor &&
               dhorEntries.map((entry) => (
                 <SessionTierCard
-                  key={`dhor-${entry.juz}`}
+                  key={`dhor-${entry.juz}-${entry.startPage}`}
                   tier="dhor"
                   assignment={formatAssignment(entry)}
                   pages={pageCount(entry)}
@@ -479,7 +479,7 @@ export default function SessionScreen() {
             {/* Show completed sabqi */}
             {sabqiEntries.map((entry) => (
               <SessionTierCard
-                key={`sabqi-${entry.juz}`}
+                key={`sabqi-${entry.juz}-${entry.startPage}`}
                 tier="sabqi"
                 assignment={formatAssignment(entry)}
                 pages={pageCount(entry)}
@@ -494,7 +494,7 @@ export default function SessionScreen() {
               const rated = dhorRatings[entry.juz]
               return (
                 <SessionTierCard
-                  key={`dhor-${entry.juz}`}
+                  key={`dhor-${entry.juz}-${entry.startPage}`}
                   tier="dhor"
                   assignment={formatAssignment(entry)}
                   pages={pageCount(entry)}
