@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 09-level-adaptive-guided-daily-session-ui-with-heatmap-dhor-cycle-tracker-and-session-flow
-current_plan: 3 of 4
-status: in_progress
-stopped_at: "Completed 09-03: Heatmap, dhor tracker, level transition and missed day banner"
-last_updated: "2026-03-09T05:00:14Z"
+current_plan: 2 of 4
+status: executing
+stopped_at: Completed 09-02-PLAN.md
+last_updated: "2026-03-09T05:02:35.942Z"
 last_activity: "2026-03-09 - Completed 09-03: Mushaf heatmap, dhor cycle tracker, level transition modal, missed day banner wired into hub"
 progress:
   total_phases: 10
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 32
-  completed_plans: 25
+  completed_plans: 26
 ---
 
 # Session State
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.0 milestone
 **Current phase:** 09-level-adaptive-guided-daily-session-ui-with-heatmap-dhor-cycle-tracker-and-session-flow
-**Current Plan:** 1 of 4
+**Current Plan:** 2 of 4
 **Status:** In progress
 
 ## Session Log
@@ -97,6 +97,10 @@ See: .planning/PROJECT.md
 - [Phase 09-03]: Linear progress bar for dhor cycle (simpler than circular, consistent with card layout)
 - [Phase 09-03]: LevelTransition uses useResolvedTheme for full theme support including parchment
 - [Phase 09-03]: MissedDayBanner dismiss is local useState (resets each app session)
+- [Phase 09]: State machine uses useState for 4-phase guided session flow (sabaq/sabqi/dhor/summary)
+- [Phase 09]: Auto-advance after 500ms delay when all tier entries are rated for visual feedback
+- [Phase 09]: Sabaq uses Mark Complete button (page-based), sabqi/dhor use QualityRating as completion signal
+- [Phase 09]: Proportional flex weights from sessionSplit; dominant tier gets 3px left border emphasis
 
 ### Quick Tasks Completed
 
@@ -115,7 +119,7 @@ See: .planning/PROJECT.md
 
 ### Last Session
 
-- **Stopped at:** Completed 09-03: Heatmap, dhor tracker, level transition and missed day banner
+- **Stopped at:** Completed 09-02-PLAN.md
 - **Timestamp:** 2026-03-09T05:00:14Z
 
 Last activity: 2026-03-09 - Completed 09-03: Mushaf heatmap, dhor cycle tracker, level transition modal, missed day banner wired into hub
