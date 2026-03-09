@@ -2,14 +2,17 @@
  * TodaySession - Daily session overview card showing Sabaq/Sabqi/Dhor breakdown.
  *
  * Reads from madinahHifzStore to display the three-tier Madinah method session
- * with page counts, ranges, and estimated time.
+ * with page counts, ranges, estimated time, Start Session button, and
+ * level-adaptive visual weighting.
  */
 
 import React from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, Pressable, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
 import { useMadinahHifzStore } from '@/stores/madinahHifzStore'
-import type { DhorCycleEntry } from '@/lib/algorithm'
+import { getLevelConfig } from '@/lib/algorithm'
+import type { DhorCycleEntry, StudentLevel } from '@/lib/algorithm'
 
 interface TodaySessionProps {
   isDark: boolean
@@ -39,9 +42,25 @@ function pageCount(entries: { startPage: number; endPage: number }[]): number {
   return entries.reduce((s, e) => s + (e.endPage - e.startPage + 1), 0)
 }
 
+/** Get proportional flex weights from sessionSplit percentages */
+function getFlexWeights(sessionSplit: [number, number, number]): [number, number, number] {
+  const [sabaq, sabqi, dhor] = sessionSplit
+  // Normalize: find the smallest non-zero value
+  const nonZero = [sabaq, sabqi, dhor].filter((v) => v > 0)
+  if (nonZero.length === 0) return [1, 1, 1]
+  const min = Math.min(...nonZero)
+  return [
+    sabaq > 0 ? Math.round(sabaq / min) : 0,
+    sabqi > 0 ? Math.round(sabqi / min) : 0,
+    dhor > 0 ? Math.round(dhor / min) : 0,
+  ]
+}
+
 export function TodaySession({ isDark }: TodaySessionProps) {
+  const router = useRouter()
   const todaySession = useMadinahHifzStore((s) => s.todaySession)
   const studentLevel = useMadinahHifzStore((s) => s.studentLevel)
+  const getMissedDays = useMadinahHifzStore((s) => s.getMissedDays)
 
   const c = buildColors(isDark)
 
@@ -70,8 +89,51 @@ export function TodaySession({ isDark }: TodaySessionProps) {
     (e: DhorCycleEntry) => e.priority === 'high',
   )
 
+  // Level-adaptive flex weights
+  const levelConfig = studentLevel !== null ? getLevelConfig(studentLevel) : null
+  const sessionSplit = levelConfig?.sessionSplit ?? [33, 33, 34] as [number, number, number]
+  const [sabaqFlex, sabqiFlex, dhorFlex] = getFlexWeights(sessionSplit)
+
+  // Determine dominant tier for border emphasis
+  const maxPct = Math.max(...sessionSplit)
+  const dominantTier = sessionSplit[0] === maxPct ? 'sabaq' : sessionSplit[1] === maxPct ? 'sabqi' : 'dhor'
+  const dominantBorderColor =
+    dominantTier === 'sabaq' ? c.sabaq : dominantTier === 'sabqi' ? c.sabqi : c.dhor
+
+  // Missed days
+  const missedDays = getMissedDays()
+
+  const hideSabaq = sabaqFlex === 0
+
   return (
     <View style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
+      {/* Missed day banner */}
+      {missedDays > 0 && (
+        <View
+          style={[
+            styles.missedBanner,
+            {
+              backgroundColor: isDark ? 'rgba(251,191,36,0.12)' : 'rgba(245,158,11,0.08)',
+              borderColor: isDark ? 'rgba(251,191,36,0.25)' : 'rgba(245,158,11,0.2)',
+            },
+          ]}
+        >
+          <Ionicons
+            name="alert-circle-outline"
+            size={16}
+            color={isDark ? '#fbbf24' : '#d97706'}
+          />
+          <Text
+            style={[
+              styles.missedBannerText,
+              { color: isDark ? '#fbbf24' : '#92400e' },
+            ]}
+          >
+            Welcome back! You missed {missedDays} day{missedDays !== 1 ? 's' : ''}. Your schedule has been adjusted.
+          </Text>
+        </View>
+      )}
+
       {/* Header */}
       <View style={styles.headerRow}>
         <Text style={[styles.headerTitle, { color: c.text }]}>
@@ -89,31 +151,53 @@ export function TodaySession({ isDark }: TodaySessionProps) {
       </View>
 
       {/* Sabaq row */}
-      <View style={styles.tierRow}>
-        <View style={[styles.tierIconBox, { backgroundColor: c.sabaqBg }]}>
-          <Ionicons name="book-outline" size={16} color={c.sabaq} />
-        </View>
-        <View style={styles.tierContent}>
-          <Text style={[styles.tierLabel, { color: c.text }]}>Sabaq</Text>
-          <Text style={[styles.tierDetail, { color: c.muted }]}>
-            {todaySession.sabaq
-              ? `Juz ${todaySession.sabaq.juz}, p.${todaySession.sabaq.startPage}-${todaySession.sabaq.endPage}`
-              : 'Paused'}
-          </Text>
-        </View>
-        {sabaqPages > 0 ? (
-          <View style={[styles.pagePill, { backgroundColor: c.sabaqBg }]}>
-            <Text style={[styles.pagePillText, { color: c.sabaq }]}>
-              {sabaqPages} pg
+      {!hideSabaq && (
+        <View
+          style={[
+            styles.tierRow,
+            studentLevel !== null && {
+              flex: sabaqFlex,
+              borderLeftWidth: dominantTier === 'sabaq' ? 3 : 0,
+              borderLeftColor: dominantBorderColor,
+              paddingLeft: dominantTier === 'sabaq' ? 8 : 0,
+            },
+          ]}
+        >
+          <View style={[styles.tierIconBox, { backgroundColor: c.sabaqBg }]}>
+            <Ionicons name="book-outline" size={16} color={c.sabaq} />
+          </View>
+          <View style={styles.tierContent}>
+            <Text style={[styles.tierLabel, { color: c.text }]}>Sabaq</Text>
+            <Text style={[styles.tierDetail, { color: c.muted }]}>
+              {todaySession.sabaq
+                ? `Juz ${todaySession.sabaq.juz}, p.${todaySession.sabaq.startPage}-${todaySession.sabaq.endPage}`
+                : 'Paused'}
             </Text>
           </View>
-        ) : (
-          <Text style={[styles.tierMuted, { color: c.muted }]}>--</Text>
-        )}
-      </View>
+          {sabaqPages > 0 ? (
+            <View style={[styles.pagePill, { backgroundColor: c.sabaqBg }]}>
+              <Text style={[styles.pagePillText, { color: c.sabaq }]}>
+                {sabaqPages} pg
+              </Text>
+            </View>
+          ) : (
+            <Text style={[styles.tierMuted, { color: c.muted }]}>--</Text>
+          )}
+        </View>
+      )}
 
       {/* Sabqi row */}
-      <View style={styles.tierRow}>
+      <View
+        style={[
+          styles.tierRow,
+          studentLevel !== null && {
+            flex: sabqiFlex,
+            borderLeftWidth: dominantTier === 'sabqi' ? 3 : 0,
+            borderLeftColor: dominantBorderColor,
+            paddingLeft: dominantTier === 'sabqi' ? 8 : 0,
+          },
+        ]}
+      >
         <View style={[styles.tierIconBox, { backgroundColor: c.sabqiBg }]}>
           <Ionicons name="reload-outline" size={16} color={c.sabqi} />
         </View>
@@ -137,7 +221,17 @@ export function TodaySession({ isDark }: TodaySessionProps) {
       </View>
 
       {/* Dhor row */}
-      <View style={styles.tierRow}>
+      <View
+        style={[
+          styles.tierRow,
+          studentLevel !== null && {
+            flex: dhorFlex,
+            borderLeftWidth: dominantTier === 'dhor' ? 3 : 0,
+            borderLeftColor: dominantBorderColor,
+            paddingLeft: dominantTier === 'dhor' ? 8 : 0,
+          },
+        ]}
+      >
         <View style={[styles.tierIconBox, { backgroundColor: c.dhorBg }]}>
           <Ionicons name="library-outline" size={16} color={c.dhor} />
         </View>
@@ -174,6 +268,21 @@ export function TodaySession({ isDark }: TodaySessionProps) {
           ~{totalMinutes} min
         </Text>
       </View>
+
+      {/* Start Session button */}
+      <Pressable
+        style={({ pressed }) => [
+          styles.startButton,
+          {
+            backgroundColor: c.accent,
+            opacity: pressed ? 0.8 : 1,
+          },
+        ]}
+        onPress={() => router.push('/(main)/session')}
+      >
+        <Ionicons name="play-circle-outline" size={20} color="#fff" />
+        <Text style={styles.startButtonText}>Start Session</Text>
+      </Pressable>
     </View>
   )
 }
@@ -206,6 +315,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     paddingVertical: 20,
+  },
+  missedBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginBottom: 12,
+    gap: 8,
+  },
+  missedBannerText: {
+    fontSize: 12,
+    fontWeight: '500',
+    flex: 1,
+    lineHeight: 17,
   },
   headerRow: {
     flexDirection: 'row',
@@ -281,5 +405,19 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 13,
+  },
+  startButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 12,
+    gap: 8,
+  },
+  startButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
   },
 })
